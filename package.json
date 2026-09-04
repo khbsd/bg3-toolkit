@@ -9,15 +9,24 @@
   "categories": [
     "Other"
   ],
-  "activationEvents": ["onStartupFinished", "onView:toolkitTree"],
+  "activationEvents": ["onStartupFinished"],
   "main": "./out/extension.js",
   "contributes": {
     "commands": [
       {
-        "command": "bg3-toolkit.helloWorld",
-        "title": "Hello World"
+        "command": "bg3-toolkit.hrtRemind",
+        "title": "secret :3"
       }
     ],
+    "viewsContainers": {
+      "activitybar": [
+        {
+          "id": "bg3-toolkit",
+          "title": "bg3 toolkit",
+          "icon": "resources/icon/icon.svg"
+        }
+      ]
+    },
     "views": {
       "bg3-toolkit": [
         {
@@ -27,15 +36,12 @@
         }
       ]
     },
-    "viewsContainers": {
-      "activitybar": [
-        {
-          "id": "bg3-toolkit",
-          "title": "bg3 toolkit",
-          "icon": "resources/icon/icon.svg"
-        }
-      ]
-    }
+    "viewsWelcome": [
+      {
+        "view": "toolkitTree",
+        "contents": "hi!! i love you.\n[click me plz i need it](command:bg3-toolkit.hrtRemind)"
+      }
+    ]
   },
   "scripts": {
     "vscode:prepublish": "npm run compile",
