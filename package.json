@@ -32,7 +32,12 @@
         {
           "icon": "",
           "id": "toolkitTree",
-          "name": "bg3 toolkit"
+          "name": "toolkit"
+        },
+        {
+          "icon": "",
+          "id": "toolkitTreeWorkspace",
+          "name": "workspace"
         }
       ]
     },
