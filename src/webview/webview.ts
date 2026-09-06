@@ -29,6 +29,14 @@ export class ToolkitWebviewViewProvider implements vscode.WebviewViewProvider {
     webviewView.webview.html = this._getHtmlForWebview(webviewView.webview);
 	}
 
+  /**
+   * 
+   * examples:
+   * https://github.com/microsoft/vscode-extension-samples/blob/main/webview-view-sample/src/extension.ts
+   * https://github.com/microsoft/vscode-extension-samples/blob/main/webview-view-sample/media/main.js
+   * 
+   */
+
   private _getHtmlForWebview(webview: vscode.Webview) {
 		// Get the local path to main script run in the webview, then convert it to a uri we can use in the webview.
 		const scriptUri = webview.asWebviewUri(vscode.Uri.joinPath(this._extensionUri, 'js', 'main.js'));
