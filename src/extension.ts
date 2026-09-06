@@ -1,7 +1,8 @@
 import * as vscode from 'vscode';
 import * as path from 'path';
 import { Registrar } from './command/registrar';
-import { ToolkitTreeProvider } from './treeview/treeview';
+import { WorkspaceTreeViewProvider } from './treeview/treeview';
+import { ToolkitWebviewViewProvider } from './webview/webview';
 
 export async function activate(context: vscode.ExtensionContext) {
 	vscode.window.showInformationMessage('yo bitches im fuckin back lmao');
@@ -13,24 +14,33 @@ export async function activate(context: vscode.ExtensionContext) {
 		context.subscriptions.push(disposable);
 	}
 
-	// set up treeview
+	// set up wsPath
 	let wsPath: string;
 
-	if (vscode.workspace.workspaceFolders?.length !== undefined && vscode.workspace.workspaceFolders.length > 0) {
+	if (vscode.workspace.workspaceFolders?.length !== undefined
+		&& vscode.workspace.workspaceFolders.length > 0)
+	{
 		wsPath = vscode.workspace.workspaceFolders[0].uri.toString();
 	} else {
 		wsPath = "home";
 	}
-	let tvWelcome = vscode.window.createTreeView('toolkitTree', {
-  		treeDataProvider: new ToolkitTreeProvider(wsPath),
-	});
+
+	let wsPathShortSlice = wsPath.split(path.sep).slice(-1);
+	let wsPathShort: string = "";
+	wsPathShortSlice.forEach((p) => wsPathShort = wsPathShort.concat(p, path.sep, ""));
+
+	// treeview
 	let tvWorkspace = vscode.window.createTreeView('toolkitTreeWorkspace', {
-  		treeDataProvider: new ToolkitTreeProvider(wsPath),
+  		treeDataProvider: new WorkspaceTreeViewProvider(wsPath),
 	});
 
-	let wsPathShort = wsPath.split(path.sep).slice(-4);
-	console.log(wsPathShort);
-	tvWorkspace.message = "\nyour workspace is:\n\n" + wsPathShort.forEach((p) => {console.log(p);return path.join(p, path.sep);});
+	// webview
+	let wvToolkit = new ToolkitWebviewViewProvider(context.extensionUri);
+	context.subscriptions.push(
+		vscode.window.registerWebviewViewProvider(ToolkitWebviewViewProvider.viewType, wvToolkit)
+	);
+
+	tvWorkspace.message = "\nyour workspace is:" + ".../" + wsPathShort;
 	
 }
 

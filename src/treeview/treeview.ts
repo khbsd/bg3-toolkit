@@ -1,7 +1,7 @@
 import * as vscode from 'vscode';
 import * as path from 'path';
 
-export class ToolkitTreeProvider implements vscode.TreeDataProvider<ToolkitTreeView> {
+export class WorkspaceTreeViewProvider implements vscode.TreeDataProvider<ToolkitTreeView> {
   constructor(private workspaceRoot: string) {}
   getTreeItem(element: ToolkitTreeView): vscode.TreeItem {
     return element;
