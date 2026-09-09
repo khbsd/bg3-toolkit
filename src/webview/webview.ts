@@ -1,6 +1,8 @@
 import * as fs from "fs";
 import * as path from "path";
 import * as vscode from "vscode";
+import * as util from "util";
+import { getWorkspacePath } from "../utils/utils";
 
 export class ToolkitWebviewViewProvider implements vscode.WebviewViewProvider {
   public static readonly viewType = "toolkitWebviewView";
@@ -25,11 +27,7 @@ export class ToolkitWebviewViewProvider implements vscode.WebviewViewProvider {
     webviewView.webview.html = this._getHtmlForWebview(webviewView.webview);
 
     webviewView.webview.onDidReceiveMessage((data) => {
-      switch (data.type) {
-        case "beep": {
-          console.log("message recieved: ", data.message);
-        }
-      }
+      console.log("message recieved: ", data.message);
     });
   }
 
@@ -43,6 +41,15 @@ export class ToolkitWebviewViewProvider implements vscode.WebviewViewProvider {
 
   private _getHtmlForWebview(webview: vscode.Webview) {
     // Get the local path to main script run in the webview, then convert it to a uri we can use in the webview.
+    const htmlUri = path.resolve(
+      __dirname,
+      "..",
+      "..",
+      "src",
+      "webview",
+      "html",
+      "main.html",
+    );
     const scriptUri = webview.asWebviewUri(
       vscode.Uri.joinPath(
         this._extensionUri,
@@ -52,38 +59,36 @@ export class ToolkitWebviewViewProvider implements vscode.WebviewViewProvider {
         "main.js",
       ),
     );
-    const htmlUri = webview.asWebviewUri(
-			vscode.Uri.joinPath(
-				this._extensionUri,
-				"src",
-				"webview",
-				"html",
-				"main.html",
-			),
-		);
-    console.log(htmlUri);
-
-    // Do the same for the stylesheet.
-    //const styleResetUri = webview.asWebviewUri(vscode.Uri.joinPath(this._extensionUri, 'media', 'reset.css'));
-    //const styleVSCodeUri = webview.asWebviewUri(vscode.Uri.joinPath(this._extensionUri, 'media', 'vscode.css'));
-    //const styleMainUri = webview.asWebviewUri(vscode.Uri.joinPath(this._extensionUri, 'media', 'main.css'));
-    //<link href="${styleResetUri}" rel="stylesheet">
-    //<link href="${styleVSCodeUri}" rel="stylesheet">
-    //<link href="${styleMainUri}" rel="stylesheet">
+    const styleMainUri = webview.asWebviewUri(
+      vscode.Uri.joinPath(
+        this._extensionUri,
+        "src",
+        "webview",
+        "css",
+        "main.css",
+      ),
+    );
 
     // Use a nonce to only allow a specific script to be run.
     const nonce = this.getNonce();
+    const csp = webview.cspSource;
 
     let html = "";
     try {
-      html = fs.readFileSync(htmlUri.toString()).toString();
+      html = util.format(
+        fs.readFileSync(htmlUri.toString()).toString(),
+        csp,
+        nonce,
+        styleMainUri,
+        getWorkspacePath(),
+        nonce,
+        scriptUri,
+      );
     } catch (err) {
       console.log(err);
     }
 
-		console.log(html);
-
-    return String.raw`${html}`;
+    return html;
   }
 
   getNonce() {

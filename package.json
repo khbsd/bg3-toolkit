@@ -18,6 +18,10 @@
       {
         "command": "bg3-toolkit.hrtRemind",
         "title": "secret :3"
+      },
+      {
+        "command": "bg3-toolkit.packMod",
+        "title": "pack ya mod :3"
       }
     ],
     "viewsContainers": {
