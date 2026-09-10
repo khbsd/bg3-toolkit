@@ -4,6 +4,7 @@ import * as vscode from "vscode";
 import * as util from "util";
 import { getWorkspacePath } from "../utils/ws_utils";
 import { HtmlDataUtils, HtmlData, HtmlDataObj } from "../utils/html_utils";
+import { Pak } from "../utils/ls-utils/pak";
 
 export class ToolkitWebviewViewProvider implements vscode.WebviewViewProvider {
   public static readonly viewType = "toolkitWebviewView";
@@ -29,6 +30,12 @@ export class ToolkitWebviewViewProvider implements vscode.WebviewViewProvider {
 
     webviewView.webview.onDidReceiveMessage((data) => {
       console.log("message recieved: ", data.message);
+      switch (data.type) {
+        case "pak": {
+          let p = new Pak(getWorkspacePath());
+          p.build();
+        }
+      }
     });
   }
 

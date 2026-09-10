@@ -6,7 +6,7 @@
   let window = vscode.window;
 
   document.querySelector(".pack-button").addEventListener("click", () => {
-    vscode.postMessage({ type: "pack", message: "packing files" });
+    vscode.postMessage({ type: "pak", message: "packing files" });
   });
   // TODO: this
   /*document.querySelector(".pack-button").addEventListener("click", () => {
