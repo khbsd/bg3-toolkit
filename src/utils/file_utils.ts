@@ -14,6 +14,17 @@ export function fixPath(wsPath: string): string {
   return wsPath;
 }
 
+export function getRelativeModPath(modPath: string, fullPath: string): string {
+  // aw yeah the good ole split slice split :^ )
+  let relPath = fullPath.split(path.sep).slice(modPath.split(path.sep).length);
+
+  let relativePath = "";
+  relPath.forEach((d) => {
+    relativePath = path.join(relativePath, d);
+  });
+  return relativePath;
+}
+
 export function getModPath(wsPath: string): string {
   let wsPaths = fs.readdirSync(fixPath(wsPath), {
     recursive: true,

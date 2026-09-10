@@ -28,8 +28,7 @@ export class Pak {
       let fPath = path.join(file.parentPath, file.name);
       let fContents = fs.readFileSync(fPath);
       try {
-        console.log(fContents);
-        this.builder.add_file(fPath, new Uint8Array(fContents));
+        this.builder.add_file(futils.getRelativeModPath(this.modPath, fPath), new Uint8Array(fContents));
       } catch (err) {
         console.log(err);
       }
@@ -42,7 +41,7 @@ export class Pak {
         futils.getModName(this.modPath) + ".pak",
       );
 
-      console.log(modDestPath);
+      //console.log(modDestPath);
       fs.writeFileSync(modDestPath, Buffer.from(packed), { flag: "w+" });
     } catch (err) {
       console.log(err);
