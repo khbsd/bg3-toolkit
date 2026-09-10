@@ -6,7 +6,7 @@ button {
   font-size: var(--vscode-editor-font-weight);
   font-weight: var(--vscode-editor-font-size);
   height: 1.875rem;
-  width: 40%;
+  width: 41%;
   background-color: var(--vscode-button-background);
 } button:hover {
   background-color: var(--vscode-button-hoverBackground);

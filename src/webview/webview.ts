@@ -3,7 +3,7 @@ import * as path from "path";
 import * as vscode from "vscode";
 import * as util from "util";
 import { getWorkspacePath } from "../utils/ws_utils";
-import { HtmlData } from "../utils/html_utils";
+import { HtmlDataUtils, HtmlData, HtmlDataObj } from "../utils/html_utils";
 
 export class ToolkitWebviewViewProvider implements vscode.WebviewViewProvider {
   public static readonly viewType = "toolkitWebviewView";
@@ -32,16 +32,13 @@ export class ToolkitWebviewViewProvider implements vscode.WebviewViewProvider {
     });
   }
 
-  /**
-   *
-   * examples:
-   * https://github.com/microsoft/vscode-extension-samples/blob/main/webview-view-sample/src/extension.ts
-   * https://github.com/microsoft/vscode-extension-samples/blob/main/webview-view-sample/media/main.js
-   *
-   */
-
   private _getHtmlForWebview(webview: vscode.Webview) {
-    // Get the local path to main script run in the webview, then convert it to a uri we can use in the webview.
+    const hd: HtmlDataUtils = new HtmlDataUtils();
+
+    // Use a nonce to only allow a specific script to be run.
+    const nonce = hd.getNonce();
+
+    // file to read html from
     const htmlUri = path.resolve(
       __dirname,
       "..",
@@ -51,6 +48,8 @@ export class ToolkitWebviewViewProvider implements vscode.WebviewViewProvider {
       "html",
       "main.html",
     );
+
+    // path to js script
     const scriptUri = webview.asWebviewUri(
       vscode.Uri.joinPath(
         this._extensionUri,
@@ -60,6 +59,8 @@ export class ToolkitWebviewViewProvider implements vscode.WebviewViewProvider {
         "main.js",
       ),
     );
+
+    // path to css file
     const styleMainUri = webview.asWebviewUri(
       vscode.Uri.joinPath(
         this._extensionUri,
@@ -70,44 +71,32 @@ export class ToolkitWebviewViewProvider implements vscode.WebviewViewProvider {
       ),
     );
 
-    // TODO: make regex for these string values, ie Regex(${HtmlData.Nonce}) etc etc
-    Object.values(HtmlData).forEach((value) => {
-      if (typeof value === "string") {
-        console.log("HtmlData:", value);
-      }
-    });
-
-    // Use a nonce to only allow a specific script to be run.
-    const nonce = this.getNonce();
+    // content security policy or whatever. who cares.
     const csp = webview.cspSource;
 
-    // TODO: replace this with a series of String.replace() calls with more verbose
-    // names
+    // make this data into an array for hd.getObjs()
+    const data: string[] = [];
+    {
+      data[HtmlData.Nonce] = nonce;
+      data[HtmlData.ScriptSrc] = scriptUri.toString();
+      data[HtmlData.StyleSrc] = styleMainUri.toString();
+      data[HtmlData.CspSrc] = csp;
+      data[HtmlData.WorkspacePath] = getWorkspacePath();
+    }
+
     let html = "";
     try {
-      html = util.format(
-        fs.readFileSync(htmlUri.toString()).toString(),
-        csp,
-        nonce,
-        styleMainUri,
-        getWorkspacePath(),
-        nonce,
-        scriptUri,
-      );
+      html = fs.readFileSync(htmlUri.toString()).toString();
     } catch (err) {
       console.log(err);
+      return "";
+    }
+
+    // programmatically find and replace the placeholder values from the html file we read
+    for (let obj of hd.getObjs(data)) {
+      html = html.replaceAll("${" + obj.name + "}", obj.data);
     }
 
     return html;
-  }
-
-  getNonce() {
-    let text = "";
-    const possible =
-      "ABCDEFGHIJKLMNOPQRSTUVWXYZabcdefghijklmnopqrstuvwxyz0123456789";
-    for (let i = 0; i < 32; i++) {
-      text += possible.charAt(Math.floor(Math.random() * possible.length));
-    }
-    return text;
   }
 }

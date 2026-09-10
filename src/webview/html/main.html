@@ -1,15 +1,15 @@
 <!DOCTYPE html>
-    <html lang="en">
+<html lang="en">
     <head>
         <meta charset="UTF-8">
-        <meta http-equiv="Content-Security-Policy" content="default-src 'none'; style-src %s; script-src 'nonce-%s';">
+        <meta http-equiv="Content-Security-Policy" content="default-src 'none'; style-src ${CspSrc}; script-src 'nonce-${Nonce}';">
 
         <meta name="viewport" content="width=device-width, initial-scale=1.0">
-        <link href="%s" rel="stylesheet">
+        <link href="${StyleSrc}" rel="stylesheet">
     </head>
     <body>
         pack ya mod babes!!!
-        <button class="pack-button" title="Pack your mod, starting from '%s'">PACK</button>
+        <button class="pack-button" title="Pack your mod, starting from '${WorkspacePath}'">PACK</button>
         <br>
         <br>
         click on these to convert each file of that type into its other form
@@ -17,6 +17,6 @@
         <button class="lsx-button" title="also works on .lsfex files">*.lsx</button> <-> <button class="lsf-button" title="also works on .lsfx files">*.lsf</button>
         <br>
         <button class="locaxml-button" title="">*.loca.xml</button> <-> <button class="loca-button" title="">*.loca</button>
-        <script nonce="%s" src="%s"></script>
+        <script nonce="${Nonce}" src="${ScriptSrc}"></script>
     </body>
 </html>
