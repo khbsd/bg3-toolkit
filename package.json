@@ -21,7 +21,15 @@
       },
       {
         "command": "bg3-toolkit.packMod",
-        "title": "pack ya mod :3"
+        "title": "pack mod"
+      },
+      {
+        "command": "bg3-toolkit.lsxConvert",
+        "title": "convert lsx"
+      },
+      {
+        "command": "bg3-toolkit.locaXmlConvert",
+        "title": "convert loca.xml"
       }
     ],
     "viewsContainers": {
@@ -65,12 +73,12 @@
   },
   "devDependencies": {
     "@types/mocha": "^10.0.10",
-    "@types/node": "24.x",
+    "@types/node": "26.x",
     "@types/vscode": "^1.126.0",
     "@vscode/test-cli": "^0.0.15",
     "@vscode/test-electron": "^3.0.0",
     "eslint": "^10.5.0",
-    "typescript": "^6.0.3",
+    "typescript": "^7.x",
     "typescript-eslint": "^8.61.1"
   },
   "overrides": {
@@ -78,6 +86,6 @@
     "serialize-javascript": "^7.0.6"
   },
   "dependencies": {
-    "larian-formats-wasm": "^0.9.2"
+    "larian-formats-wasm": "^0.9.3"
   }
 }

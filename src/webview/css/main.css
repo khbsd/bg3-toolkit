@@ -8,8 +8,11 @@ button {
   width: 100%;
   height: 1.875rem;
   background-color: var(--vscode-button-background);
-}
-button:hover {
+} button:hover {
   background-color: var(--vscode-button-hoverBackground);
   cursor: pointer;
+}
+
+.pack-button {
+  height: 3rem;
 }

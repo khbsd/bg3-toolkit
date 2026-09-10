@@ -2,7 +2,8 @@ import * as fs from "fs";
 import * as path from "path";
 import * as vscode from "vscode";
 import * as util from "util";
-import { getWorkspacePath } from "../utils/utils";
+import { getWorkspacePath } from "../utils/ws_utils";
+import { HtmlData } from "../utils/html_utils";
 
 export class ToolkitWebviewViewProvider implements vscode.WebviewViewProvider {
   public static readonly viewType = "toolkitWebviewView";
@@ -69,10 +70,19 @@ export class ToolkitWebviewViewProvider implements vscode.WebviewViewProvider {
       ),
     );
 
+    // TODO: make regex for these string values, ie Regex(${HtmlData.Nonce}) etc etc
+    Object.values(HtmlData).forEach((value) => {
+      if (typeof value === "string") {
+        console.log("HtmlData:", value);
+      }
+    });
+
     // Use a nonce to only allow a specific script to be run.
     const nonce = this.getNonce();
     const csp = webview.cspSource;
 
+    // TODO: replace this with a series of String.replace() calls with more verbose
+    // names
     let html = "";
     try {
       html = util.format(
