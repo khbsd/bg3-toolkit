@@ -1,7 +1,7 @@
 import * as fs from "fs";
 import * as path from "path";
 
-const ignorePaths = [".git", ".pak", ".vscode"];
+const pakIgnorePaths = [".git", ".pak", ".vscode"];
 
 export function fixPath(wsPath: string): string {
   const illegal_strings = ["file:"];
@@ -58,8 +58,9 @@ export function getModName(modPath: string): string {
   return modPath.split(path.sep).at(-1) ?? "";
 }
 
-export function getFiles(wsPath: string): fs.Dirent[] {
+export function getFiles(wsPath: string, type?: string): fs.Dirent[] {
   let paths: fs.Dirent[] = [];
+  let fType: string = type ?? "";
 
   wsPath = fixPath(wsPath);
   let dirents = fs.readdirSync(wsPath, {
@@ -69,12 +70,19 @@ export function getFiles(wsPath: string): fs.Dirent[] {
 
   for (let entry of dirents) {
     let pathOk: boolean = true;
-    for (let i of ignorePaths) {
+    let filter: boolean = true;
+
+    if (fType.length > 0) {
+      filter = entry.name.includes(fType) && entry.name !== "meta.lsx";
+    }
+
+    for (let i of pakIgnorePaths) {
       pathOk =
         !entry.parentPath.includes(i) &&
         !entry.name.includes(i) &&
         entry.name !== i &&
-        entry.isFile();
+        entry.isFile() &&
+        filter;
 
       if (!pathOk) {
         break;

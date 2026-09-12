@@ -1,10 +1,12 @@
 import * as fs from "fs";
 import * as path from "path";
 import * as vscode from "vscode";
-import * as util from "util";
 import { getWorkspacePath } from "../utils/ws_utils";
 import { HtmlDataUtils, HtmlData, HtmlDataObj } from "../utils/html_utils";
+import * as futils from "../utils/file_utils";
 import { Pak } from "../utils/ls-utils/pak";
+import { Lsx } from "../utils/ls-utils/lsx";
+import * as formats from "../utils/ls-utils/formats";
 
 export class ToolkitWebviewViewProvider implements vscode.WebviewViewProvider {
   public static readonly viewType = "toolkitWebviewView";
@@ -32,8 +34,15 @@ export class ToolkitWebviewViewProvider implements vscode.WebviewViewProvider {
       console.log("message recieved: ", data.message);
       switch (data.type) {
         case "pak": {
-          let p = new Pak(getWorkspacePath());
-          p.build();
+          console.log(typeof HtmlData);
+          //let p = new Pak(getWorkspacePath());
+          //p.build();
+          //break;
+        }
+        case "lsx": {
+          //let l = new Lsx(getWorkspacePath());
+          //l.convert();
+          //console.log(futils.getFiles(getWorkspacePath(), data.type));
         }
       }
     });

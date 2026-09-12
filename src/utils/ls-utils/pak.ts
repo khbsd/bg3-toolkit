@@ -13,14 +13,7 @@ export class Pak {
     this.builder = new lsPak.PakBuilder();
     this.wsPath = futils.fixPath(wsPath);
     this.modPath = modPath ?? futils.getModPath(this.wsPath);
-    this.paths = this.getFiles();
-  }
-
-  public getFiles(): fs.Dirent[] {
-    let paths: fs.Dirent[] = [];
-    paths = futils.getFiles(this.modPath);
-    this.paths = paths;
-    return paths;
+    this.paths = futils.getFiles(this.modPath);
   }
 
   public build() {
