@@ -8,15 +8,23 @@
         <link href="${StyleSrc}" rel="stylesheet">
     </head>
     <body>
-        pack ya mod babes!!!
+        <li class="info">pack ya mod babes !!!</li>
         <button class="pack-button" title="Pack your mod, starting from '${WorkspacePath}'">PACK</button>
+
         <br>
+
         <br>
-        click on these to convert each file of that type into its other form
+
+        <li class="info">click on these to convert files that the game expects to be binary.</li>
         <br>
-        <button class="lsx-button" title="also works on .lsfex files">*.lsx</button> <-> <button class="lsf-button" title="also works on .lsfx files">*.lsf</button>
+        <div class="buttons-arrows">
+            <button class="lsx-button left-button" title="also works on .lsfex files">*.lsx</button><div class="center-arrows"><-></div><button class="lsf-button right-button" title="also works on .lsfx files">*.lsf</button>
+        </div>
         <br>
-        <button class="locaxml-button" title="">*.loca.xml</button> <-> <button class="loca-button" title="">*.loca</button>
+
+        <div class="buttons-arrows">
+            <button class="locaxml-button left-button" title="">*.loca.xml</button><div class="center-arrows"><-></div><button class="loca-button right-button" title="">*.loca</button>
+        </div>
         <script nonce="${Nonce}" src="${ScriptSrc}"></script>
     </body>
 </html>

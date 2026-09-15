@@ -3,6 +3,7 @@ import * as lsPak from "larian-formats-wasm";
 import * as path from "path";
 import * as formats from "./formats";
 import * as futils from "../file_utils";
+import { FileFormats } from "./formats";
 
 // TODO: this
 
@@ -17,7 +18,7 @@ export class LocaXml {
   wsPath: string;
   modPath: string;
   paths: fs.Dirent[];
-  type: string = ".xml";
+  type: string = FileFormats[FileFormats.xml];
   constructor(wsPath: string, modPath?: string | undefined) {
     this.builder = lsPak;
     this.wsPath = futils.fixPath(wsPath);
@@ -29,7 +30,7 @@ export class LocaXml {
 
   public convert() {
     for (let p of this.paths) {
-      console.log(new formats.FileType(path.join(p.parentPath, p.name)));
+      console.log(new formats.File(path.join(p.parentPath, p.name)));
     }
   }
 }

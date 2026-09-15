@@ -93,7 +93,7 @@ export function getFiles(
   forConversion?: boolean,
 ): fs.Dirent[] {
   let paths: fs.Dirent[] = [];
-  let fType: string = type ?? "";
+  let fType: string = "." + (type ?? "");
 
   wsPath = fixPath(wsPath);
   let dirents = fs.readdirSync(wsPath, {
@@ -105,7 +105,7 @@ export function getFiles(
     let pathOk: boolean = true;
     let filter: boolean = true;
 
-    if (fType.length > 0) {
+    if (fType.length > 1) {
       filter = entry.name.includes(fType);
     }
 

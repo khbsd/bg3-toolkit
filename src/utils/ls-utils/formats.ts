@@ -4,7 +4,7 @@ import * as eutils from "../enum_utils";
 import * as futils from "../file_utils";
 import * as wsutils from "../ws_utils";
 
-export enum FileTypes {
+export enum FileFormats {
   lsx,
   xml,
   // non-editable below this line
@@ -20,7 +20,7 @@ export enum FileTypes {
   count,
 }
 
-export const EditableTypes: FileTypes[] = [FileTypes.lsx, FileTypes.xml];
+export const EditableFormats: FileFormats[] = [FileFormats.lsx, FileFormats.xml];
 
 export enum CompressionType {
   lsf,
@@ -28,7 +28,7 @@ export enum CompressionType {
   count,
 }
 
-export class FileType {
+export class File {
   name: string;
   path: string;
   compressionType: CompressionType;
@@ -47,9 +47,9 @@ export class FileType {
   public getCompressionType(): CompressionType {
     let c: CompressionType = CompressionType.lsf;
 
-    switch (FileTypes[this.ext as keyof typeof FileTypes]) {
-      case FileTypes.xml:
-      case FileTypes.loca: {
+    switch (FileFormats[this.ext as keyof typeof FileFormats]) {
+      case FileFormats.xml:
+      case FileFormats.loca: {
         c = CompressionType.loca;
       }
     }
@@ -58,7 +58,7 @@ export class FileType {
 
   public isEditable(ext?: string): boolean {
     ext = ext ?? this.ext;
-    return eutils.getNames(FileTypes).includes(ext);
+    return eutils.getNames(FileFormats).includes(ext);
   }
 
   public toExt(ext?: string): string {
@@ -77,26 +77,34 @@ export class FileType {
 
     if (
       targetFile.length === 0 &&
-      Object(FileTypes).hasOwnProperty(sourceExt)
+      Object(FileFormats).hasOwnProperty(sourceExt)
     ) {
-      switch (FileTypes[sourceExt as keyof typeof FileTypes]) {
-        case FileTypes.lsx: {
-          targetFile = path.join(this.name + "." + FileTypes[FileTypes.lsf]);
+      switch (FileFormats[sourceExt as keyof typeof FileFormats]) {
+        case FileFormats.lsx: {
+          targetFile = path.join(
+            this.name + "." + FileFormats[FileFormats.lsf],
+          );
         }
-        case FileTypes.xml: {
-          targetFile = path.join(this.name + "." + FileTypes[FileTypes.loca]);
+        case FileFormats.xml: {
+          targetFile = path.join(
+            this.name + "." + FileFormats[FileFormats.loca],
+          );
         }
         default:
-        case FileTypes.lsf:
-        case FileTypes.lsfx:
-        case FileTypes.lsfex:
-        case FileTypes.lsb:
-        case FileTypes.lsbc:
-        case FileTypes.lsbs: {
-          targetFile = path.join(this.name + "." + FileTypes[FileTypes.lsx]);
+        case FileFormats.lsf:
+        case FileFormats.lsfx:
+        case FileFormats.lsfex:
+        case FileFormats.lsb:
+        case FileFormats.lsbc:
+        case FileFormats.lsbs: {
+          targetFile = path.join(
+            this.name + "." + FileFormats[FileFormats.lsx],
+          );
         }
-        case FileTypes.loca: {
-          targetFile = path.join(this.name + "." + FileTypes[FileTypes.xml]);
+        case FileFormats.loca: {
+          targetFile = path.join(
+            this.name + "." + FileFormats[FileFormats.xml],
+          );
         }
       }
     }

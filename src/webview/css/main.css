@@ -1,3 +1,10 @@
+body {
+  width: 88%;
+  overflow: hidden;
+  align-items: center;
+  justify-content: center;
+}
+
 button {
   color: var(--vscode-button-foreground);
   border-radius: 0.4rem;
@@ -6,15 +13,45 @@ button {
   font-size: var(--vscode-editor-font-weight);
   font-weight: var(--vscode-editor-font-size);
   height: 1.875rem;
-  width: 41%;
+  width: 50%;
+  min-width: 5%;
+  display: inline;
   background-color: var(--vscode-button-background);
 } button:hover {
   background-color: var(--vscode-button-hoverBackground);
   cursor: pointer;
 }
 
+.info li::before{
+  content: "<";
+}
+
+.buttons-arrows {
+  width: 100%;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+}
+
 .pack-button {
+  display: block;
   height: 3rem;
   width: 100%;
 }
+
+.right-button {
+  flex: 1;
+  flex-grow: 2;
+}
+
+.left-button {
+  flex: 1;
+  flex-grow: 2;
+}
+
+.center-arrows {
+  flex: 1;
+  text-align: center;
+}
+
 

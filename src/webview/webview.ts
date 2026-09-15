@@ -9,7 +9,7 @@ import { Lsx } from "../utils/ls-utils/lsx";
 import { Pak } from "../utils/ls-utils/pak";
 import { LocaXml } from "../utils/ls-utils/loca-xml";
 import * as formats from "../utils/ls-utils/formats";
-import { FileTypes } from "../utils/ls-utils/formats";
+import { FileFormats } from "../utils/ls-utils/formats";
 
 export class ToolkitWebviewViewProvider implements vscode.WebviewViewProvider {
   public static readonly viewType = "toolkitWebviewView";
@@ -35,17 +35,17 @@ export class ToolkitWebviewViewProvider implements vscode.WebviewViewProvider {
 
     webviewView.webview.onDidReceiveMessage((data) => {
       console.log("message recieved: ", data.message);
-      switch (FileTypes[data.type as keyof typeof FileTypes]) {
-        case FileTypes.pak: {
-          console.log(FileTypes[FileTypes.loca]);
+      switch (FileFormats[data.type as keyof typeof FileFormats]) {
+        case FileFormats.pak: {
+          console.log(FileFormats[FileFormats.loca]);
           break;
         }
-        case FileTypes.lsx: {
+        case FileFormats.lsx: {
           let l = new Lsx(getWorkspacePath());
           l.convert();
           break;
         }
-        case FileTypes.xml: {
+        case FileFormats.xml: {
           let l = new LocaXml(getWorkspacePath());
           l.convert();
           break;
