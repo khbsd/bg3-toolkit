@@ -13,7 +13,7 @@ import { FileFormats } from "./formats";
 // probably should check in their folders to see if theres a file with the same name
 // but a different extension
 
-export class LocaXml {
+export class Xml {
   builder;
   wsPath: string;
   modPath: string;
@@ -30,7 +30,55 @@ export class LocaXml {
 
   public convert() {
     for (let p of this.paths) {
-      console.log(new formats.File(path.join(p.parentPath, p.name)));
+      const fullPath: string = path.join(p.parentPath, p.name);
+      let f = new formats.File(fullPath);
+      let outContents: Uint8Array;
+      try {
+        outContents = this.builder.convert_xml_to_loca(
+          fs.readFileSync(fullPath).toString(),
+        );
+        console.log("writing: ", f.name);
+        fs.writeFileSync(f.out_path, Buffer.from(outContents), {
+          flag: "w",
+        });
+      } catch (err) {
+        console.log(err);
+      }
+    }
+  }
+}
+
+export class Loca {
+  builder;
+  wsPath: string;
+  modPath: string;
+  paths: fs.Dirent[];
+  type: string = FileFormats[FileFormats.loca];
+  constructor(wsPath: string, modPath?: string | undefined) {
+    this.builder = lsPak;
+    this.wsPath = futils.fixPath(wsPath);
+    this.modPath = modPath ?? futils.getModPath(this.wsPath);
+    this.paths = futils.getFiles(this.modPath, this.type, true);
+  }
+
+  public fileObjBuilder() {}
+
+  public convert() {
+    for (let p of this.paths) {
+      const fullPath: string = path.join(p.parentPath, p.name);
+      let f = new formats.File(fullPath);
+      let outContents: string;
+      try {
+        outContents = this.builder
+          .convert_loca_to_xml(new Uint8Array(fs.readFileSync(fullPath)))
+          .toString();
+        console.log("writing: ", f.name);
+        fs.writeFileSync(f.out_path, outContents, {
+          flag: "w",
+        });
+      } catch (err) {
+        console.log(err);
+      }
     }
   }
 }

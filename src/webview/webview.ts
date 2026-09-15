@@ -5,9 +5,9 @@ import { getWorkspacePath } from "../utils/ws_utils";
 import { HtmlDataUtils, HtmlData } from "../utils/html_utils";
 import * as eutils from "../utils/enum_utils";
 import * as futils from "../utils/file_utils";
-import { Lsx } from "../utils/ls-utils/lsx";
+import { Lsx, Lsf } from "../utils/ls-utils/lsx";
 import { Pak } from "../utils/ls-utils/pak";
-import { LocaXml } from "../utils/ls-utils/loca-xml";
+import { Loca, Xml } from "../utils/ls-utils/loca-xml";
 import * as formats from "../utils/ls-utils/formats";
 import { FileFormats } from "../utils/ls-utils/formats";
 
@@ -37,17 +37,28 @@ export class ToolkitWebviewViewProvider implements vscode.WebviewViewProvider {
       console.log("message recieved: ", data.message);
       switch (FileFormats[data.type as keyof typeof FileFormats]) {
         case FileFormats.pak: {
-          console.log(FileFormats[FileFormats.loca]);
+          let pak = new Pak(getWorkspacePath());
+          pak.build();
           break;
         }
         case FileFormats.lsx: {
-          let l = new Lsx(getWorkspacePath());
-          l.convert();
+          let lsx = new Lsx(getWorkspacePath());
+          lsx.convert();
           break;
         }
         case FileFormats.xml: {
-          let l = new LocaXml(getWorkspacePath());
-          l.convert();
+          let xml = new Xml(getWorkspacePath());
+          xml.convert();
+          break;
+        }
+        case FileFormats.lsf: {
+          let lsf = new Lsf(getWorkspacePath());
+          lsf.convert();
+          break;
+        }
+        case FileFormats.loca: {
+          let loca = new Loca(getWorkspacePath());
+          loca.convert();
           break;
         }
       }

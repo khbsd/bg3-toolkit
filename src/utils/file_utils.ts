@@ -1,15 +1,9 @@
 import * as fs from "fs";
 import * as path from "path";
 
-const pakIgnorePaths: string[] = [
-  ".git",
-  ".pak",
-  ".vscode",
-  ".bak",
-  ".zip",
-  "meta.lsx",
-  "Icons_Items.lsx",
-];
+const pakIgnorePaths: string[] = [".git", ".pak", ".vscode", ".bak", ".zip"];
+
+const convertIgnoreFiles: string[] = ["meta.lsx", "Icons_Items"];
 
 const fileConvertDirs: string[] = [
   "[PAK]_UI",
@@ -115,7 +109,11 @@ export function getFiles(
 
       for (let dir of fileConvertDirs) {
         if (forConversion) {
-          conversion = entry.parentPath.includes(dir);
+          conversion =
+            entry.parentPath.includes(dir) &&
+            !convertIgnoreFiles.includes(
+              path.basename(entry.name, path.extname(entry.name)),
+            );
         }
         if (conversion) {
           break;

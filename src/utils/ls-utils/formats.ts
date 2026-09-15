@@ -20,12 +20,29 @@ export enum FileFormats {
   count,
 }
 
-export const EditableFormats: FileFormats[] = [FileFormats.lsx, FileFormats.xml];
+export const EditableFormats: FileFormats[] = [
+  FileFormats.lsx,
+  FileFormats.xml,
+];
 
 export enum CompressionType {
   lsf,
   loca,
   count,
+}
+
+export function isEditable(ext: string): boolean {
+  let isEdit: boolean = false;
+  if (ext.startsWith(".")) {
+    ext = ext.slice(1);
+  }
+  for (const ef of EditableFormats) {
+    isEdit = FileFormats[ef] === ext;
+    if (isEdit) {
+      break;
+    }
+  }
+  return isEdit;
 }
 
 export class File {

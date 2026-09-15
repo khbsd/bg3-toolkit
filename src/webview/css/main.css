@@ -22,8 +22,13 @@ button {
   cursor: pointer;
 }
 
-.info li::before{
-  content: "<";
+li {
+  list-style-type: none;
+}
+
+.info::before {
+  content: ">";
+  margin-right: 2%;
 }
 
 .buttons-arrows {
