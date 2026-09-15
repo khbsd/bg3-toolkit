@@ -1,5 +1,6 @@
 import * as vscode from "vscode";
 import * as path from "path";
+import * as futils from "./file_utils";
 
 export function getWorkspacePath(short: boolean = false): string {
   let wsPath = "";
@@ -20,5 +21,5 @@ export function getWorkspacePath(short: boolean = false): string {
   if (short) {
     return wsPathShort;
   }
-  return wsPath;
+  return futils.fixPath(wsPath);
 }

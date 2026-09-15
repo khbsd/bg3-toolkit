@@ -1,7 +1,31 @@
 import * as fs from "fs";
 import * as path from "path";
 
-const pakIgnorePaths = [".git", ".pak", ".vscode"];
+const pakIgnorePaths: string[] = [
+  ".git",
+  ".pak",
+  ".vscode",
+  ".bak",
+  ".zip",
+  "meta.lsx",
+  "Icons_Items.lsx",
+];
+
+const fileConvertDirs: string[] = [
+  "[PAK]_UI",
+  "[PAK]_Armor",
+  "[PAK]_GeneratedDialogTimelines",
+  "Assets",
+  "Content",
+  "Effects",
+  "Flags",
+  "LevelMapValues",
+  "Localization",
+  "MultiEffectInfos",
+  "RootTemplates",
+  "Timeline",
+  "UI",
+];
 
 export function fixPath(wsPath: string): string {
   const illegal_strings = ["file:"];
@@ -31,6 +55,9 @@ export function getModPath(wsPath: string): string {
     withFileTypes: true,
   });
   for (let p of wsPaths) {
+    if (!p.isFile()) {
+      continue;
+    }
     if (p.name.toLowerCase().includes("meta.lsx")) {
       return path.resolve(p.parentPath, "..", "..");
     }
@@ -38,11 +65,13 @@ export function getModPath(wsPath: string): string {
   return "";
 }
 
+// maybe unneeded tbh
 export function isModPath(path: string): boolean {
   let hasMetaLsx: boolean = false;
   let files = fs.readdirSync(path);
 
   for (let file in files) {
+    console.log(file);
     hasMetaLsx = file.toLowerCase().includes("meta.lsx");
     if (hasMetaLsx) {
       break;
@@ -58,7 +87,11 @@ export function getModName(modPath: string): string {
   return modPath.split(path.sep).at(-1) ?? "";
 }
 
-export function getFiles(wsPath: string, type?: string): fs.Dirent[] {
+export function getFiles(
+  wsPath: string,
+  type?: string,
+  forConversion?: boolean,
+): fs.Dirent[] {
   let paths: fs.Dirent[] = [];
   let fType: string = type ?? "";
 
@@ -73,17 +106,27 @@ export function getFiles(wsPath: string, type?: string): fs.Dirent[] {
     let filter: boolean = true;
 
     if (fType.length > 0) {
-      filter = entry.name.includes(fType) && entry.name !== "meta.lsx";
+      filter = entry.name.includes(fType);
     }
 
     for (let i of pakIgnorePaths) {
-      pathOk =
-        !entry.parentPath.includes(i) &&
-        !entry.name.includes(i) &&
-        entry.name !== i &&
-        entry.isFile() &&
-        filter;
+      let p: string = path.join(entry.parentPath, entry.name);
+      let conversion: boolean = true;
 
+      for (let dir of fileConvertDirs) {
+        if (forConversion) {
+          conversion = entry.parentPath.includes(dir);
+        }
+        if (conversion) {
+          break;
+        }
+      }
+      pathOk =
+        conversion &&
+        !p.includes(i) &&
+        entry.isFile() &&
+        !entry.name.startsWith(".") &&
+        filter;
       if (!pathOk) {
         break;
       }
@@ -91,6 +134,7 @@ export function getFiles(wsPath: string, type?: string): fs.Dirent[] {
 
     if (pathOk) {
       paths.push(entry);
+      console.log("added", entry);
     }
   }
 

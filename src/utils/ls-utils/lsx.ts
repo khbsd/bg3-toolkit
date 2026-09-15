@@ -1,7 +1,7 @@
 import * as fs from "fs";
 import * as lsPak from "larian-formats-wasm";
 import * as path from "path";
-
+import * as formats from "./formats";
 import * as futils from "../file_utils";
 
 // TODO: this
@@ -18,19 +18,16 @@ export class Lsx {
   modPath: string;
   paths: fs.Dirent[];
   type: string = ".lsx";
-  constructor(wsPath: string, modPath: string | undefined = undefined) {
+  constructor(wsPath: string, modPath?: string | undefined) {
     this.builder = lsPak;
     this.wsPath = futils.fixPath(wsPath);
     this.modPath = modPath ?? futils.getModPath(this.wsPath);
-    this.paths = futils.getFiles(this.modPath, this.type);
+    this.paths = futils.getFiles(this.modPath, this.type, true);
   }
 
   public convert() {
-    for (let file of this.paths) {
-      /*this.builder.convert_lsx_to_lsf(
-        fs.readFileSync(path.join(file.name, file.parentPath)).toString(),
-      );*/
-      console.log(file);
+    for (let p of this.paths) {
+      console.log(new formats.FileType(path.join(p.parentPath, p.name)));
     }
   }
 }

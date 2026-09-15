@@ -1,84 +1,106 @@
 import * as fs from "fs";
 import * as path from "path";
+import * as eutils from "../enum_utils";
+import * as futils from "../file_utils";
+import * as wsutils from "../ws_utils";
 
-export enum EditableFileType {
+export enum FileTypes {
   lsx,
+  xml,
+  // non-editable below this line
+  lsf,
   lsfx,
   lsfex,
-  xml,
-}
-
-export enum NonEditableFileType {
-  lsf,
   lsb,
+  lsbc,
+  lsbs,
   lsj,
   loca,
+  pak,
+  count,
 }
 
-export type FileTypeObj = {
+export const EditableTypes: FileTypes[] = [FileTypes.lsx, FileTypes.xml];
+
+export enum CompressionType {
+  lsf,
+  loca,
+  count,
+}
+
+export class FileType {
   name: string;
-  value: number;
-  data: string;
-}
-
-export class FileFormats {
-  constructor() {}
-  public getEditableNames(): string[] {
-    let names: string[] = [];
-    Object.values(EditableFileType).forEach((value) => {
-      if (typeof value === "string") {
-        names.push(value);
-      }
-    });
-
-    return names;
+  path: string;
+  compressionType: CompressionType;
+  ext: string;
+  out_path: string;
+  out_ext: string;
+  constructor(fp: string, wsPath?: string) {
+    this.name = path.basename(fp, path.extname(fp));
+    this.ext = path.extname(fp).slice(1);
+    this.path = fp;
+    this.compressionType = this.getCompressionType();
+    this.out_path = this.toExt();
+    this.out_ext = path.extname(this.out_path).slice(1);
   }
 
-  public getEditableValues(): number[] {
-    let values: number[] = [];
-    Object.values(EditableFileType).forEach((value) => {
-      if (typeof value === "number") {
-        values.push(value);
+  public getCompressionType(): CompressionType {
+    let c: CompressionType = CompressionType.lsf;
+
+    switch (FileTypes[this.ext as keyof typeof FileTypes]) {
+      case FileTypes.xml:
+      case FileTypes.loca: {
+        c = CompressionType.loca;
       }
-    });
-
-    return values;
-  }
-
-  public getEditableObjs(fillVals: string[]): FileTypeObj[] {
-    let obj: FileTypeObj[] = [];
-    let names: string[] = this.getEditableNames();
-    let values: number[] = this.getEditableValues();
-    for (let value of values) {
-      let tempobj: FileTypeObj = {
-        name: names[value],
-        value: value,
-        data: fillVals[value],
-      };
-      obj.push(tempobj);
     }
-    return obj;
+    return c;
   }
 
-  public getNonEditableNames(): string[] {
-    let names: string[] = [];
-    Object.values(NonEditableFileType).forEach((value) => {
-      if (typeof value === "string") {
-        names.push(value);
+  public isEditable(ext?: string): boolean {
+    ext = ext ?? this.ext;
+    return eutils.getNames(FileTypes).includes(ext);
+  }
+
+  public toExt(ext?: string): string {
+    let sourceExt: string = ext ?? this.ext;
+    let tempPath: string = path.resolve(this.path, "..");
+    let targetFile: string = "";
+    fs.readdirSync(tempPath, { withFileTypes: true }).forEach((entry) => {
+      if (
+        !entry.name.includes("." + sourceExt) &&
+        entry.name.includes(this.name) &&
+        !entry.name.includes(".bak")
+      ) {
+        targetFile = path.join(entry.parentPath, entry.name);
       }
     });
 
-    return names;
-  }
-
-  public getNonEditableValues(): number[] {
-    let values: number[] = [];
-    Object.values(NonEditableFileType).forEach((value) => {
-      if (typeof value === "number") {
-        values.push(value);
+    if (
+      targetFile.length === 0 &&
+      Object(FileTypes).hasOwnProperty(sourceExt)
+    ) {
+      switch (FileTypes[sourceExt as keyof typeof FileTypes]) {
+        case FileTypes.lsx: {
+          targetFile = path.join(this.name + "." + FileTypes[FileTypes.lsf]);
+        }
+        case FileTypes.xml: {
+          targetFile = path.join(this.name + "." + FileTypes[FileTypes.loca]);
+        }
+        default:
+        case FileTypes.lsf:
+        case FileTypes.lsfx:
+        case FileTypes.lsfex:
+        case FileTypes.lsb:
+        case FileTypes.lsbc:
+        case FileTypes.lsbs: {
+          targetFile = path.join(this.name + "." + FileTypes[FileTypes.lsx]);
+        }
+        case FileTypes.loca: {
+          targetFile = path.join(this.name + "." + FileTypes[FileTypes.xml]);
+        }
       }
-    });
+    }
 
-    return values;
+    return targetFile;
   }
 }

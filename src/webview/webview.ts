@@ -2,11 +2,14 @@ import * as fs from "fs";
 import * as path from "path";
 import * as vscode from "vscode";
 import { getWorkspacePath } from "../utils/ws_utils";
-import { HtmlDataUtils, HtmlData, HtmlDataObj } from "../utils/html_utils";
+import { HtmlDataUtils, HtmlData } from "../utils/html_utils";
+import * as eutils from "../utils/enum_utils";
 import * as futils from "../utils/file_utils";
-import { Pak } from "../utils/ls-utils/pak";
 import { Lsx } from "../utils/ls-utils/lsx";
+import { Pak } from "../utils/ls-utils/pak";
+import { LocaXml } from "../utils/ls-utils/loca-xml";
 import * as formats from "../utils/ls-utils/formats";
+import { FileTypes } from "../utils/ls-utils/formats";
 
 export class ToolkitWebviewViewProvider implements vscode.WebviewViewProvider {
   public static readonly viewType = "toolkitWebviewView";
@@ -32,17 +35,20 @@ export class ToolkitWebviewViewProvider implements vscode.WebviewViewProvider {
 
     webviewView.webview.onDidReceiveMessage((data) => {
       console.log("message recieved: ", data.message);
-      switch (data.type) {
-        case "pak": {
-          console.log(typeof HtmlData);
-          //let p = new Pak(getWorkspacePath());
-          //p.build();
-          //break;
+      switch (FileTypes[data.type as keyof typeof FileTypes]) {
+        case FileTypes.pak: {
+          console.log(FileTypes[FileTypes.loca]);
+          break;
         }
-        case "lsx": {
-          //let l = new Lsx(getWorkspacePath());
-          //l.convert();
-          //console.log(futils.getFiles(getWorkspacePath(), data.type));
+        case FileTypes.lsx: {
+          let l = new Lsx(getWorkspacePath());
+          l.convert();
+          break;
+        }
+        case FileTypes.xml: {
+          let l = new LocaXml(getWorkspacePath());
+          l.convert();
+          break;
         }
       }
     });
@@ -107,12 +113,6 @@ export class ToolkitWebviewViewProvider implements vscode.WebviewViewProvider {
       console.log(err);
       return "";
     }
-
-    // programmatically find and replace the placeholder values from the html file we read
-    for (let obj of hd.getObjs(data)) {
-      html = html.replaceAll("${" + obj.name + "}", obj.data);
-    }
-
-    return html;
+    return hd.formatHtml(html, data);
   }
 }

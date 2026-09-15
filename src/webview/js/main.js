@@ -20,8 +20,8 @@
   });
   document.querySelector(".locaxml-button").addEventListener("click", () => {
     vscode.postMessage({
-      type: "loca.xml",
-      message: "converting loca.xml files",
+      type: "xml",
+      message: "converting xml files",
     });
   });
   document.querySelector(".loca-button").addEventListener("click", () => {
