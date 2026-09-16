@@ -54,8 +54,8 @@ export class Unpak {
   wsPath: string;
   unpakPath: string;
   constructor(wsPath: string, unpakPath?: string) {
-    this.unpakPath = unpakPath ?? path.resolve(futils.fixPath(wsPath), "..");
     this.wsPath = futils.fixPath(wsPath);
+    this.unpakPath = unpakPath ?? path.resolve(this.wsPath, "..");
   }
 
   public unpack(): void {
