@@ -2,7 +2,7 @@
   "name": "bg3-toolkit",
   "displayName": "bg3-toolkit",
   "description": "",
-  "version": "0.1.0",
+  "version": "0.1.5",
   "repository": {
     "type": "git",
     "url": "https://github.com/khbsd/bg3-toolkit"
@@ -32,10 +32,42 @@
         "title": "convert lsx"
       },
       {
-        "command": "bg3-toolkit.locaXmlConvert",
-        "title": "convert loca.xml"
+        "command": "bg3-toolkit.lsfConvert",
+        "title": "convert lsf"
+      },
+      {
+        "command": "bg3-toolkit.xmlConvert",
+        "title": "convert xml"
+      },
+      {
+        "command": "bg3-toolkit.locaConvert",
+        "title": "convert loca"
+      },
+      {
+        "command": "bg3-toolkit.lsxConvertAll",
+        "title": "convert all lsx"
+      },
+      {
+        "command": "bg3-toolkit.lsfConvertAll",
+        "title": "convert all lsf"
+      },
+      {
+        "command": "bg3-toolkit.xmlConvertAll",
+        "title": "convert all xml"
+      },
+      {
+        "command": "bg3-toolkit.locaConvertAll",
+        "title": "convert all loca"
       }
     ],
+    "menus": {
+      "explorer/context": [
+        {
+          "when": "resourceExtname == .lsf || resourceExtname == .LSF",
+          "command": "bg3-toolkit.lsxConvert"
+        }
+      ]
+    },
     "viewsContainers": {
       "activitybar": [
         {

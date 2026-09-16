@@ -20,7 +20,7 @@
   document.querySelector(".lsf-button").addEventListener("click", () => {
     vscode.postMessage({ type: "lsf", message: "converting lsf files" });
   });
-  document.querySelector(".locaxml-button").addEventListener("click", () => {
+  document.querySelector(".xml-button").addEventListener("click", () => {
     vscode.postMessage({
       type: "xml",
       message: "converting xml files",

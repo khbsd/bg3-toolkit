@@ -7,7 +7,7 @@ import * as eutils from "../utils/enum_utils";
 import * as futils from "../utils/file_utils";
 import { Lsx, Lsf } from "../utils/ls-utils/lsx";
 import { Pak, Unpak } from "../utils/ls-utils/pak";
-import { Loca, Xml } from "../utils/ls-utils/loca-xml";
+import { Loca, Xml } from "../utils/ls-utils/loca_xml";
 import * as formats from "../utils/ls-utils/formats";
 import { FileFormats } from "../utils/ls-utils/formats";
 
@@ -103,22 +103,22 @@ export class ToolkitWebviewViewProvider implements vscode.WebviewViewProvider {
         }
         case FileFormats.lsx: {
           let lsx = new Lsx(getWorkspacePath());
-          lsx.convert();
+          lsx.convertModDir();
           break;
         }
         case FileFormats.xml: {
           let xml = new Xml(getWorkspacePath());
-          xml.convert();
+          xml.convertModDir();
           break;
         }
         case FileFormats.lsf: {
           let lsf = new Lsf(getWorkspacePath());
-          lsf.convert();
+          lsf.convertModDir();
           break;
         }
         case FileFormats.loca: {
           let loca = new Loca(getWorkspacePath());
-          loca.convert();
+          loca.convertModDir();
           break;
         }
       }

@@ -1,5 +1,6 @@
 import * as fs from "fs";
 import * as path from "path";
+import { FileFormats, LsfCompressionFormats } from "./ls-utils/formats";
 
 const pakIgnorePaths: string[] = [".git", ".pak", ".vscode", ".bak", ".zip"];
 
@@ -87,7 +88,7 @@ export function getFiles(
   forConversion?: boolean,
 ): fs.Dirent[] {
   let paths: fs.Dirent[] = [];
-  let fType: string = "." + (type ?? "");
+  type = type ?? "";
 
   wsPath = fixPath(wsPath);
   let dirents = fs.readdirSync(wsPath, {
@@ -99,10 +100,21 @@ export function getFiles(
     let pathOk: boolean = true;
     let filter: boolean = true;
 
-    if (fType.length > 1) {
-      filter = entry.name.includes(fType);
+    // filter out specified file formats by provided extension
+    if (type.length > 0) {
+      if (type === FileFormats[FileFormats.lsf]) {
+        for (const t of LsfCompressionFormats) {
+          filter = entry.name.includes("." + FileFormats[t]);
+          if (filter) {
+            break;
+          }
+        }
+      } else {
+        filter = entry.name.includes("." + type);
+      }
     }
 
+    // ignore paths or files that dont need converting
     for (let i of pakIgnorePaths) {
       let p: string = path.join(entry.parentPath, entry.name);
       let conversion: boolean = true;
@@ -121,10 +133,10 @@ export function getFiles(
       }
       pathOk =
         conversion &&
+        filter &&
         !p.includes(i) &&
         entry.isFile() &&
-        !entry.name.startsWith(".") &&
-        filter;
+        !entry.name.startsWith(".");
       if (!pathOk) {
         break;
       }
