@@ -6,7 +6,7 @@ import { HtmlDataUtils, HtmlData } from "../utils/html_utils";
 import * as eutils from "../utils/enum_utils";
 import * as futils from "../utils/file_utils";
 import { Lsx, Lsf } from "../utils/ls-utils/lsx";
-import { Pak } from "../utils/ls-utils/pak";
+import { Pak, Unpak } from "../utils/ls-utils/pak";
 import { Loca, Xml } from "../utils/ls-utils/loca-xml";
 import * as formats from "../utils/ls-utils/formats";
 import { FileFormats } from "../utils/ls-utils/formats";
@@ -33,8 +33,68 @@ export class ToolkitWebviewViewProvider implements vscode.WebviewViewProvider {
 
     webviewView.webview.html = this._getHtmlForWebview(webviewView.webview);
 
-    webviewView.webview.onDidReceiveMessage((data) => {
+    webviewView.webview.onDidReceiveMessage(async (data) => {
       console.log("message recieved: ", data.message);
+      if (data.type === "unpack") {
+        let pakPath: string | undefined;
+        let unpakPath: string | undefined;
+        while (pakPath === undefined) {
+          pakPath = await vscode.window
+            .showOpenDialog({
+              canSelectFiles: true,
+              canSelectFolders: false,
+              canSelectMany: false,
+              filters: { "PAK Files": ["pak"] },
+              title: "Select a .pak file to unpack",
+            })
+            .then((p) => p?.toString());
+
+          if (pakPath === undefined) {
+            let warning;
+            await vscode.window
+              .showWarningMessage(
+                "You must select a pak!",
+                "oops",
+                "never mind",
+              )
+              .then((value) => {
+                warning = value;
+              });
+            if (warning !== "oops") {
+              return;
+            }
+          }
+        }
+        while (unpakPath === undefined) {
+          unpakPath = await vscode.window
+            .showOpenDialog({
+              canSelectFiles: false,
+              canSelectFolders: true,
+              canSelectMany: false,
+              title: "Select a location to unpack to",
+            })
+            .then((p) => p?.toString());
+          if (unpakPath === undefined) {
+            let warning;
+            await vscode.window
+              .showWarningMessage(
+                "You must select a destination!",
+                "oops",
+                "never mind",
+              )
+              .then((value) => {
+                warning = value;
+              });
+            if (warning !== "oops") {
+              return;
+            }
+          }
+        }
+
+        let unpak = new Unpak(pakPath, unpakPath);
+        unpak.unpack();
+        return;
+      }
       switch (FileFormats[data.type as keyof typeof FileFormats]) {
         case FileFormats.pak: {
           let pak = new Pak(getWorkspacePath());

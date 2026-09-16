@@ -8,10 +8,12 @@
   document.querySelector(".pack-button").addEventListener("click", () => {
     vscode.postMessage({ type: "pak", message: "packing files" });
   });
-  // TODO: this
-  /*document.querySelector(".pack-button").addEventListener("click", () => {
-    vscode.postMessage({ type: "unpack", message: "select a .pak fi" });
-  });*/
+  document.querySelector(".unpack-button").addEventListener("click", () => {
+    vscode.postMessage({
+      type: "unpack",
+      message: "select a .pak file and its destination",
+    });
+  });
   document.querySelector(".lsx-button").addEventListener("click", () => {
     vscode.postMessage({ type: "lsx", message: "converting lsx files" });
   });
