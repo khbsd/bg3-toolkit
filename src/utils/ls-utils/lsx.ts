@@ -8,6 +8,7 @@ export class Lsx extends ConvertCommon {
   }
 
   public convertFile(f: File) {
+    console.log(f);
     let outContents: Uint8Array;
     try {
       outContents = this.builder.convert_lsx_to_lsf(
@@ -30,6 +31,7 @@ export class Lsf extends ConvertCommon {
   }
 
   public convertFile(f: File) {
+    console.log(f);
     let outContents: string;
     try {
       outContents = this.builder

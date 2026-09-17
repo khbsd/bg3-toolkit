@@ -145,7 +145,7 @@ export class ConvertCommon {
   builder;
   wsPath: string;
   modPath: string;
-  paths: fs.Dirent[];
+  files: File[] = [];
   type: FileFormats;
 
   /**
@@ -154,21 +154,45 @@ export class ConvertCommon {
   protected _cf = (f: File) => {
     return;
   };
-  constructor(wsPath: string, type: FileFormats, modPath?: string | undefined) {
+  /**
+   * @param wsPath string
+   * @param type FileFormats
+   * @param modPath string | undefined
+   *
+   * if you pass a single file instead of a folder for the 'wsPath' parameter,
+   * this class will assume you are converting a single file and skip populating
+   * the 'paths' array.
+   */
+  constructor(
+    wsPath: string,
+    type?: FileFormats,
+    modPath?: string | undefined,
+  ) {
     this.builder = lsPak;
-    this.type = type;
+    this.type = type ?? FileFormats.lsx;
     this.wsPath = futils.fixPath(wsPath);
     this.modPath = modPath ?? futils.getModPath(this.wsPath);
-    this.paths = futils.getFiles(this.modPath, FileFormats[this.type], true);
+    if (fs.statSync(this.wsPath).isDirectory()) {
+      if (this.type === FileFormats.pak) {
+        futils.getFiles(this.modPath).forEach((entry) => {
+          this.files.push(new File(path.join(entry.parentPath, entry.name)));
+        });
+      } else {
+        futils
+          .getFiles(this.modPath, FileFormats[this.type], true)
+          .forEach((entry) => {
+            this.files.push(new File(path.join(entry.parentPath, entry.name)));
+          });
+      }
+    }
   }
 
   /**
    * make sure you have assigned 'this._cf' in your extended class before calling this function.
    */
   public convertModDir() {
-    for (let p of this.paths) {
-      const fullPath: string = path.join(p.parentPath, p.name);
-      this._cf(new File(fullPath));
+    for (let f of this.files) {
+      this._cf(f);
     }
   }
 }

@@ -2,7 +2,7 @@
   "name": "bg3-toolkit",
   "displayName": "bg3-toolkit",
   "description": "",
-  "version": "0.1.5",
+  "version": "0.2.0",
   "repository": {
     "type": "git",
     "url": "https://github.com/khbsd/bg3-toolkit"
@@ -29,42 +29,62 @@
       },
       {
         "command": "bg3-toolkit.lsxConvert",
-        "title": "convert lsx"
+        "title": "Convert this .lsx file to .lsf binary format"
       },
       {
         "command": "bg3-toolkit.lsfConvert",
-        "title": "convert lsf"
+        "title": "Convert this .lsf binary format file to .lsx"
       },
       {
         "command": "bg3-toolkit.xmlConvert",
-        "title": "convert xml"
+        "title": "Convert this .xml file to .loca"
       },
       {
         "command": "bg3-toolkit.locaConvert",
-        "title": "convert loca"
+        "title": "Convert this .loca file to .xml"
+      },
+      {
+        "command": "bg3-toolkit.unpackMod",
+        "title": "Unpack this mod into its current folder"
       },
       {
         "command": "bg3-toolkit.lsxConvertAll",
-        "title": "convert all lsx"
+        "title": "Convert all .lsx files to .lsf binary format"
       },
       {
         "command": "bg3-toolkit.lsfConvertAll",
-        "title": "convert all lsf"
+        "title": "Convert all .lsf binary format files to .lsx"
       },
       {
         "command": "bg3-toolkit.xmlConvertAll",
-        "title": "convert all xml"
+        "title": "Convert all .xml files to .loca"
       },
       {
         "command": "bg3-toolkit.locaConvertAll",
-        "title": "convert all loca"
+        "title": "Convert all .loca files to .xml"
       }
     ],
     "menus": {
       "explorer/context": [
         {
-          "when": "resourceExtname == .lsf || resourceExtname == .LSF",
+          "when": "resourceExtname == .lsx || resourceExtname == .LSX",
           "command": "bg3-toolkit.lsxConvert"
+        },
+        {
+          "when": "resourceExtname == .lsf || resourceExtname == .LSF || resourceExtname == .lsb ||  resourceExtname == .LSB || resourceExtname == .lsfx || resourceExtname == .LSFX || resourceExtname == .lsfex || resourceExtname == .LSFEX || resourceExtname == .lsbc || resourceExtname == .LSBC || resourceExtname == .lsbs || resourceExtname == .LSBS ",
+          "command": "bg3-toolkit.lsfConvert"
+        },
+        {
+          "when": "resourceExtname == .xml || resourceExtname == .XML",
+          "command": "bg3-toolkit.xmlConvert"
+        },
+        {
+          "when": "resourceExtname == .loca || resourceExtname == .LOCA",
+          "command": "bg3-toolkit.locaConvert"
+        },
+        {
+          "when": "resourceExtname == .pak || resourceExtname == .PAK",
+          "command": "bg3-toolkit.unpackMod"
         }
       ]
     },

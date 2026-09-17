@@ -5,7 +5,7 @@ import { convert } from "../junction";
 export class Command {
   get(): vscode.Disposable {
     const disposable = vscode.commands.registerCommand(
-      "bg3-toolkit.lsfConvert",
+      "bg3-toolkit.unpackMod",
       (uri) => {
         console.log(uri.path);
         convert(new File(uri.path));

@@ -1,15 +1,14 @@
 import * as fs from "fs";
 import * as path from "path";
 import * as vscode from "vscode";
+
 import { getWorkspacePath } from "../utils/ws_utils";
 import { HtmlDataUtils, HtmlData } from "../utils/html_utils";
-import * as eutils from "../utils/enum_utils";
-import * as futils from "../utils/file_utils";
 import { Lsx, Lsf } from "../utils/ls-utils/lsx";
 import { Pak, Unpak } from "../utils/ls-utils/pak";
 import { Loca, Xml } from "../utils/ls-utils/loca_xml";
-import * as formats from "../utils/ls-utils/formats";
 import { FileFormats } from "../utils/ls-utils/formats";
+import { ConvertAll } from "../command/junction";
 
 export class ToolkitWebviewViewProvider implements vscode.WebviewViewProvider {
   public static readonly viewType = "toolkitWebviewView";
@@ -35,6 +34,8 @@ export class ToolkitWebviewViewProvider implements vscode.WebviewViewProvider {
 
     webviewView.webview.onDidReceiveMessage(async (data) => {
       console.log("message recieved: ", data.message);
+      const type: FileFormats =
+        FileFormats[data.type as keyof typeof FileFormats];
       if (data.type === "unpack") {
         let pakPath: string | undefined;
         let unpakPath: string | undefined;
@@ -95,42 +96,19 @@ export class ToolkitWebviewViewProvider implements vscode.WebviewViewProvider {
         unpak.unpack();
         return;
       }
-      switch (FileFormats[data.type as keyof typeof FileFormats]) {
-        case FileFormats.pak: {
-          let pak = new Pak(getWorkspacePath());
-          pak.build();
-          break;
-        }
-        case FileFormats.lsx: {
-          let lsx = new Lsx(getWorkspacePath());
-          lsx.convertModDir();
-          break;
-        }
-        case FileFormats.xml: {
-          let xml = new Xml(getWorkspacePath());
-          xml.convertModDir();
-          break;
-        }
-        case FileFormats.lsf: {
-          let lsf = new Lsf(getWorkspacePath());
-          lsf.convertModDir();
-          break;
-        }
-        case FileFormats.loca: {
-          let loca = new Loca(getWorkspacePath());
-          loca.convertModDir();
-          break;
-        }
+      if (type === FileFormats.pak) {
+        let pak = new Pak(getWorkspacePath());
+        pak.build();
+      } else {
+        new ConvertAll(getWorkspacePath(), type);
       }
     });
   }
 
   private _getHtmlForWebview(webview: vscode.Webview) {
     const hd: HtmlDataUtils = new HtmlDataUtils();
-
-    // Use a nonce to only allow a specific script to be run.
     const nonce = hd.getNonce();
-
+    
     // file to read html from
     const htmlUri = path.resolve(
       __dirname,

@@ -44,20 +44,34 @@ export function getRelativeModPath(modPath: string, fullPath: string): string {
   return relativePath;
 }
 
+/**
+ * find mod root path from a path within your mod. can be a file or a directory.
+ * @param wsPath string
+ * @returns string
+ */
 export function getModPath(wsPath: string): string {
-  let wsPaths = fs.readdirSync(fixPath(wsPath), {
+  let tempPath: string = fixPath(wsPath);
+  let retPath: string = "";
+  if (fs.statSync(tempPath).isFile()) {
+    tempPath = path.resolve(wsPath, "..");
+  }
+  let wsPaths = fs.readdirSync(tempPath, {
     recursive: true,
     withFileTypes: true,
   });
+  console.log(wsPaths);
   for (let p of wsPaths) {
     if (!p.isFile()) {
       continue;
     }
     if (p.name.toLowerCase().includes("meta.lsx")) {
-      return path.resolve(p.parentPath, "..", "..");
+      retPath = path.resolve(p.parentPath, "..", "..");
     }
   }
-  return "";
+  if (retPath.length === 0) {
+    return getModPath(path.resolve(tempPath, ".."));
+  }
+  return retPath;
 }
 
 // maybe unneeded tbh

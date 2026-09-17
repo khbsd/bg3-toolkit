@@ -3,31 +3,24 @@ import * as lsPak from "larian-formats-wasm";
 import * as path from "path";
 
 import * as futils from "../file_utils";
-import { FileFormats } from "./formats";
+import { FileFormats, ConvertCommon } from "./formats";
 
-export class Pak {
-  builder: lsPak.PakBuilder;
-  wsPath: string;
-  paths: fs.Dirent[];
-  modPath: string;
-  constructor(wsPath: string, modPath: string | undefined = undefined) {
-    this.builder = new lsPak.PakBuilder();
-    this.wsPath = futils.fixPath(wsPath);
-    this.modPath = modPath ?? futils.getModPath(this.wsPath);
-    this.paths = futils.getFiles(this.modPath);
+export class Pak extends ConvertCommon {
+  constructor(wsPath: string, modPath?: string | undefined) {
+    super(wsPath, FileFormats.pak, modPath);
   }
 
   public build() {
-    for (let file of this.paths) {
-      let fullPath = path.join(file.parentPath, file.name);
-      let fContents = fs.readFileSync(fullPath);
+    let builder = new lsPak.PakBuilder();
+    for (let file of this.files) {
+      let fContents = fs.readFileSync(file.path);
       console.log(
         "adding file: ",
-        futils.getRelativeModPath(this.modPath, fullPath),
+        futils.getRelativeModPath(this.modPath, file.path),
       );
       try {
-        this.builder.add_file(
-          futils.getRelativeModPath(this.modPath, fullPath),
+        builder.add_file(
+          futils.getRelativeModPath(this.modPath, file.path),
           new Uint8Array(fContents),
         );
       } catch (err) {
@@ -36,7 +29,7 @@ export class Pak {
     }
 
     try {
-      let packed = this.builder.pack();
+      let packed = builder.pack();
       let modDestPath = path.join(
         this.wsPath,
         futils.getModName(this.modPath) + ".pak",
@@ -50,6 +43,7 @@ export class Pak {
   }
 }
 
+// doesnt need to extend anything since its all contained in the pak
 export class Unpak {
   wsPath: string;
   unpakPath: string;
