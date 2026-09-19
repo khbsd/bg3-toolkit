@@ -184,7 +184,7 @@ export class ConvertCommon {
           forPacking: this.conf.doNotPackEditables,
         });
       } else {
-        futils.getFiles(this.modPath, {
+        this.files = futils.getFiles(this.modPath, {
           type: FileFormats[this.type],
           forConversion: true,
         });
