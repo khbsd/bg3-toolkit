@@ -36,7 +36,9 @@ export function getRelativeModPath(modPath: string, fullPath: string): string {
  * @returns string
  */
 export function getModPath(wsPath: string): string {
-  let tempPath: string = fixPath(wsPath);
+  wsPath = fixPath(wsPath);
+
+  let tempPath: string = wsPath;
   let retPath: string = "";
   if (fs.statSync(tempPath).isFile()) {
     tempPath = path.resolve(wsPath, "..");

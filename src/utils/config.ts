@@ -8,6 +8,8 @@ export class Config extends Object {
   conversionExcludeFiles: string[] = [];
   conversionExcludePaths: string[] = [];
   conversionNeededDirectories: string[] = [];
+  customModPath: string = "";
+  gameDataPath: string = "";
   constructor() {
     super();
     for (const obj of Object.keys(this._config)) {

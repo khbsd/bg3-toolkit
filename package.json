@@ -85,7 +85,16 @@
         "bg3-toolkit.conversionNeededDirectories": {
           "type": "string",
           "default": "[PAK]_UI, [PAK]_Armor, [PAK]_GeneratedDialogTimelines, Assets, Content, Effects, Flags, LevelMapValues, Localization, MultiEffectInfos, RootTemplates, Timeline, UI",
-          "description": "list of directories that will have their files converted from editable to ls binary. if you dont know what youre doing probably leave this one as is."
+          "description": "list of directories that will have their files converted from editable to ls binary.\n!! if you dont know what youre doing probably leave this one as is."
+        },
+        "bg3-toolkit.customModPath": {
+          "type": "string",
+          "default": "",
+          "description": "this extension looks for your meta.lsx file and then determines your mods root path by moving two directories up from where that file is found.\n!! only use this if you have multiple mods in the same folder."
+        },
+        "bg3-toolkit.gameDataPath": {
+          "type": "string",
+          "description": "location of your games data folder."
         }
       }
     },
