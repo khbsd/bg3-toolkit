@@ -1,6 +1,6 @@
 import * as vscode from "vscode";
-import { Xml } from "../../utils/ls-utils/loca_xml";
-import { getWorkspacePath } from "../../utils/ws_utils";
+import { Xml } from "../../utils/ls-formats/loca_xml";
+import { getWorkspacePath } from "../../utils/ws";
 
 export class Command {
   get(): vscode.Disposable {

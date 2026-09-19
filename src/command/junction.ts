@@ -1,10 +1,10 @@
-import { FileFormats, File } from "../utils/ls-utils/formats";
-import { Lsx, Lsf } from "../utils/ls-utils/lsx";
-import { Pak, Unpak } from "../utils/ls-utils/pak";
-import { Loca, Xml } from "../utils/ls-utils/loca_xml";
-import * as futils from "../utils/file_utils";
+import { FileFormats, File } from "../utils/ls-formats/formats";
+import { Lsx, Lsf } from "../utils/ls-formats/lsx";
+import { Pak, Unpak } from "../utils/ls-formats/pak";
+import { Loca, Xml } from "../utils/ls-formats/loca_xml";
+import * as futils from "../utils/file";
 import * as fs from "fs";
-import * as path from "path";
+import { getWorkspacePath } from "../utils/ws";
 
 export class ConvertAll {
   files: File[] = [];
@@ -15,8 +15,9 @@ export class ConvertAll {
     } else {
       this.path = dirPath;
     }
-    futils.getFiles(dirPath, FileFormats[type], true).forEach((file) => {
-      this.files.push(new File(path.join(file.parentPath, file.name)));
+    this.files = futils.getFiles(dirPath, {
+      type: FileFormats[type],
+      forConversion: true,
     });
     this._convertAll();
   }
@@ -51,4 +52,9 @@ export function convert(file: File) {
   if (c !== undefined) {
     c.convertFile(file);
   }
+}
+
+export function pack(wsPath?: string) {
+  wsPath = wsPath ?? getWorkspacePath();
+  new Pak(wsPath).build();
 }

@@ -1,9 +1,9 @@
 import * as fs from "fs";
 import * as path from "path";
-import * as eutils from "../enum_utils";
-import * as futils from "../file_utils";
+import * as eutils from "../enum";
+import * as futils from "../file";
 import * as lsPak from "larian-formats-wasm";
-import * as wsutils from "../ws_utils";
+import { Config } from "../config";
 
 export enum FileFormats {
   lsx,
@@ -50,9 +50,21 @@ export function isEditable(ext: string): boolean {
   return EditableFormats.includes(FileFormats[ext as keyof typeof FileFormats]);
 }
 
+export function getCompressionType(ext: string): CompressionType {
+  switch (FileFormats[ext as keyof typeof FileFormats]) {
+    case FileFormats.xml:
+    case FileFormats.loca: {
+      return CompressionType.loca;
+    }
+    default:
+      return CompressionType.lsf;
+  }
+}
+
 export class File {
   name: string;
   path: string;
+  parent: string;
   compressionType: CompressionType;
   ext: string;
   out_path: string;
@@ -60,21 +72,11 @@ export class File {
   constructor(fp: string) {
     this.name = path.basename(fp, path.extname(fp));
     this.ext = path.extname(fp).slice(1);
+    this.parent = fp.slice(this.name.length);
     this.path = fp;
-    this.compressionType = this.getCompressionType();
+    this.compressionType = getCompressionType(this.ext);
     this.out_path = path.resolve(this.path, "..", this.toExt());
     this.out_ext = path.extname(this.out_path).slice(1);
-  }
-
-  public getCompressionType(): CompressionType {
-    switch (FileFormats[this.ext as keyof typeof FileFormats]) {
-      case FileFormats.xml:
-      case FileFormats.loca: {
-        return CompressionType.loca;
-      }
-      default:
-        return CompressionType.lsf;
-    }
   }
 
   public isEditable(ext?: string): boolean {
@@ -138,6 +140,12 @@ export class File {
   }
 }
 
+class ConvertCommonOpts {
+  type?: FileFormats;
+  modPath?: string;
+  conf?: Config;
+}
+
 /**
  * THIS CLASS SHOULD ONLY BE EXTENDED, NOT INSTANTIATED.
  */
@@ -147,6 +155,7 @@ export class ConvertCommon {
   modPath: string;
   files: File[] = [];
   type: FileFormats;
+  conf: Config;
 
   /**
    * placeholder for format specific file conversion funcs.
@@ -161,28 +170,24 @@ export class ConvertCommon {
    *
    * if you pass a single file instead of a folder for the 'wsPath' parameter,
    * this class will assume you are converting a single file and skip populating
-   * the 'paths' array.
+   * the 'files' array.
    */
-  constructor(
-    wsPath: string,
-    type?: FileFormats,
-    modPath?: string | undefined,
-  ) {
+  constructor(wsPath: string, opts?: ConvertCommonOpts) {
     this.builder = lsPak;
-    this.type = type ?? FileFormats.lsx;
+    this.type = opts?.type ?? FileFormats.lsx;
     this.wsPath = futils.fixPath(wsPath);
-    this.modPath = modPath ?? futils.getModPath(this.wsPath);
+    this.modPath = opts?.modPath ?? futils.getModPath(this.wsPath);
+    this.conf = opts?.conf ?? new Config();
     if (fs.statSync(this.wsPath).isDirectory()) {
       if (this.type === FileFormats.pak) {
-        futils.getFiles(this.modPath).forEach((entry) => {
-          this.files.push(new File(path.join(entry.parentPath, entry.name)));
+        this.files = futils.getFiles(this.modPath, {
+          forPacking: this.conf.doNotPackEditables,
         });
       } else {
-        futils
-          .getFiles(this.modPath, FileFormats[this.type], true)
-          .forEach((entry) => {
-            this.files.push(new File(path.join(entry.parentPath, entry.name)));
-          });
+        futils.getFiles(this.modPath, {
+          type: FileFormats[this.type],
+          forConversion: true,
+        });
       }
     }
   }

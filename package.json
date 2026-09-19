@@ -2,7 +2,7 @@
   "name": "bg3-toolkit",
   "displayName": "bg3-toolkit",
   "description": "",
-  "version": "0.2.0",
+  "version": "0.3.0",
   "repository": {
     "type": "git",
     "url": "https://github.com/khbsd/bg3-toolkit"
@@ -64,6 +64,31 @@
         "title": "Convert all .loca files to .xml"
       }
     ],
+    "configuration": {
+      "title": "bg3-toolkit",
+      "properties": {
+        "bg3-toolkit.doNotPackEditables": {
+          "type":"boolean",
+          "default": false,
+          "description": "when packing up your mod, dont include editable files to save space."
+        },
+        "bg3-toolkit.conversionExcludeFiles": {
+          "type": "string",
+          "default": "meta.lsx, Icons_Items",
+          "description": "files that the extension will ignore when converting. if you leave the file extension off, all files with that name will be ignored."
+        },
+        "bg3-toolkit.conversionExcludePaths": {
+          "type": "string",
+          "default": ".git, .pak, .vscode, .bak, .zip",
+          "description": "if the path includes any of these strings, it will not be included in conversion or packing processes."
+        },
+        "bg3-toolkit.conversionNeededDirectories": {
+          "type": "string",
+          "default": "[PAK]_UI, [PAK]_Armor, [PAK]_GeneratedDialogTimelines, Assets, Content, Effects, Flags, LevelMapValues, Localization, MultiEffectInfos, RootTemplates, Timeline, UI",
+          "description": "list of directories that will have their files converted from editable to ls binary. if you dont know what youre doing probably leave this one as is."
+        }
+      }
+    },
     "menus": {
       "explorer/context": [
         {

@@ -5,28 +5,28 @@
   const vscode = acquireVsCodeApi();
   let window = vscode.window;
 
-  document.querySelector(".pack-button").addEventListener("click", () => {
-    vscode.postMessage({ type: "pak", message: "packing files" });
-  });
-  document.querySelector(".unpack-button").addEventListener("click", () => {
-    vscode.postMessage({
+  const buttonInfo = [
+    { class: ".pack-button", type: "pak", msg: "packing files" },
+    {
+      class: ".unpack-button",
       type: "unpack",
-      message: "select a .pak file and its destination",
+      msg: "select a .pak file and its destination",
+    },
+    { class: ".lsx-button", type: "lsx", msg: "converting lsx files" },
+    { class: ".lsf-button", type: "lsf", msg: "converting lsf files" },
+    { class: ".xml-button", type: "xml", msg: "converting xml files" },
+    { class: ".loca-button", type: "loca", msg: "converting loca files" },
+    { class: ".debug", type: "debug", msg: "de bug clicked 🐛" },
+  ];
+
+  let listenersAdded = false;
+
+  for (let i = 0; i < buttonInfo.length && !listenersAdded; i++) {
+    let b = buttonInfo[i];
+    document.querySelector(b.class).addEventListener("click", () => {
+      vscode.postMessage({ type: b.type, message: b.msg });
     });
-  });
-  document.querySelector(".lsx-button").addEventListener("click", () => {
-    vscode.postMessage({ type: "lsx", message: "converting lsx files" });
-  });
-  document.querySelector(".lsf-button").addEventListener("click", () => {
-    vscode.postMessage({ type: "lsf", message: "converting lsf files" });
-  });
-  document.querySelector(".xml-button").addEventListener("click", () => {
-    vscode.postMessage({
-      type: "xml",
-      message: "converting xml files",
-    });
-  });
-  document.querySelector(".loca-button").addEventListener("click", () => {
-    vscode.postMessage({ type: "loca", message: "converting loca files" });
-  });
+
+    listenersAdded = buttonInfo.length - 1 === i;
+  }
 })();

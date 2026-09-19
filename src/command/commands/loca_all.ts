@@ -1,6 +1,6 @@
 import * as vscode from "vscode";
-import { Loca } from "../../utils/ls-utils/loca_xml";
-import { getWorkspacePath } from "../../utils/ws_utils";
+import { Loca } from "../../utils/ls-formats/loca_xml";
+import { getWorkspacePath } from "../../utils/ws";
 
 export class Command {
   get(): vscode.Disposable {

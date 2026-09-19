@@ -1,5 +1,3 @@
-// TODO: use these funcs instead of specific ones
-
 export type EnumObj = {
   name: string;
   value: number;

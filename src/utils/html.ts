@@ -1,4 +1,4 @@
-import * as eutils from "./enum_utils";
+import * as eutils from "./enum";
 export enum HtmlData {
   Nonce,
   ScriptSrc,

@@ -1,26 +1,12 @@
 import * as fs from "fs";
 import * as path from "path";
-import { FileFormats, LsfCompressionFormats } from "./ls-utils/formats";
-
-const pakIgnorePaths: string[] = [".git", ".pak", ".vscode", ".bak", ".zip"];
-
-const convertIgnoreFiles: string[] = ["meta.lsx", "Icons_Items"];
-
-const fileConvertDirs: string[] = [
-  "[PAK]_UI",
-  "[PAK]_Armor",
-  "[PAK]_GeneratedDialogTimelines",
-  "Assets",
-  "Content",
-  "Effects",
-  "Flags",
-  "LevelMapValues",
-  "Localization",
-  "MultiEffectInfos",
-  "RootTemplates",
-  "Timeline",
-  "UI",
-];
+import {
+  FileFormats,
+  LsfCompressionFormats,
+  File,
+  isEditable,
+} from "./ls-formats/formats";
+import { Config } from "./config";
 
 export function fixPath(wsPath: string): string {
   const illegal_strings = ["file:"];
@@ -96,13 +82,19 @@ export function getModName(modPath: string): string {
   return modPath.split(path.sep).at(-1) ?? "";
 }
 
-export function getFiles(
-  wsPath: string,
-  type?: string,
-  forConversion?: boolean,
-): fs.Dirent[] {
-  let paths: fs.Dirent[] = [];
-  type = type ?? "";
+class getFilesOpts {
+  type?: string;
+  forConversion?: boolean;
+  conf?: Config;
+  forPacking?: boolean;
+}
+
+export function getFiles(wsPath: string, opts?: getFilesOpts): File[] {
+  let files: File[] = [];
+  let type = opts?.type ?? "";
+  let conf = opts?.conf ?? new Config();
+
+  console.log(conf);
 
   wsPath = fixPath(wsPath);
   let dirents = fs.readdirSync(wsPath, {
@@ -129,26 +121,46 @@ export function getFiles(
     }
 
     // ignore paths or files that dont need converting
-    for (let i of pakIgnorePaths) {
-      let p: string = path.join(entry.parentPath, entry.name);
+    for (const ignored of conf.conversionExcludePaths) {
+      let fp: string = path.join(entry.parentPath, entry.name);
       let conversion: boolean = true;
+      let unneeded: boolean = false;
 
-      for (let dir of fileConvertDirs) {
-        if (forConversion) {
+      for (const dir of conf.conversionNeededDirectories) {
+        if (opts?.forConversion) {
           conversion =
             entry.parentPath.includes(dir) &&
-            !convertIgnoreFiles.includes(
+            !conf.conversionExcludeFiles.includes(
               path.basename(entry.name, path.extname(entry.name)),
             );
+
+          if (conversion) {
+            break;
+          }
         }
-        if (conversion) {
-          break;
+
+        // lets you omit editable files from the .pak that the game wont look for
+        if (opts?.forPacking) {
+          const f = new File(fp);
+
+          unneeded =
+            isEditable(f.ext) &&
+            entry.parentPath.includes(dir) &&
+            !conf.conversionExcludeFiles.includes(
+              path.basename(entry.name, path.extname(entry.name)),
+            );
+
+          if (unneeded) {
+            break;
+          }
         }
       }
+
       pathOk =
         conversion &&
+        !unneeded &&
         filter &&
-        !p.includes(i) &&
+        !fp.includes(ignored) &&
         entry.isFile() &&
         !entry.name.startsWith(".");
       if (!pathOk) {
@@ -157,10 +169,10 @@ export function getFiles(
     }
 
     if (pathOk) {
-      paths.push(entry);
-      console.log("added", entry);
+      files.push(new File(path.join(entry.parentPath, entry.name)));
+      console.log("added", entry.name);
     }
   }
 
-  return paths;
+  return files;
 }

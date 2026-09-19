@@ -1,6 +1,6 @@
 import * as vscode from "vscode";
 import * as path from "path";
-import * as futils from "./file_utils";
+import * as futils from "./file";
 
 export function getWorkspacePath(short: boolean = false): string {
   let wsPath = "";

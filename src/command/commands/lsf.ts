@@ -1,5 +1,5 @@
 import * as vscode from "vscode";
-import { File } from "../../utils/ls-utils/formats";
+import { File } from "../../utils/ls-formats/formats";
 import { convert } from "../junction";
 
 export class Command {

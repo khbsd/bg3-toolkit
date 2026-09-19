@@ -2,16 +2,21 @@ import * as fs from "fs";
 import * as lsPak from "larian-formats-wasm";
 import * as path from "path";
 
-import * as futils from "../file_utils";
+import * as futils from "../file";
+import { Lsx } from "./lsx";
+import { Xml } from "./loca_xml";
 import { FileFormats, ConvertCommon } from "./formats";
 
 export class Pak extends ConvertCommon {
   constructor(wsPath: string, modPath?: string | undefined) {
-    super(wsPath, FileFormats.pak, modPath);
+    super(wsPath, { type: FileFormats.pak, modPath: modPath });
   }
 
   public build() {
     let builder = new lsPak.PakBuilder();
+    new Lsx(this.wsPath).convertModDir();
+    new Xml(this.wsPath).convertModDir();
+
     for (let file of this.files) {
       let fContents = fs.readFileSync(file.path);
       console.log(

@@ -1,17 +1,16 @@
 import * as fs from "fs";
 import { FileFormats, File, ConvertCommon } from "./formats";
 
-export class Lsx extends ConvertCommon {
+export class Xml extends ConvertCommon {
   constructor(wsPath: string, modPath?: string | undefined) {
-    super(wsPath, FileFormats.lsx, modPath);
+    super(wsPath, { type: FileFormats.xml, modPath: modPath });
     this._cf = this.convertFile;
   }
 
   public convertFile(f: File) {
-    console.log(f);
     let outContents: Uint8Array;
     try {
-      outContents = this.builder.convert_lsx_to_lsf(
+      outContents = this.builder.convert_xml_to_loca(
         fs.readFileSync(f.path).toString(),
       );
       console.log("writing: ", f.name);
@@ -24,18 +23,17 @@ export class Lsx extends ConvertCommon {
   }
 }
 
-export class Lsf extends ConvertCommon {
+export class Loca extends ConvertCommon {
   constructor(wsPath: string, modPath?: string | undefined) {
-    super(wsPath, FileFormats.lsf, modPath);
+    super(wsPath, { type: FileFormats.loca, modPath: modPath });
     this._cf = this.convertFile;
   }
 
   public convertFile(f: File) {
-    console.log(f);
     let outContents: string;
     try {
       outContents = this.builder
-        .convert_lsf_to_lsx(new Uint8Array(fs.readFileSync(f.path)))
+        .convert_loca_to_xml(new Uint8Array(fs.readFileSync(f.path)))
         .toString();
       console.log("writing: ", f.name);
       fs.writeFileSync(f.out_path, outContents, {

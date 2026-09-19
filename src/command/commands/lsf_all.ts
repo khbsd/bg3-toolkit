@@ -1,8 +1,6 @@
 import * as vscode from "vscode";
-import { Lsf } from "../../utils/ls-utils/lsx";
-import { FileFormats } from "../../utils/ls-utils/formats";
-import { getWorkspacePath } from "../../utils/ws_utils";
-import { getModPath } from "../../utils/file_utils";
+import { Lsf } from "../../utils/ls-formats/lsx";
+import { getWorkspacePath } from "../../utils/ws";
 
 export class Command {
   get(): vscode.Disposable {

@@ -2,13 +2,12 @@ import * as fs from "fs";
 import * as path from "path";
 import * as vscode from "vscode";
 
-import { getWorkspacePath } from "../utils/ws_utils";
-import { HtmlDataUtils, HtmlData } from "../utils/html_utils";
-import { Lsx, Lsf } from "../utils/ls-utils/lsx";
-import { Pak, Unpak } from "../utils/ls-utils/pak";
-import { Loca, Xml } from "../utils/ls-utils/loca_xml";
-import { FileFormats } from "../utils/ls-utils/formats";
+import { getWorkspacePath } from "../utils/ws";
+import { HtmlDataUtils, HtmlData } from "../utils/html";
+import { Pak, Unpak } from "../utils/ls-formats/pak";
+import { FileFormats } from "../utils/ls-formats/formats";
 import { ConvertAll } from "../command/junction";
+import { Config } from "../utils/config";
 
 export class ToolkitWebviewViewProvider implements vscode.WebviewViewProvider {
   public static readonly viewType = "toolkitWebviewView";
@@ -23,16 +22,16 @@ export class ToolkitWebviewViewProvider implements vscode.WebviewViewProvider {
   ) {
     this._view = webviewView;
 
-    webviewView.webview.options = {
+    this._view.webview.options = {
       // Allow scripts in the webview
       enableScripts: true,
 
       localResourceRoots: [this._extensionUri],
     };
 
-    webviewView.webview.html = this._getHtmlForWebview(webviewView.webview);
+    this._view.webview.html = this._getHtmlForWebview(this._view.webview);
 
-    webviewView.webview.onDidReceiveMessage(async (data) => {
+    this._view.webview.onDidReceiveMessage(async (data) => {
       console.log("message recieved: ", data.message);
       const type: FileFormats =
         FileFormats[data.type as keyof typeof FileFormats];
@@ -96,6 +95,13 @@ export class ToolkitWebviewViewProvider implements vscode.WebviewViewProvider {
         unpak.unpack();
         return;
       }
+      if (data.type === "debug") {
+        const c = new Config();
+        for (const s of Object.values(c)) {
+          console.log(s);
+        }
+        return;
+      }
       if (type === FileFormats.pak) {
         let pak = new Pak(getWorkspacePath());
         pak.build();
@@ -106,9 +112,10 @@ export class ToolkitWebviewViewProvider implements vscode.WebviewViewProvider {
   }
 
   private _getHtmlForWebview(webview: vscode.Webview) {
+    const wv: vscode.Webview = webview;
     const hd: HtmlDataUtils = new HtmlDataUtils();
     const nonce = hd.getNonce();
-    
+
     // file to read html from
     const htmlUri = path.resolve(
       __dirname,
@@ -121,7 +128,7 @@ export class ToolkitWebviewViewProvider implements vscode.WebviewViewProvider {
     );
 
     // path to js script
-    const scriptUri = webview.asWebviewUri(
+    const scriptUri = wv.asWebviewUri(
       vscode.Uri.joinPath(
         this._extensionUri,
         "src",
@@ -132,7 +139,7 @@ export class ToolkitWebviewViewProvider implements vscode.WebviewViewProvider {
     );
 
     // path to css file
-    const styleMainUri = webview.asWebviewUri(
+    const styleMainUri = wv.asWebviewUri(
       vscode.Uri.joinPath(
         this._extensionUri,
         "src",
@@ -143,7 +150,7 @@ export class ToolkitWebviewViewProvider implements vscode.WebviewViewProvider {
     );
 
     // content security policy or whatever. who cares.
-    const csp = webview.cspSource;
+    const csp = wv.cspSource;
 
     // make this data into an array for hd.getObjs()
     const data: string[] = [];
