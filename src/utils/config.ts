@@ -14,11 +14,11 @@ export class Config extends Object {
     super();
     for (const obj of Object.keys(this._config)) {
       if (this.hasOwnProperty(obj)) {
-        let c: any = this._config.get(obj);
+        let cfg: any = this._config.get(obj);
         if (Array.isArray(Reflect.get(this, obj))) {
-          c = c.split(",").map((f: any) => f.trim());
+          cfg = cfg.split(",").map((f: any) => f.trim());
         }
-        Reflect.set(this, obj, c);
+        Reflect.set(this, obj, cfg);
       }
     }
   }

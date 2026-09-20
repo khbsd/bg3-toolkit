@@ -8,8 +8,10 @@ import { Xml } from "./loca_xml";
 import { FileFormats, ConvertCommon } from "./formats";
 
 export class Pak extends ConvertCommon {
+  vscode: any;
   constructor(wsPath: string, modPath?: string | undefined) {
     super(wsPath, { type: FileFormats.pak, modPath: modPath });
+    this.vscode = require('vscode');
   }
 
   public build() {
@@ -35,13 +37,15 @@ export class Pak extends ConvertCommon {
 
     try {
       let packed = builder.pack();
+      let name = futils.getModName(this.modPath) + "." + FileFormats[this.type];
       let modDestPath = path.join(
         this.wsPath,
-        futils.getModName(this.modPath) + ".pak",
+        name,
       );
 
       // console.log("packing file: ", modDestPath);
       fs.writeFileSync(modDestPath, Buffer.from(packed), { flag: "w+" });
+      this.vscode.window.showInformationMessage(name + " packed!");
     } catch (err) {
       console.log(err);
     }

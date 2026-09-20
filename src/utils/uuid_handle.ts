@@ -19,17 +19,14 @@ export const chars: string[] = [
 ];
 
 const illegal = "fag";
-
 const value_length: number = 36;
-
 const dash_pos: number[] = [8, 13, 18, 23];
 
 export class Uuid {
   re: RegExp;
   uuid: string;
   constructor() {
-    this.re =
-      /(?<uuid>[A-Ga-g\d]{8}-[A-Ga-g\d]{4}-[A-Ga-g\d]{4}-[A-Ga-g\d]{4}-[A-Ga-g\d]{12})/;
+    this.re = /(?<uuid>[A-Ga-g\d]{8}-(?:[A-Ga-g\d]{4}-){3}[A-Ga-g\d]{12})/;
     this.uuid = this.get();
   }
 

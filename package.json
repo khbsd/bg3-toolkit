@@ -62,6 +62,10 @@
       {
         "command": "bg3-toolkit.locaConvertAll",
         "title": "Convert all .loca files to .xml"
+      },
+      {
+        "command": "bg3-toolkit.uuidHandle",
+        "title": "insert and or replace uuids or handles"
       }
     ],
     "configuration": {
