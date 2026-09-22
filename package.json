@@ -64,12 +64,20 @@
         "title": "Convert all .loca files to .xml"
       },
       {
-        "command": "bg3-toolkit.uuid",
-        "title": "insert and or replace uuids"
+        "command": "bg3-toolkit.uuidInsert",
+        "title": "Insert UUID here"
       },
       {
-        "command": "bg3-toolkit.handle",
-        "title": "insert and or replace handles"
+        "command": "bg3-toolkit.handleInsert",
+        "title": "Insert Handle here"
+      },
+      {
+        "command": "bg3-toolkit.uuidReplace",
+        "title": "Replace with new UUID"
+      },
+      {
+        "command": "bg3-toolkit.handleReplace",
+        "title": "Replace with new Handle"
       }
     ],
     "configuration": {
@@ -132,11 +140,19 @@
       "editor/context": [
         {
           "when": "bg3-toolkit.handleSelected",
-          "command": "bg3-toolkit.handle"
+          "command": "bg3-toolkit.handleReplace"
         },
         {
           "when": "bg3-toolkit.uuidSelected",
-          "command": "bg3-toolkit.uuid"
+          "command": "bg3-toolkit.uuidReplace"
+        },
+        {
+          "when": "bg3-toolkit.uuidSelected == false && bg3-toolkit.handleSelected == false",
+          "command": "bg3-toolkit.handleInsert"
+        },
+        {
+          "when": "bg3-toolkit.uuidSelected == false && bg3-toolkit.handleSelected == false",
+          "command": "bg3-toolkit.uuidInsert"
         }
       ]
     },

@@ -4,7 +4,7 @@ import { CommandCommon } from "../command_common";
 export class Command {
   get(): vscode.Disposable {
     const disposable = vscode.commands.registerCommand(
-      "bg3-toolkit.uuid",
+      "bg3-toolkit.uuidReplace",
       () => {
         console.log("yoo id");
       },
