@@ -22,6 +22,15 @@ const illegal = "fag";
 const value_length: number = 36;
 const dash_pos: number[] = [8, 13, 18, 23];
 
+export enum UuidHandle {
+  Uuid,
+  Enum,
+}
+
+export function getChar(): string {
+  return chars[Math.floor(Math.random() * chars.length)];
+}
+
 export class Uuid {
   re: RegExp;
   uuid: string;
@@ -36,7 +45,7 @@ export class Uuid {
       if (dash_pos.includes(p)) {
         uuid += "-";
       } else {
-        uuid += chars[Math.floor(Math.random() * chars.length)];
+        uuid += getChar();
       }
     }
     if (uuid.includes(illegal)) {
@@ -57,7 +66,7 @@ export class Handle {
   public get(): string {
     let handle: string = "h";
     for (let p = 0; p < value_length; p++) {
-      handle += chars[Math.floor(Math.random() * chars.length)];
+      handle += getChar();
     }
 
     if (handle.includes(illegal)) {

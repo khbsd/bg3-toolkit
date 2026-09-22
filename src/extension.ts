@@ -1,6 +1,6 @@
 import * as vscode from "vscode";
 import { getWorkspacePath } from "./utils/ws";
-import { Registrar } from "./command/registrar";
+import { Registrar } from "./registrar/registrar";
 import { WorkspaceTreeViewProvider } from "./treeview/treeview";
 import { ToolkitWebviewViewProvider } from "./webview/webview";
 

@@ -1,14 +1,15 @@
 import * as vscode from "vscode";
-import { Lsf } from "../../utils/ls-formats/lsx";
+import { Loca } from "../../utils/ls-formats/loca_xml";
 import { getWorkspacePath } from "../../utils/ws";
+import { CommandCommon } from "../command_common";
 
 export class Command {
   get(): vscode.Disposable {
     const disposable = vscode.commands.registerCommand(
-      "bg3-toolkit.lsfConvertAll",
+      "bg3-toolkit.locaConvertAll",
       () => {
         console.log(getWorkspacePath());
-        new Lsf(getWorkspacePath()).convertModDir();
+        new Loca(getWorkspacePath()).convertModDir();
       },
     );
     return disposable;

@@ -4,6 +4,8 @@ export type EnumObj = {
   data: string | undefined;
 };
 
+// TODO: re-evaluate if we need these
+
 export function getNames(e: object): string[] {
   let names: string[] = [];
   Object.values(e).forEach((value) => {
@@ -24,42 +26,6 @@ export function getValues(e: object): number[] {
   });
 
   return values;
-}
-
-export function objFromName(n: string, e: object): EnumObj | undefined {
-  let obj: EnumObj | undefined;
-  let names = getNames(e);
-  let values = getValues(e);
-
-  for (let value of values) {
-    if (names[value] === n) {
-      obj = {
-        name: names[value],
-        value: value,
-        data: undefined,
-      };
-      break;
-    }
-  }
-  return obj;
-}
-
-export function objFromValue(v: number, e: object): EnumObj | undefined {
-  let obj: EnumObj | undefined;
-  let names = getNames(e);
-  let values = getValues(e);
-
-  for (let value of values) {
-    if (value === v) {
-      obj = {
-        name: names[value],
-        value: value,
-        data: undefined,
-      };
-      break;
-    }
-  }
-  return obj;
 }
 
 export function getObjFromEnum(e: Object, fillVals?: string[]): EnumObj[] {

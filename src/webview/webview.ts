@@ -6,7 +6,7 @@ import { getWorkspacePath } from "../utils/ws";
 import { HtmlDataUtils, HtmlData } from "../utils/html";
 import { Pak, Unpak } from "../utils/ls-formats/pak";
 import { FileFormats } from "../utils/ls-formats/formats";
-import { ConvertAll } from "../command/junction";
+import { ConvertAll } from "../registrar/junction";
 import { Config } from "../utils/config";
 
 export class ToolkitWebviewViewProvider implements vscode.WebviewViewProvider {
@@ -96,10 +96,9 @@ export class ToolkitWebviewViewProvider implements vscode.WebviewViewProvider {
         return;
       }
       if (data.type === "debug") {
-        const c = new Config();
-        for (const s of Object.values(c)) {
-          console.log(s);
-        }
+        vscode.window.onDidChangeTextEditorSelection((e) => {
+          console.log(e.selections);
+        });
         return;
       }
       if (type === FileFormats.pak) {

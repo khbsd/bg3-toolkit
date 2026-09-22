@@ -64,8 +64,12 @@
         "title": "Convert all .loca files to .xml"
       },
       {
-        "command": "bg3-toolkit.uuidHandle",
-        "title": "insert and or replace uuids or handles"
+        "command": "bg3-toolkit.uuid",
+        "title": "insert and or replace uuids"
+      },
+      {
+        "command": "bg3-toolkit.handle",
+        "title": "insert and or replace handles"
       }
     ],
     "configuration": {
@@ -123,6 +127,16 @@
         {
           "when": "resourceExtname == .pak || resourceExtname == .PAK",
           "command": "bg3-toolkit.unpackMod"
+        }
+      ],
+      "editor/context": [
+        {
+          "when": "bg3-toolkit.handleSelected",
+          "command": "bg3-toolkit.handle"
+        },
+        {
+          "when": "bg3-toolkit.uuidSelected",
+          "command": "bg3-toolkit.uuid"
         }
       ]
     },

@@ -1,7 +1,11 @@
-# workspace stuff
-node_modules
-.vscode
-.git
-/out
-.gitignore
+# compiler output
+out/*
+
+# node modules
+node_modules/*
+
+# config stuff
+.vscode/settings.json
+.vscodeignore
+eslint.config.mjs
 .DS_Store

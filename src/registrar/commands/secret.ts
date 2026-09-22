@@ -1,13 +1,13 @@
 import * as vscode from "vscode";
-import { pack } from "../junction";
-import { getWorkspacePath } from "../../utils/ws";
+import { CommandCommon } from "../command_common";
 
 export class Command {
   get(): vscode.Disposable {
     const disposable = vscode.commands.registerCommand(
-      "bg3-toolkit.packMod",
+      "bg3-toolkit.hrtRemind",
       () => {
-        pack();
+        vscode.window.showInformationMessage("take ya hrt weirdo");
+        console.log("hi");
       },
     );
     return disposable;
