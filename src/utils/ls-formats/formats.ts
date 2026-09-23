@@ -4,6 +4,7 @@ import * as eutils from "../enum";
 import * as futils from "../file";
 import * as lsPak from "larian-formats-wasm";
 import { Config } from "../config";
+import { GlobPattern } from "vscode";
 
 export enum FileFormats {
   lsx,
@@ -21,6 +22,13 @@ export enum FileFormats {
   count,
 }
 
+// should be distinct from the FileFormats type
+export enum CompressionType {
+  lsf,
+  loca,
+  count,
+}
+
 export const LsfCompressionFormats: FileFormats[] = [
   FileFormats.lsf,
   FileFormats.lsfx,
@@ -35,12 +43,7 @@ export const EditableFormats: FileFormats[] = [
   FileFormats.xml,
 ];
 
-// should be distinct from the FileFormats type
-export enum CompressionType {
-  lsf,
-  loca,
-  count,
-}
+export const editableGlob: GlobPattern = "**/*.{txt,lsx,xml}";
 
 export function isEditable(ext: string): boolean {
   if (ext.startsWith(".")) {

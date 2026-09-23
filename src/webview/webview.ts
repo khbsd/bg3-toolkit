@@ -96,9 +96,18 @@ export class ToolkitWebviewViewProvider implements vscode.WebviewViewProvider {
         return;
       }
       if (data.type === "debug") {
-        vscode.window.onDidChangeTextEditorSelection((e) => {
-          console.log(e.selections);
-        });
+        let editor = vscode.window.activeTextEditor;
+        let selection = vscode.window.activeTextEditor?.selection;
+        if (selection !== undefined && editor !== undefined) {
+          let word =
+            vscode.window.activeTextEditor?.document.getWordRangeAtPosition(
+              selection?.active,
+            );
+          console.log(word);
+          console.log(editor.document.getText(word));
+        }
+
+        console.log(selection?.active);
         return;
       }
       if (type === FileFormats.pak) {

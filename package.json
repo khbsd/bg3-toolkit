@@ -2,7 +2,7 @@
   "name": "bg3-toolkit",
   "displayName": "bg3-toolkit",
   "description": "",
-  "version": "0.3.2",
+  "version": "0.4.0",
   "repository": {
     "type": "git",
     "url": "https://github.com/khbsd/bg3-toolkit"
@@ -140,19 +140,21 @@
       "editor/context": [
         {
           "when": "bg3-toolkit.handleSelected",
-          "command": "bg3-toolkit.handleReplace"
+          "command": "bg3-toolkit.handleReplace",
+          "group": "1_modification@5"
         },
         {
           "when": "bg3-toolkit.uuidSelected",
-          "command": "bg3-toolkit.uuidReplace"
+          "command": "bg3-toolkit.uuidReplace",
+          "group": "1_modification@6"
         },
         {
-          "when": "bg3-toolkit.uuidSelected == false && bg3-toolkit.handleSelected == false",
-          "command": "bg3-toolkit.handleInsert"
+          "command": "bg3-toolkit.handleInsert",
+          "group": "1_modification@7"
         },
         {
-          "when": "bg3-toolkit.uuidSelected == false && bg3-toolkit.handleSelected == false",
-          "command": "bg3-toolkit.uuidInsert"
+          "command": "bg3-toolkit.uuidInsert",
+          "group": "1_modification@8"
         }
       ]
     },
