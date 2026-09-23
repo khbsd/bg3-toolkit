@@ -4,6 +4,10 @@ import { Registrar } from "./registrar/registrar";
 import { WorkspaceTreeViewProvider } from "./treeview/treeview";
 import { ToolkitWebviewViewProvider } from "./webview/webview";
 
+// icon attribution:
+// - square brackets ("[", "]"): https://github.com/tonsky/FiraCode, Fira Code OFL license
+// - d20 vector: https://opensvg.dev/icons/action?prefix=fa-solid&icon=dice-d20, by dave gandy (c) CC BY 4.0
+
 export async function activate(context: vscode.ExtensionContext) {
   // register commands
   // this needs to go first, since the commands are used in the tree view
