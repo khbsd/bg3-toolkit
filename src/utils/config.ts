@@ -10,6 +10,7 @@ export class Config extends Object {
   conversionNeededDirectories: string[] = [];
   customModPath: string = "";
   gameDataPath: string = "";
+  installedModsPath: string = "";
   constructor() {
     super();
     for (const obj of Object.keys(this._config)) {

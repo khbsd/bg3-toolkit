@@ -111,7 +111,12 @@
         "bg3-toolkit.gameDataPath": {
           "type": "string",
           "description": "location of your games data folder."
+        },
+        "bg3-toolkit.installedModsPath": {
+          "type": "string",
+          "description": "location of your installed mods. if supplied, this extension will attempt to copy any mods you pack up into the installed mods folder, replacing any files of the same name.\nif left blank, will do nothing."
         }
+
       }
     },
     "menus": {

@@ -11,10 +11,10 @@ export class Pak extends ConvertCommon {
   vscode: any;
   constructor(wsPath: string, modPath?: string | undefined) {
     super(wsPath, { type: FileFormats.pak, modPath: modPath });
-    this.vscode = require('vscode');
+    this.vscode = require("vscode");
   }
 
-  public build() {
+  public build(): void {
     let builder = new lsPak.PakBuilder();
     new Lsx(this.wsPath).convertModDir();
     new Xml(this.wsPath).convertModDir();
@@ -36,16 +36,23 @@ export class Pak extends ConvertCommon {
     }
 
     try {
-      let packed = builder.pack();
-      let name = futils.getModName(this.modPath) + "." + FileFormats[this.type];
-      let modDestPath = path.join(
-        this.wsPath,
-        name,
-      );
+      const packed: Uint8Array = builder.pack();
+      const name: string =
+        futils.getModName(this.modPath) + "." + FileFormats[this.type];
+      const modDestPath: string = path.join(this.wsPath, name);
 
       // console.log("packing file: ", modDestPath);
       fs.writeFileSync(modDestPath, Buffer.from(packed), { flag: "w+" });
       this.vscode.window.showInformationMessage(name + " packed!");
+
+      let installPath: string = this.conf.installedModsPath;
+      if (installPath.length > 0) {
+        installPath = path.join(installPath, name);
+        fs.copyFileSync(modDestPath, installPath);
+        this.vscode.window.showInformationMessage(
+          name + " copied to " + installPath,
+        );
+      }
     } catch (err) {
       console.log(err);
     }
