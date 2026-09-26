@@ -5,6 +5,7 @@ import {
   LsfCompressionFormats,
   File,
   isEditable,
+  isLoca,
 } from "./ls-formats/formats";
 import { Config } from "./config";
 import { FileHandle } from "fs/promises";
@@ -19,10 +20,6 @@ const xmlTags: xmlTagType[] = [
   {linePresent: false, expectedValue: "<contentlist>"},
   {linePresent: false, expectedValue: "</contentlist>"},
 ];
-
-const xmlVersionEncodingTag: string = '<?xml version="1.0" encoding="utf-8"?>';
-const xmlOpenContentList: string = "<contentlist>";
-const xmlCloseContentList: string = "</contentlist>";
 
 export function fixPath(wsPath: string): string {
   const illegal_strings = ["file:"];
@@ -100,11 +97,31 @@ export function getModName(modPath: string): string {
   return modPath.split(path.sep).at(-1) ?? "";
 }
 
+function filterLocalizations(dirents: fs.Dirent[]): fs.Dirent[] {
+  const conf = new Config();
+  const mergedLocaBin: string =
+    conf.mergedLocalizationName + "." + FileFormats[FileFormats.loca];
+  const mergedLocaEditable: string =
+    conf.mergedLocalizationName + "." + FileFormats[FileFormats.xml];
+
+  let mergedBin: boolean = false;
+  let mergedEditable: boolean = false;
+  let filteredDirs: fs.Dirent[] = [];
+
+  for (const dir of dirents) {
+    if (isLoca(dir.name)) {
+      mergedBin = dir.name === mergedLocaBin;
+      mergedEditable = dir.name === mergedLocaEditable;
+    }
+  }
+}
+
 class getFilesOpts {
   type?: string;
   forConversion?: boolean;
   conf?: Config;
   forPacking?: boolean;
+  forXmlMerging?: boolean;
 }
 
 export function getFiles(wsPath: string, opts?: getFilesOpts): File[] {
@@ -119,6 +136,8 @@ export function getFiles(wsPath: string, opts?: getFilesOpts): File[] {
     recursive: true,
     withFileTypes: true,
   });
+
+  dirents = filterLocalizations(dirents);
 
   for (let entry of dirents) {
     let pathOk: boolean = true;
@@ -145,6 +164,16 @@ export function getFiles(wsPath: string, opts?: getFilesOpts): File[] {
       let unneeded: boolean = false;
 
       for (const dir of conf.conversionNeededDirectories) {
+        if (opts?.forXmlMerging) {
+          console.log(entry.name);
+          if (
+            path.basename(entry.name) === conf.mergedLocalizationName &&
+            isLoca(entry.name)
+          ) {
+            unneeded = true;
+            break;
+          }
+        }
         if (opts?.forConversion) {
           conversion =
             entry.parentPath.includes(dir) &&
@@ -160,7 +189,6 @@ export function getFiles(wsPath: string, opts?: getFilesOpts): File[] {
         // lets you omit editable files from the .pak that the game wont look for
         if (opts?.forPacking) {
           const f = new File(fp);
-
           unneeded =
             isEditable(f.ext) &&
             entry.parentPath.includes(dir) &&
@@ -226,10 +254,6 @@ export function getLinesFromFileSync(filePath: string): string[] {
 export function mergeXmlLines(lines: string[]): string[] {
   const conf: Config = new Config();
 
-  let verEncodingTag: boolean = false;
-  let openingContentTag: boolean = false;
-  let closingContentTag: boolean = false;
-
   let tags = xmlTags;
 
   let mergedLines: string[] = [];
@@ -250,9 +274,6 @@ export function mergeXmlLines(lines: string[]): string[] {
           !mergedLines.includes(lines[i]) &&
           i !== lines.length - 1;
       }
-
-      console.log(lines[i]);
-      console.log(tag.linePresent, i);
     }
 
     if (dontPushValue) {

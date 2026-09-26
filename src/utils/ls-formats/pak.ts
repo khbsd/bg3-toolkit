@@ -16,8 +16,8 @@ export class Pak extends ConvertCommon {
 
   public build(): void {
     let builder = new lsPak.PakBuilder();
-    new Lsx(this.wsPath).convertModDir();
-    new Xml(this.wsPath).convertModDir();
+    let _ = new Lsx(this.wsPath).convertModDir();
+    _ = new Xml(this.wsPath).convertModDir();
 
     for (let file of this.files) {
       let fContents = fs.readFileSync(file.path);

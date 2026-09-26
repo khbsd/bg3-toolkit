@@ -64,6 +64,18 @@ export function getCompressionType(ext: string): CompressionType {
   }
 }
 
+export function isLoca(name: string): boolean {
+  return (
+    getCompressionType(path.extname(name).slice(1)) === CompressionType.loca
+  );
+}
+
+export function isLsFile(name: string): boolean {
+  return (
+    getCompressionType(path.extname(name).slice(1)) === CompressionType.lsf
+  );
+}
+
 export class File {
   name: string;
   path: string;
