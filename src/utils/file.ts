@@ -10,15 +10,19 @@ import { Config } from "./config";
 import { FileHandle } from "fs/promises";
 
 type xmlTagType = {
-  expectedLine: number;
+  linePresent: boolean;
   expectedValue: string;
 };
 
 const xmlTags: xmlTagType[] = [
-  { expectedLine: 1, expectedValue: '<?xml version="1.0" encoding="utf-8"?>' },
-  { expectedLine: 2, expectedValue: "<contentlist>" },
-  { expectedLine: -1, expectedValue: "</contentlist>" },
+  {linePresent: false, expectedValue: '<?xml version="1.0" encoding="utf-8"?>'},
+  {linePresent: false, expectedValue: "<contentlist>"},
+  {linePresent: false, expectedValue: "</contentlist>"},
 ];
+
+const xmlVersionEncodingTag: string = '<?xml version="1.0" encoding="utf-8"?>';
+const xmlOpenContentList: string = "<contentlist>";
+const xmlCloseContentList: string = "</contentlist>";
 
 export function fixPath(wsPath: string): string {
   const illegal_strings = ["file:"];
@@ -218,59 +222,51 @@ export function getLinesFromFileSync(filePath: string): string[] {
   return lines;
 }
 
-// this can probably be simplified. needs boolean flags for each of the expected values instead of lines.
-// each expectedValue needs to be found in order but not necessarily at exact lines.
+// needs more testing, copy one line in each of the xml file dupes and change it to make sure differences are caught
 export function mergeXmlLines(lines: string[]): string[] {
   const conf: Config = new Config();
+
+  let verEncodingTag: boolean = false;
+  let openingContentTag: boolean = false;
+  let closingContentTag: boolean = false;
+
+  let tags = xmlTags;
+
   let mergedLines: string[] = [];
   for (let i = 0; i < lines.length; i++) {
     const line = lines[i].trim().toLowerCase();
     let dontPushValue: boolean = false;
-    for (const tag of xmlTags) {
-      if (
-        (i === tag.expectedLine && line === tag.expectedValue) ||
-        (i === lines.length - 1 &&
-          tag.expectedLine === -1 &&
-          tag.expectedValue === line)
-      ) {
-        mergedLines.push(lines[i]);
-        if (line === xmlTags[0].expectedValue && mergedLines.length > 0) {
-          mergedLines.reverse();
-        }
-        dontPushValue = true;
-        // console.log("pushed " + lines[i] + " at " + i);
-        break;
-      } else {
-        dontPushValue =
-          (i === tag.expectedLine && line !== tag.expectedValue) ||
-          (i !== tag.expectedLine && line === tag.expectedValue);
-      }
 
+    for (let tag of tags) {
       if (dontPushValue) {
-        //console.log("not pushing " + lines[i] + " at " + i);
         break;
       }
-
-      // console.log(!dontPushValue, i, tag, lines[i]);
-    }
-    if (!dontPushValue) {
-      if (
-        conf.mergedLocalizationAllowDuplicates &&
-        mergedLines.includes(lines[i])
-      ) {
-        // console.log("pushed allowed duplicate " + lines[i] + " at " + i);
-        mergedLines.push(lines[i]);
-      } else if (line === "" && mergedLines.at(-1) !== line) {
-        // console.log("pushing empty line");
-        mergedLines.push(lines[i]);
-      } else if (!mergedLines.includes(lines[i])) {
-        mergedLines.push(lines[i]);
+      if (tag.expectedValue !== xmlTags.at(-1)?.expectedValue) {
+        tag.linePresent = dontPushValue =
+          tag.expectedValue === line && mergedLines.includes(lines[i]);
+      } else {
+        tag.linePresent = dontPushValue =
+          tag.expectedValue === line &&
+          !mergedLines.includes(lines[i]) &&
+          i !== lines.length - 1;
       }
-    } else {
-      // console.log("not pushing " + lines[i] + " at " + i);
+
+      console.log(lines[i]);
+      console.log(tag.linePresent, i);
     }
 
-    // TODO: this function needs cleaning up i think
+    if (dontPushValue) {
+      continue;
+    }
+
+    if (
+      (conf.mergedLocalizationAllowDuplicates &&
+        mergedLines.includes(lines[i])) ||
+      !mergedLines.includes(lines[i]) ||
+      (line === "" && mergedLines.at(-1) !== line)
+    ) {
+      mergedLines.push(lines[i]);
+    }
   }
 
   return mergedLines;
