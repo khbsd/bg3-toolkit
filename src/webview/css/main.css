@@ -59,4 +59,6 @@ li {
   text-align: center;
 }
 
-
+.toggle {
+  display: none;
+}

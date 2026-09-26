@@ -84,7 +84,7 @@
       "title": "bg3-toolkit",
       "properties": {
         "bg3-toolkit.doNotPackEditables": {
-          "type":"boolean",
+          "type": "boolean",
           "default": false,
           "description": "when packing up your mod, dont include editable files to save space."
         },
@@ -110,13 +110,24 @@
         },
         "bg3-toolkit.gameDataPath": {
           "type": "string",
+          "default": "",
           "description": "location of your games data folder."
         },
         "bg3-toolkit.installedModsPath": {
           "type": "string",
+          "default": "",
           "description": "location of your installed mods. if supplied, this extension will attempt to copy any mods you pack up into the installed mods folder, replacing any files of the same name.\nif left blank, will do nothing."
+        },
+        "bg3-toolkit.mergedLocalizationName": {
+          "type": "string",
+          "default": "merged",
+          "description": "name for the merged localization file. the extension will look for this first and stop adding additional localization files if it exists."
+        },
+        "bg3-toolkit.mergedLocalizationAllowDuplicates": {
+          "type": "boolean",
+          "default": false,
+          "description": "whether the extension should keep duplicate entries when merging localization files."
         }
-
       }
     },
     "menus": {

@@ -4,6 +4,7 @@ export class Config extends Object {
   protected _config = vscode.workspace.getConfiguration("bg3-toolkit");
 
   // these are just garbo values that let me programmatically assign them in the constructor
+  // "pRoPeRty has nO inItiAlIzeR aNd iS NoT dEfInItely aSsIgNEd in ThE coNsTrucToR." go to hell
   doNotPackEditables: boolean = false;
   conversionExcludeFiles: string[] = [];
   conversionExcludePaths: string[] = [];
@@ -11,6 +12,9 @@ export class Config extends Object {
   customModPath: string = "";
   gameDataPath: string = "";
   installedModsPath: string = "";
+  mergedLocalizationName: string = "";
+  mergedLocalizationAllowDuplicates: boolean = false;
+
   constructor() {
     super();
     for (const obj of Object.keys(this._config)) {

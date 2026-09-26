@@ -21,15 +21,13 @@ export class Pak extends ConvertCommon {
 
     for (let file of this.files) {
       let fContents = fs.readFileSync(file.path);
-      console.log(
-        "adding file: ",
-        futils.getRelativeModPath(this.modPath, file.path),
+      const relPath: string = futils.getRelativeModPath(
+        this.modPath,
+        file.path,
       );
+      console.log("adding file: ", relPath);
       try {
-        builder.add_file(
-          futils.getRelativeModPath(this.modPath, file.path),
-          new Uint8Array(fContents),
-        );
+        builder.add_file(relPath, new Uint8Array(fContents));
       } catch (err) {
         console.log(err);
       }
@@ -49,6 +47,7 @@ export class Pak extends ConvertCommon {
       if (installPath.length > 0) {
         installPath = path.join(installPath, name);
         fs.copyFileSync(modDestPath, installPath);
+
         this.vscode.window.showInformationMessage(
           name + " copied to " + installPath,
         );

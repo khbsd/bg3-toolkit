@@ -7,6 +7,18 @@ import {
   isEditable,
 } from "./ls-formats/formats";
 import { Config } from "./config";
+import { FileHandle } from "fs/promises";
+
+type xmlTagType = {
+  expectedLine: number;
+  expectedValue: string;
+};
+
+const xmlTags: xmlTagType[] = [
+  { expectedLine: 1, expectedValue: '<?xml version="1.0" encoding="utf-8"?>' },
+  { expectedLine: 2, expectedValue: "<contentlist>" },
+  { expectedLine: -1, expectedValue: "</contentlist>" },
+];
 
 export function fixPath(wsPath: string): string {
   const illegal_strings = ["file:"];
@@ -177,4 +189,89 @@ export function getFiles(wsPath: string, opts?: getFilesOpts): File[] {
   }
 
   return files;
+}
+
+export async function getLinesFromFile(filePath: string): Promise<string[]> {
+  let lines: string[] = [];
+  let file: FileHandle = await fs.promises.open(filePath);
+
+  console.log(file);
+
+  file.readLines().on("line", (line) => {
+    console.log(line);
+    lines.push(line);
+  });
+
+  return lines;
+}
+
+export function getLinesFromFileSync(filePath: string): string[] {
+  const text: string = fs.readFileSync(filePath, "utf-8");
+  let lines: string[] = text.split("\r\n");
+
+  // length of 1 means nothing was split
+  if (lines.length === 1) {
+    console.log("trying unix newlines");
+    lines = text.split("\n");
+  }
+
+  return lines;
+}
+
+// this can probably be simplified. needs boolean flags for each of the expected values instead of lines.
+// each expectedValue needs to be found in order but not necessarily at exact lines.
+export function mergeXmlLines(lines: string[]): string[] {
+  const conf: Config = new Config();
+  let mergedLines: string[] = [];
+  for (let i = 0; i < lines.length; i++) {
+    const line = lines[i].trim().toLowerCase();
+    let dontPushValue: boolean = false;
+    for (const tag of xmlTags) {
+      if (
+        (i === tag.expectedLine && line === tag.expectedValue) ||
+        (i === lines.length - 1 &&
+          tag.expectedLine === -1 &&
+          tag.expectedValue === line)
+      ) {
+        mergedLines.push(lines[i]);
+        if (line === xmlTags[0].expectedValue && mergedLines.length > 0) {
+          mergedLines.reverse();
+        }
+        dontPushValue = true;
+        // console.log("pushed " + lines[i] + " at " + i);
+        break;
+      } else {
+        dontPushValue =
+          (i === tag.expectedLine && line !== tag.expectedValue) ||
+          (i !== tag.expectedLine && line === tag.expectedValue);
+      }
+
+      if (dontPushValue) {
+        //console.log("not pushing " + lines[i] + " at " + i);
+        break;
+      }
+
+      // console.log(!dontPushValue, i, tag, lines[i]);
+    }
+    if (!dontPushValue) {
+      if (
+        conf.mergedLocalizationAllowDuplicates &&
+        mergedLines.includes(lines[i])
+      ) {
+        // console.log("pushed allowed duplicate " + lines[i] + " at " + i);
+        mergedLines.push(lines[i]);
+      } else if (line === "" && mergedLines.at(-1) !== line) {
+        // console.log("pushing empty line");
+        mergedLines.push(lines[i]);
+      } else if (!mergedLines.includes(lines[i])) {
+        mergedLines.push(lines[i]);
+      }
+    } else {
+      // console.log("not pushing " + lines[i] + " at " + i);
+    }
+
+    // TODO: this function needs cleaning up i think
+  }
+
+  return mergedLines;
 }

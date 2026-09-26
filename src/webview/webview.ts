@@ -4,10 +4,11 @@ import * as vscode from "vscode";
 
 import { getWorkspacePath } from "../utils/ws";
 import { HtmlDataUtils, HtmlData } from "../utils/html";
+import * as futils from "../utils/file";
 import { Pak, Unpak } from "../utils/ls-formats/pak";
 import { FileFormats } from "../utils/ls-formats/formats";
 import { ConvertAll } from "../registrar/junction";
-import { Config } from "../utils/config";
+import { EOL } from "os";
 
 export class ToolkitWebviewViewProvider implements vscode.WebviewViewProvider {
   public static readonly viewType = "toolkitWebviewView";
@@ -23,7 +24,6 @@ export class ToolkitWebviewViewProvider implements vscode.WebviewViewProvider {
     this._view = webviewView;
 
     this._view.webview.options = {
-      // Allow scripts in the webview
       enableScripts: true,
 
       localResourceRoots: [this._extensionUri],
@@ -94,23 +94,18 @@ export class ToolkitWebviewViewProvider implements vscode.WebviewViewProvider {
         let unpak = new Unpak(pakPath, unpakPath);
         unpak.unpack();
         return;
-      }
-      if (data.type === "debug") {
-        let editor = vscode.window.activeTextEditor;
-        let selection = vscode.window.activeTextEditor?.selection;
-        if (selection !== undefined && editor !== undefined) {
-          let word =
-            vscode.window.activeTextEditor?.document.getWordRangeAtPosition(
-              selection?.active,
-            );
-          console.log(word);
-          console.log(editor.document.getText(word));
-        }
-
-        console.log(selection?.active);
-        return;
-      }
-      if (type === FileFormats.pak) {
+      } else if (data.type === "debug") {
+        let lines: string[] = [];
+        let files = futils.getFiles(getWorkspacePath(), {
+          type: FileFormats[FileFormats.xml],
+        });
+        files.forEach((file) => {
+          lines.push("<!--" + file.name + "." + file.ext + "-->");
+          lines = lines.concat(futils.getLinesFromFileSync(file.path));
+        });
+        lines = futils.mergeXmlLines(lines);
+        console.log(lines);
+      } else if (type === FileFormats.pak) {
         let pak = new Pak(getWorkspacePath());
         pak.build();
       } else {
