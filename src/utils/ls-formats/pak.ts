@@ -16,6 +16,7 @@ export class Pak extends ConvertCommon {
 
   public build(): void {
     let builder = new lsPak.PakBuilder();
+    //TODO: figure out why xml conversion is taking too long
     let _ = new Lsx(this.wsPath).convertModDir();
     _ = new Xml(this.wsPath).convertModDir();
 
@@ -40,7 +41,7 @@ export class Pak extends ConvertCommon {
       const modDestPath: string = path.join(this.wsPath, name);
 
       // console.log("packing file: ", modDestPath);
-      fs.writeFileSync(modDestPath, Buffer.from(packed), { flag: "w+" });
+      fs.writeFileSync(modDestPath, Buffer.from(packed), {flag: "w+"});
       this.vscode.window.showInformationMessage(name + " packed!");
 
       let installPath: string = this.conf.installedModsPath;
@@ -67,7 +68,7 @@ export class Unpak {
     this.unpakPath = unpakPath ?? path.resolve(this.wsPath, "..");
   }
 
-  public unpack(): void {
+  public async unpack(): Promise<void> {
     if (
       !path.basename(this.wsPath).includes("." + FileFormats[FileFormats.pak])
     ) {
@@ -86,16 +87,15 @@ export class Unpak {
     }
 
     for (const file of unpacked) {
-      console.log(file);
-      let fullPath: string = path.join(
-        futils.getModPath(path.resolve(this.wsPath, "..")),
-        file.extract_path(),
-      );
+      let fullPath: string = path.join(this.unpakPath, file.extract_path());
+      console.log(fullPath);
       try {
-        fs.writeFileSync(fullPath, Buffer.from(file.extract_contents()), {
-          flag: "w",
+        fs.mkdir(path.resolve(fullPath, ".."), {recursive: true}, (err) => {
+          console.log(err);
         });
-        console.log(fullPath);
+        fs.writeFile(fullPath, Buffer.from(file.extract_contents()), (err) => {
+          console.log(err);
+        });
       } catch (err) {
         console.log(err);
       }

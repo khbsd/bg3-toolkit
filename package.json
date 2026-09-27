@@ -78,6 +78,10 @@
       {
         "command": "bg3-toolkit.handleReplace",
         "title": "Replace with new Handle"
+      },
+      {
+        "command": "bg3-toolkit.xmlMerge",
+        "title": "Merge .xml files into one file."
       }
     ],
     "configuration": {
@@ -120,8 +124,8 @@
         },
         "bg3-toolkit.mergedLocalizationName": {
           "type": "string",
-          "default": "merged",
-          "description": "name for the merged localization file. the extension will look for this first and stop adding additional localization files if it exists."
+          "default": "",
+          "description": "name for the merged localization file. if supplied, the extension will:\n1) attempt to merge xml files when packing a mod, writing the merged files to 'name_you_added.xml'\n2) convert and add only that xml file to the pak.\n!! does nothing if left blank."
         },
         "bg3-toolkit.mergedLocalizationAllowDuplicates": {
           "type": "boolean",

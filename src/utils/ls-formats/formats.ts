@@ -5,6 +5,7 @@ import * as futils from "../file";
 import * as lsPak from "larian-formats-wasm";
 import { Config } from "../config";
 import { GlobPattern } from "vscode";
+import {EOL} from "os";
 
 export enum FileFormats {
   lsx,
@@ -74,6 +75,32 @@ export function isLsFile(name: string): boolean {
   return (
     getCompressionType(path.extname(name).slice(1)) === CompressionType.lsf
   );
+}
+
+export function mergeXmlFiles(wsPath: string): boolean {
+  const conf = new Config();
+  if (conf.mergedLocalizationName.length < 1) {
+    return false;
+  }
+
+  let lines: string[] = [];
+  let files = futils.getFiles(wsPath, {
+    type: FileFormats[FileFormats.xml],
+    forXmlMerging: true,
+  });
+  files.forEach((file) => {
+    lines.push("<!--" + file.name + "." + file.ext + "-->");
+    lines = lines.concat(futils.getLinesFromFileSync(file.path));
+  });
+  lines = futils.mergeXmlLines(lines);
+
+  let text = lines.join(EOL);
+  let locaPath = path.join(
+    path.dirname(files[0].path),
+    conf.mergedLocalizationName + "." + FileFormats[FileFormats.xml],
+  );
+  fs.writeFileSync(locaPath, text, {flag: "w+"});
+  return true;
 }
 
 export class File {
@@ -197,6 +224,8 @@ export class ConvertCommon {
       if (this.type === FileFormats.pak) {
         this.files = futils.getFiles(this.modPath, {
           forPacking: this.conf.doNotPackEditables,
+          type: FileFormats[FileFormats.pak],
+          mergedXmlFiles: mergeXmlFiles(this.wsPath),
         });
       } else {
         this.files = futils.getFiles(this.modPath, {

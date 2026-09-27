@@ -45,7 +45,7 @@ export class ToolkitWebviewViewProvider implements vscode.WebviewViewProvider {
               canSelectFiles: true,
               canSelectFolders: false,
               canSelectMany: false,
-              filters: { "PAK Files": ["pak"] },
+              filters: {"PAK Files": ["pak"]},
               title: "Select a .pak file to unpack",
             })
             .then((p) => p?.toString());
@@ -93,27 +93,9 @@ export class ToolkitWebviewViewProvider implements vscode.WebviewViewProvider {
         }
 
         let unpak = new Unpak(pakPath, unpakPath);
-        unpak.unpack();
+        await unpak.unpack();
         return;
       } else if (data.type === "debug") {
-        const conf = new Config();
-        let lines: string[] = [];
-        let files = futils.getFiles(getWorkspacePath(), {
-          type: FileFormats[FileFormats.xml],
-          forXmlMerging: true,
-        });
-        files.forEach((file) => {
-          lines.push("<!--" + file.name + "." + file.ext + "-->");
-          lines = lines.concat(futils.getLinesFromFileSync(file.path));
-        });
-        lines = futils.mergeXmlLines(lines);
-        let text = lines.join(EOL);
-        let locaPath = path.join(
-          path.dirname(files[0].path),
-          conf.mergedLocalizationName + "." + FileFormats[FileFormats.xml],
-        );
-        fs.writeFileSync(locaPath, text, {flag: "w+"});
-        console.log(lines);
       } else if (type === FileFormats.pak) {
         let pak = new Pak(getWorkspacePath());
         pak.build();
