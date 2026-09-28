@@ -1,6 +1,6 @@
 import * as vscode from "vscode";
 import { getWorkspacePath } from "../../utils/ws";
-import { mergeXmlFiles } from "../../utils/ls-formats/formats";
+import { mergeXmlFiles } from "../../utils/file";
 import { CommandCommon } from "../command_common";
 
 export class Command {
@@ -8,7 +8,7 @@ export class Command {
     const disposable = vscode.commands.registerCommand(
       "bg3-toolkit.xmlMerge",
       () => {
-        mergeXmlFiles(getWorkspacePath())
+        mergeXmlFiles(getWorkspacePath());
       },
     );
     return disposable;

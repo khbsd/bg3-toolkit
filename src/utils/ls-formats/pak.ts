@@ -7,18 +7,25 @@ import { Lsx } from "./lsx";
 import { Xml } from "./loca_xml";
 import { FileFormats, ConvertCommon } from "./formats";
 
+function convertFilesForPacking(wsPath: string): void {
+  new Lsx(wsPath).convertModDir();
+  new Xml(wsPath).convertModDir();
+}
+
 export class Pak extends ConvertCommon {
   vscode: any;
   constructor(wsPath: string, modPath?: string | undefined) {
+    wsPath = futils.fixPath(wsPath);
+
+    // needs to be called before super() so that converted files exist before the ConvertCommon class collects them.
+    convertFilesForPacking(wsPath);
+
     super(wsPath, { type: FileFormats.pak, modPath: modPath });
     this.vscode = require("vscode");
   }
 
   public build(): void {
     let builder = new lsPak.PakBuilder();
-    //TODO: figure out why xml conversion is taking too long
-    let _ = new Lsx(this.wsPath).convertModDir();
-    _ = new Xml(this.wsPath).convertModDir();
 
     for (let file of this.files) {
       let fContents = fs.readFileSync(file.path);
@@ -40,8 +47,7 @@ export class Pak extends ConvertCommon {
         futils.getModName(this.modPath) + "." + FileFormats[this.type];
       const modDestPath: string = path.join(this.wsPath, name);
 
-      // console.log("packing file: ", modDestPath);
-      fs.writeFileSync(modDestPath, Buffer.from(packed), {flag: "w+"});
+      fs.writeFileSync(modDestPath, Buffer.from(packed), { flag: "w+" });
       this.vscode.window.showInformationMessage(name + " packed!");
 
       let installPath: string = this.conf.installedModsPath;
@@ -90,7 +96,7 @@ export class Unpak {
       let fullPath: string = path.join(this.unpakPath, file.extract_path());
       console.log(fullPath);
       try {
-        fs.mkdir(path.resolve(fullPath, ".."), {recursive: true}, (err) => {
+        fs.mkdir(path.resolve(fullPath, ".."), { recursive: true }, (err) => {
           console.log(err);
         });
         fs.writeFile(fullPath, Buffer.from(file.extract_contents()), (err) => {

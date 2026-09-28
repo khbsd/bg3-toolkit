@@ -66,6 +66,13 @@ export async function replaceInFiles(
 }
 
 // keeping because this might be nice to have later, though idk for what
+export async function sleep(time: number): Promise<void> {
+  return new Promise((resolve) => {
+    console.log("waiting for: " + time + "ms");
+    setTimeout(resolve, time);
+  });
+}
+
 export function insertAt(replaceText: string, selection: vscode.Selection) {
   const editor = vscode.window.activeTextEditor;
 

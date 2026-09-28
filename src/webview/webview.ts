@@ -4,12 +4,9 @@ import * as vscode from "vscode";
 
 import { getWorkspacePath } from "../utils/ws";
 import { HtmlDataUtils, HtmlData } from "../utils/html";
-import * as futils from "../utils/file";
 import { Pak, Unpak } from "../utils/ls-formats/pak";
 import { FileFormats } from "../utils/ls-formats/formats";
 import { ConvertAll } from "../registrar/junction";
-import { EOL } from "os";
-import {Config} from "../utils/config";
 
 export class ToolkitWebviewViewProvider implements vscode.WebviewViewProvider {
   public static readonly viewType = "toolkitWebviewView";
@@ -45,7 +42,7 @@ export class ToolkitWebviewViewProvider implements vscode.WebviewViewProvider {
               canSelectFiles: true,
               canSelectFolders: false,
               canSelectMany: false,
-              filters: {"PAK Files": ["pak"]},
+              filters: { "PAK Files": ["pak"] },
               title: "Select a .pak file to unpack",
             })
             .then((p) => p?.toString());

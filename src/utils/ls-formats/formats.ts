@@ -5,9 +5,10 @@ import * as futils from "../file";
 import * as lsPak from "larian-formats-wasm";
 import { Config } from "../config";
 import { GlobPattern } from "vscode";
-import {EOL} from "os";
+import { EOL } from "os";
 
 export enum FileFormats {
+  none,
   lsx,
   xml,
   // non-editable below this line
@@ -75,32 +76,6 @@ export function isLsFile(name: string): boolean {
   return (
     getCompressionType(path.extname(name).slice(1)) === CompressionType.lsf
   );
-}
-
-export function mergeXmlFiles(wsPath: string): boolean {
-  const conf = new Config();
-  if (conf.mergedLocalizationName.length < 1) {
-    return false;
-  }
-
-  let lines: string[] = [];
-  let files = futils.getFiles(wsPath, {
-    type: FileFormats[FileFormats.xml],
-    forXmlMerging: true,
-  });
-  files.forEach((file) => {
-    lines.push("<!--" + file.name + "." + file.ext + "-->");
-    lines = lines.concat(futils.getLinesFromFileSync(file.path));
-  });
-  lines = futils.mergeXmlLines(lines);
-
-  let text = lines.join(EOL);
-  let locaPath = path.join(
-    path.dirname(files[0].path),
-    conf.mergedLocalizationName + "." + FileFormats[FileFormats.xml],
-  );
-  fs.writeFileSync(locaPath, text, {flag: "w+"});
-  return true;
 }
 
 export class File {
@@ -216,16 +191,26 @@ export class ConvertCommon {
    */
   constructor(wsPath: string, opts?: ConvertCommonOpts) {
     this.builder = lsPak;
-    this.type = opts?.type ?? FileFormats.lsx;
+    this.type = opts?.type || FileFormats.none;
     this.wsPath = futils.fixPath(wsPath);
     this.modPath = opts?.modPath ?? futils.getModPath(this.wsPath);
     this.conf = opts?.conf ?? new Config();
     if (fs.statSync(this.wsPath).isDirectory()) {
       if (this.type === FileFormats.pak) {
         this.files = futils.getFiles(this.modPath, {
-          forPacking: this.conf.doNotPackEditables,
-          type: FileFormats[FileFormats.pak],
-          mergedXmlFiles: mergeXmlFiles(this.wsPath),
+          forRemovingEditables: this.conf.doNotPackEditables,
+          forPacking: true,
+        });
+      } else if (this.type === FileFormats.xml) {
+        futils.mergeXmlFiles(this.wsPath);
+        this.files = futils.getFiles(this.modPath, {
+          type: FileFormats[this.type],
+          forConversion: true,
+        });
+      } else if (this.type !== FileFormats.none) {
+        this.files = futils.getFiles(this.modPath, {
+          type: FileFormats[this.type],
+          forConversion: true,
         });
       } else {
         this.files = futils.getFiles(this.modPath, {

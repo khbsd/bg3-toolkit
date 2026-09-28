@@ -1,6 +1,5 @@
 import * as vscode from "vscode";
 import { pack } from "../junction";
-import { getWorkspacePath } from "../../utils/ws";
 import { CommandCommon } from "../command_common";
 
 export class Command {

@@ -6,10 +6,10 @@ import {
   File,
   isEditable,
   isLoca,
-  mergeXmlFiles,
 } from "./ls-formats/formats";
 import { Config } from "./config";
 import { FileHandle } from "fs/promises";
+import { EOL } from "os";
 
 type xmlTagType = {
   linePresent: boolean;
@@ -17,9 +17,12 @@ type xmlTagType = {
 };
 
 const xmlTags: xmlTagType[] = [
-  {linePresent: false, expectedValue: '<?xml version="1.0" encoding="utf-8"?>'},
-  {linePresent: false, expectedValue: "<contentlist>"},
-  {linePresent: false, expectedValue: "</contentlist>"},
+  {
+    linePresent: false,
+    expectedValue: '<?xml version="1.0" encoding="utf-8"?>',
+  },
+  { linePresent: false, expectedValue: "<contentlist>" },
+  { linePresent: false, expectedValue: "</contentlist>" },
 ];
 
 export function fixPath(wsPath: string): string {
@@ -98,6 +101,32 @@ export function getModName(modPath: string): string {
   return modPath.split(path.sep).at(-1) ?? "";
 }
 
+export function mergeXmlFiles(wsPath: string): boolean {
+  const conf = new Config();
+  if (conf.mergedLocalizationName.length < 1) {
+    return false;
+  }
+
+  let lines: string[] = [];
+  let files = getFiles(wsPath, {
+    type: FileFormats[FileFormats.xml],
+    forXmlMerging: true,
+  });
+  files.forEach((file) => {
+    lines.push("<!--" + file.name + "." + file.ext + "-->");
+    lines = lines.concat(getLinesFromFileSync(file.path));
+  });
+  lines = mergeXmlLines(lines);
+
+  let text = lines.join(EOL);
+  let locaPath = path.join(
+    path.dirname(files[0].path),
+    conf.mergedLocalizationName + "." + FileFormats[FileFormats.xml],
+  );
+  fs.writeFileSync(locaPath, text, { flag: "w+" });
+  return true;
+}
+
 export function mergedLocaExists(
   dirents: fs.Dirent[],
   mergedLocaName: string,
@@ -107,7 +136,9 @@ export function mergedLocaExists(
   for (const entry of dirents) {
     if (isLoca(entry.name)) {
       mergedExists = entry.name.split(".")[0] === mergedLocaName;
-      if (mergedExists) return true;
+      if (mergedExists) {
+        return true;
+      }
     }
   }
   return mergedExists;
@@ -125,7 +156,6 @@ function filterLocalizations(dirents: fs.Dirent[]): fs.Dirent[] {
   for (const entry of dirents) {
     if (isLoca(entry.name)) {
       if (mergedExists) {
-        console.log(entry.name.split(".")[0]);
         if (entry.name.split(".")[0] === conf.mergedLocalizationName) {
           filteredDirs.push(entry);
         }
@@ -144,9 +174,9 @@ class getFilesOpts {
   type?: string;
   forConversion?: boolean;
   conf?: Config;
-  forPacking?: boolean;
+  forRemovingEditables?: boolean;
   forXmlMerging?: boolean;
-  mergedXmlFiles?: boolean;
+  forPacking?: boolean;
 }
 
 export function getFiles(wsPath: string, opts?: getFilesOpts): File[] {
@@ -155,17 +185,15 @@ export function getFiles(wsPath: string, opts?: getFilesOpts): File[] {
   let conf = opts?.conf ?? new Config();
 
   console.log(conf);
-
   wsPath = fixPath(wsPath);
+
   let dirents = fs.readdirSync(wsPath, {
     recursive: true,
     withFileTypes: true,
   });
 
-  if (
-    type === FileFormats[FileFormats.pak] &&
-    conf.mergedLocalizationName.length > 0
-  ) {
+  if (conf.mergedLocalizationName.length > 0 && opts?.forPacking) {
+    console.log("removing non-merged loca files");
     dirents = filterLocalizations(dirents);
   }
 
@@ -174,11 +202,13 @@ export function getFiles(wsPath: string, opts?: getFilesOpts): File[] {
     let filter: boolean = true;
 
     // filter out specified file formats by provided extension
-    if (type.length > 0 && type !== FileFormats[FileFormats.pak]) {
+    if (type.length > 0 && type !== FileFormats[FileFormats.none]) {
       if (type === FileFormats[FileFormats.lsf]) {
         for (const t of LsfCompressionFormats) {
           filter = entry.name.includes("." + FileFormats[t]);
-          if (filter) break;
+          if (filter) {
+            break;
+          }
         }
       } else {
         filter = entry.name.includes("." + type);
@@ -193,12 +223,13 @@ export function getFiles(wsPath: string, opts?: getFilesOpts): File[] {
 
       for (const dir of conf.conversionNeededDirectories) {
         if (opts?.forXmlMerging) {
-          console.log(entry.name);
           unneeded =
             entry.name.split(".")[0] === conf.mergedLocalizationName &&
             isLoca(entry.name);
 
-          if (unneeded) break;
+          if (unneeded) {
+            break;
+          }
         }
 
         if (opts?.forConversion) {
@@ -208,11 +239,13 @@ export function getFiles(wsPath: string, opts?: getFilesOpts): File[] {
               path.basename(entry.name, path.extname(entry.name)),
             );
 
-          if (conversion) break;
+          if (conversion) {
+            break;
+          }
         }
 
         // lets you omit editable files from the .pak that the game wont look for
-        if (opts?.forPacking) {
+        if (opts?.forRemovingEditables) {
           const f = new File(fp);
           unneeded =
             isEditable(f.ext) &&
@@ -221,7 +254,9 @@ export function getFiles(wsPath: string, opts?: getFilesOpts): File[] {
               path.basename(entry.name, path.extname(entry.name)),
             );
 
-          if (unneeded) break;
+          if (unneeded) {
+            break;
+          }
         }
       }
 
@@ -232,7 +267,9 @@ export function getFiles(wsPath: string, opts?: getFilesOpts): File[] {
         !fp.includes(ignored) &&
         entry.isFile() &&
         !entry.name.startsWith(".");
-      if (!pathOk) break;
+      if (!pathOk) {
+        break;
+      }
     }
 
     if (pathOk) {
@@ -248,10 +285,7 @@ export async function getLinesFromFile(filePath: string): Promise<string[]> {
   let lines: string[] = [];
   let file: FileHandle = await fs.promises.open(filePath);
 
-  console.log(file);
-
   file.readLines().on("line", (line) => {
-    console.log(line);
     lines.push(line);
   });
 
@@ -283,7 +317,9 @@ export function mergeXmlLines(lines: string[]): string[] {
     let dontPushValue: boolean = false;
 
     for (let tag of tags) {
-      if (dontPushValue) break;
+      if (dontPushValue) {
+        break;
+      }
 
       if (tag.expectedValue !== xmlTags.at(-1)?.expectedValue) {
         tag.linePresent = dontPushValue =
@@ -296,7 +332,9 @@ export function mergeXmlLines(lines: string[]): string[] {
       }
     }
 
-    if (dontPushValue) continue;
+    if (dontPushValue) {
+      continue;
+    }
 
     if (
       (conf.mergedLocalizationAllowDuplicates &&
