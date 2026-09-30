@@ -2,7 +2,7 @@
   "name": "bg3-toolkit",
   "displayName": "bg3-toolkit",
   "description": "",
-  "version": "0.4.2",
+  "version": "0.5.0",
   "repository": {
     "type": "git",
     "url": "https://github.com/khbsd/bg3-toolkit"
@@ -25,7 +25,7 @@
       },
       {
         "command": "bg3-toolkit.packMod",
-        "title": "pack mod"
+        "title": "Pack the current workspace"
       },
       {
         "command": "bg3-toolkit.lsxConvert",
@@ -82,6 +82,10 @@
       {
         "command": "bg3-toolkit.xmlMerge",
         "title": "Merge .xml files into one file."
+      },
+      {
+        "command": "bg3-toolkit.addToXml",
+        "title": "Add as a handle to localization file"
       }
     ],
     "configuration": {
@@ -120,7 +124,7 @@
         "bg3-toolkit.installedModsPath": {
           "type": "string",
           "default": "",
-          "description": "location of your installed mods. if supplied, this extension will attempt to copy any mods you pack up into the installed mods folder, replacing any files of the same name.\nif left blank, will do nothing."
+          "description": "location of your installed mods. if supplied, this extension will attempt to copy any mods you pack up into the installed mods folder, replacing any files of the same name.\n!! if left blank, will do nothing."
         },
         "bg3-toolkit.mergedLocalizationName": {
           "type": "string",
@@ -137,42 +141,49 @@
     "menus": {
       "explorer/context": [
         {
-          "when": "resourceExtname == .lsx || resourceExtname == .LSX",
+          "when": "(resourceExtname == .lsx || resourceExtname == .LSX) && bg3-toolkit.isModWorkspace",
           "command": "bg3-toolkit.lsxConvert"
         },
         {
-          "when": "resourceExtname == .lsf || resourceExtname == .LSF || resourceExtname == .lsb ||  resourceExtname == .LSB || resourceExtname == .lsfx || resourceExtname == .LSFX || resourceExtname == .lsfex || resourceExtname == .LSFEX || resourceExtname == .lsbc || resourceExtname == .LSBC || resourceExtname == .lsbs || resourceExtname == .LSBS ",
+          "when": "(resourceExtname == .lsf || resourceExtname == .LSF || resourceExtname == .lsb ||  resourceExtname == .LSB || resourceExtname == .lsfx || resourceExtname == .LSFX || resourceExtname == .lsfex || resourceExtname == .LSFEX || resourceExtname == .lsbc || resourceExtname == .LSBC || resourceExtname == .lsbs || resourceExtname == .LSBS) && bg3-toolkit.isModWorkspace",
           "command": "bg3-toolkit.lsfConvert"
         },
         {
-          "when": "resourceExtname == .xml || resourceExtname == .XML",
+          "when": "(resourceExtname == .xml || resourceExtname == .XML) && bg3-toolkit.isModWorkspace",
           "command": "bg3-toolkit.xmlConvert"
         },
         {
-          "when": "resourceExtname == .loca || resourceExtname == .LOCA",
+          "when": "(resourceExtname == .loca || resourceExtname == .LOCA) && bg3-toolkit.isModWorkspace",
           "command": "bg3-toolkit.locaConvert"
         },
         {
-          "when": "resourceExtname == .pak || resourceExtname == .PAK",
+          "when": "(resourceExtname == .pak || resourceExtname == .PAK) && bg3-toolkit.isModWorkspace",
           "command": "bg3-toolkit.unpackMod"
         }
       ],
       "editor/context": [
         {
-          "when": "bg3-toolkit.handleSelected",
+          "when": "bg3-toolkit.isModWorkspace",
+          "command": "bg3-toolkit.addToXml",
+          "group": "1_modification@4"
+        },
+        {
+          "when": "bg3-toolkit.handleSelected && bg3-toolkit.isModWorkspace",
           "command": "bg3-toolkit.handleReplace",
           "group": "1_modification@5"
         },
         {
-          "when": "bg3-toolkit.uuidSelected",
+          "when": "bg3-toolkit.uuidSelected && bg3-toolkit.isModWorkspace",
           "command": "bg3-toolkit.uuidReplace",
           "group": "1_modification@6"
         },
         {
+          "when": "bg3-toolkit.isModWorkspace",
           "command": "bg3-toolkit.handleInsert",
           "group": "1_modification@7"
         },
         {
+          "when": "bg3-toolkit.isModWorkspace",
           "command": "bg3-toolkit.uuidInsert",
           "group": "1_modification@8"
         }
@@ -194,11 +205,6 @@
           "icon": "",
           "id": "toolkitWebviewView",
           "name": "toolkit"
-        },
-        {
-          "icon": "",
-          "id": "toolkitTreeWorkspace",
-          "name": "workspace"
         }
       ]
     },

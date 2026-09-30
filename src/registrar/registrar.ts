@@ -15,6 +15,10 @@ export class Registrar {
       }
     }
 
+    return commands;
+  }
+
+  registerListeners(): void {
     for (const f of fs.readdirSync(path.join(__dirname, "listeners"))) {
       const tempPath = path.join(__dirname, "listeners", f);
       if (path.extname(tempPath) === ".js") {
@@ -22,7 +26,5 @@ export class Registrar {
         new l.Listener().setup();
       }
     }
-
-    return commands;
   }
 }

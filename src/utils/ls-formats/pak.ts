@@ -94,7 +94,6 @@ export class Unpak {
 
     for (const file of unpacked) {
       let fullPath: string = path.join(this.unpakPath, file.extract_path());
-      console.log(fullPath);
       try {
         fs.mkdir(path.resolve(fullPath, ".."), { recursive: true }, (err) => {
           console.log(err);

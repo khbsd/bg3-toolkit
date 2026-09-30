@@ -1,5 +1,6 @@
 import * as fs from "fs";
 import * as path from "path";
+import * as vscode from "vscode";
 import {
   FileFormats,
   LsfCompressionFormats,
@@ -10,17 +11,25 @@ import {
 import { Config } from "./config";
 import { FileHandle } from "fs/promises";
 import { EOL } from "os";
+import { getSelectionOrCursorWord, getWorkspacePath } from "./ws";
 
 const enum XmlTag {
   VersionEncoding,
   OpenContentList,
   CloseContentList,
+  OpenContent = 0,
+  CloseContent = 1,
 }
 
-const xmlTags: string[] = [
+const xmlFileTags: string[] = [
   '<?xml version="1.0" encoding="UTF-8"?>',
   "<contentList>",
   "</contentList>",
+];
+
+const xmlLineTags: string[] = [
+  '<content contentuid="${handle}" version="1">',
+  "</content>",
 ];
 
 export function fixPath(wsPath: string): string {
@@ -62,7 +71,7 @@ export function getModPath(wsPath: string): string {
     recursive: true,
     withFileTypes: true,
   });
-  console.log(wsPaths);
+
   for (let p of wsPaths) {
     if (!p.isFile()) {
       continue;
@@ -97,6 +106,56 @@ export function getModName(modPath: string): string {
   console.log("getting mod name from mod path: ", modPath);
   console.log(modPath.split(path.sep).at(-1));
   return modPath.split(path.sep).at(-1) ?? "";
+}
+
+export async function addHandleToXml(handle?: string, fileIndex?: number) {
+  handle = handle ?? getSelectionOrCursorWord();
+  handle =
+    "    " +
+    xmlLineTags[XmlTag.OpenContent].replace("${handle}", handle) +
+    xmlLineTags[XmlTag.CloseContent];
+  fileIndex = fileIndex ?? 0;
+
+  const xmlFiles: File[] = getFiles(getWorkspacePath(), {
+    type: FileFormats[FileFormats.xml],
+  });
+
+  let xmlFile: File | undefined = undefined;
+
+  switch (xmlFiles.length) {
+    case 0: {
+      await vscode.window.showErrorMessage("You have no localization files.");
+      return;
+    }
+    case 1: {
+      xmlFile = xmlFiles[fileIndex];
+      break;
+    }
+    default: {
+      const names: string[] = [];
+      xmlFiles.forEach((file) => {
+        names.push(file.name);
+      });
+      let picked =
+        (await vscode.window.showQuickPick(names)) ?? names[fileIndex];
+
+      xmlFiles.forEach((file) => {
+        if (path.basename(file.name) === picked) {
+          xmlFile = file;
+        }
+      });
+      break;
+    }
+  }
+
+  if (xmlFile !== undefined) {
+    let lines = mergeXmlLines(getLinesFromFileSync(xmlFile.path));
+    lines.splice(lines.length - 1, 0, handle);
+
+    fs.writeFile(xmlFile.path, lines.join(EOL), { flag: "w+" }, (err) => {
+      console.log(err);
+    });
+  }
 }
 
 export function mergeXmlFiles(wsPath: string): boolean {
@@ -142,6 +201,44 @@ export function mergedLocaExists(
   return mergedExists;
 }
 
+export function mergeXmlLines(lines: string[]): string[] {
+  const conf: Config = new Config();
+
+  let mergedLines: string[] = [
+    xmlFileTags[XmlTag.VersionEncoding],
+    xmlFileTags[XmlTag.OpenContentList],
+  ];
+
+  for (let i = 0; i < lines.length; i++) {
+    const line = lines[i].trim();
+
+    for (const tag of xmlFileTags) {
+      if (line.toLowerCase().includes(tag.toLowerCase())) {
+        if (line !== tag) {
+          lines[i] = lines[i].replace(tag, "");
+        } else {
+          lines[i] = "";
+        }
+      }
+    }
+
+    if (
+      !mergedLines.includes(lines[i]) ||
+      conf.mergedLocalizationAllowDuplicates ||
+      (line === "" && mergedLines.at(-1) !== line) ||
+      line.includes("<!--")
+    ) {
+      mergedLines.push(lines[i]);
+    }
+
+    if (i === lines.length - 1) {
+      mergedLines.push(xmlFileTags[XmlTag.CloseContentList]);
+    }
+  }
+
+  return mergedLines;
+}
+
 function filterLocalizations(dirents: fs.Dirent[]): fs.Dirent[] {
   const conf = new Config();
 
@@ -168,6 +265,9 @@ function filterLocalizations(dirents: fs.Dirent[]): fs.Dirent[] {
   return filteredDirs;
 }
 
+/**
+ * @param type: string | undefined
+ */
 class getFilesOpts {
   type?: string;
   forConversion?: boolean;
@@ -301,44 +401,4 @@ export function getLinesFromFileSync(filePath: string): string[] {
   }
 
   return lines;
-}
-
-export function mergeXmlLines(lines: string[]): string[] {
-  const conf: Config = new Config();
-
-  let tags = xmlTags;
-  let mergedLines: string[] = [
-    tags[XmlTag.VersionEncoding],
-    tags[XmlTag.OpenContentList],
-  ];
-
-  for (let i = 0; i < lines.length; i++) {
-    const line = lines[i].trim();
-
-    for (const tag of tags) {
-      if (line.toLowerCase().includes(tag.toLowerCase())) {
-        console.log(line);
-        if (line !== tag) {
-          lines[i] = lines[i].replace(tag, "");
-        } else {
-          lines[i] = "";
-        }
-      }
-    }
-
-    if (
-      !mergedLines.includes(lines[i]) ||
-      conf.mergedLocalizationAllowDuplicates ||
-      (line === "" && mergedLines.at(-1) !== line) ||
-      line.includes("<!--")
-    ) {
-      mergedLines.push(lines[i]);
-    }
-
-    if (i === lines.length - 1) {
-      mergedLines.push(tags[XmlTag.CloseContentList]);
-    }
-  }
-
-  return mergedLines;
 }

@@ -6,26 +6,20 @@ import * as futils from "../utils/file";
 import * as fs from "fs";
 import { getWorkspacePath } from "../utils/ws";
 
-export class ConvertAll {
-  files: File[] = [];
-  path: string;
-  constructor(dirPath: string, type: FileFormats) {
-    if (fs.statSync(dirPath).isFile()) {
-      this.path = futils.getModPath(dirPath);
-    } else {
-      this.path = dirPath;
-    }
-    this.files = futils.getFiles(dirPath, {
+export function convertAll(dirPath: string, type: FileFormats) {
+  let path: string = dirPath;
+  if (fs.statSync(dirPath).isFile()) {
+    path = futils.getModPath(dirPath);
+  }
+
+  futils
+    .getFiles(dirPath, {
       type: FileFormats[type],
       forConversion: true,
-    });
-    this._convertAll();
-  }
-  private _convertAll() {
-    this.files.forEach((file) => {
+    })
+    .forEach((file) => {
       convert(file);
     });
-  }
 }
 
 export function convert(file: File) {

@@ -4,15 +4,22 @@ import * as vscode from "vscode";
 
 import { getWorkspacePath } from "../utils/ws";
 import { HtmlDataUtils, HtmlData } from "../utils/html";
+import * as futils from "../utils/file";
 import { Pak, Unpak } from "../utils/ls-formats/pak";
 import { FileFormats } from "../utils/ls-formats/formats";
-import { ConvertAll } from "../registrar/junction";
+import { convertAll } from "../registrar/junction";
 
 export class ToolkitWebviewViewProvider implements vscode.WebviewViewProvider {
   public static readonly viewType = "toolkitWebviewView";
   private _view?: vscode.WebviewView;
+  isModWorkspace: boolean;
 
-  constructor(private readonly _extensionUri: vscode.Uri) {}
+  constructor(
+    private readonly _extensionUri: vscode.Uri,
+    isModWorkspace?: boolean,
+  ) {
+    this.isModWorkspace = isModWorkspace ?? true;
+  }
 
   public resolveWebviewView(
     webviewView: vscode.WebviewView,
@@ -93,11 +100,19 @@ export class ToolkitWebviewViewProvider implements vscode.WebviewViewProvider {
         await unpak.unpack();
         return;
       } else if (data.type === "debug") {
+        let xmls = futils.getFiles(getWorkspacePath(), {
+          type: FileFormats[FileFormats.xml],
+        });
+        console.log(
+          xmls.forEach((file) => {
+            console.log(file.name, fs.statSync(file.path).mtimeMs);
+          }),
+        );
       } else if (type === FileFormats.pak) {
         let pak = new Pak(getWorkspacePath());
         pak.build();
       } else {
-        new ConvertAll(getWorkspacePath(), type);
+        convertAll(getWorkspacePath(), type);
       }
     });
   }
@@ -106,17 +121,30 @@ export class ToolkitWebviewViewProvider implements vscode.WebviewViewProvider {
     const wv: vscode.Webview = webview;
     const hd: HtmlDataUtils = new HtmlDataUtils();
     const nonce = hd.getNonce();
+    let htmlUri: string;
 
     // file to read html from
-    const htmlUri = path.resolve(
-      __dirname,
-      "..",
-      "..",
-      "src",
-      "webview",
-      "html",
-      "main.html",
-    );
+    if (!this.isModWorkspace) {
+      htmlUri = path.resolve(
+        __dirname,
+        "..",
+        "..",
+        "src",
+        "webview",
+        "html",
+        "no_mod_workspace.html",
+      );
+    } else {
+      htmlUri = path.resolve(
+        __dirname,
+        "..",
+        "..",
+        "src",
+        "webview",
+        "html",
+        "main.html",
+      );
+    }
 
     // path to js script
     const scriptUri = wv.asWebviewUri(

@@ -31,6 +31,16 @@ li {
   margin-right: 2%;
 }
 
+.info-debug {
+  content: ">";
+  margin-right: 2%;
+  display: none;
+}
+
+.debug {
+  display: none;
+}
+
 .buttons-arrows {
   width: 100%;
   display: flex;
