@@ -23,7 +23,7 @@ button {
 }
 
 p {
-  display: inline; 
+  display: inline;
 }
 
 li {
@@ -77,9 +77,10 @@ body:has(.info .toggle input:checked) .info.toggled {
   color: var(--vscode-button-foreground);
   display: inline;
   background-color: var(--vscode-button-background);
-  border-radius: 0.4rem;
+  border-radius: 0.3rem;
   border-style: solid;
-  padding: 0.05rem;
+  padding-left: 0.45rem;
+  padding-right: 0.45rem;
 } .text-button:hover {
   background-color: var(--vscode-button-hoverBackground);
   cursor: pointer;

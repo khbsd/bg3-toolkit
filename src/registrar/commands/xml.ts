@@ -1,7 +1,6 @@
 import * as vscode from "vscode";
 import { File } from "../../utils/ls-formats/formats";
-import { convert } from "../junction";
-import { CommandCommon } from "../command_common";
+import { convert } from "../../utils/ls-formats/junction";
 
 export class Command {
   get(): vscode.Disposable {

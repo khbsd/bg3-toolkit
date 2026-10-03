@@ -1,8 +1,7 @@
 import * as vscode from "vscode";
-import { getWorkspacePath } from "./utils/ws";
-import { getModPath } from "./utils/file";
 import { Registrar } from "./registrar/registrar";
-import { WorkspaceTreeViewProvider } from "./treeview/treeview";
+import { getModPath } from "./utils/file";
+import { getWorkspacePath } from "./utils/ws";
 import { ToolkitWebviewViewProvider } from "./webview/webview";
 
 // icon attribution:

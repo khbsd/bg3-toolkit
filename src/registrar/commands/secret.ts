@@ -1,5 +1,4 @@
 import * as vscode from "vscode";
-import { CommandCommon } from "../command_common";
 
 export class Command {
   get(): vscode.Disposable {

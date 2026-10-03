@@ -3,9 +3,9 @@ import * as lsPak from "larian-formats-wasm";
 import * as path from "path";
 
 import * as futils from "../file";
-import { Lsx } from "./lsx";
+import { ConvertCommon, FileFormats } from "./formats";
 import { Xml } from "./loca_xml";
-import { FileFormats, ConvertCommon } from "./formats";
+import { Lsx } from "./lsx";
 
 function convertFilesForPacking(wsPath: string): void {
   new Lsx(wsPath).convertModDir();

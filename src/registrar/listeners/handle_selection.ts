@@ -1,7 +1,6 @@
 import * as vscode from "vscode";
 import { Handle } from "../../utils/uuid_handle";
 import { getSelectionOrCursorWord } from "../../utils/ws";
-import { CommandCommon } from "../command_common";
 
 export class Listener {
   setup() {

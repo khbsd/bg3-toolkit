@@ -1,7 +1,7 @@
-import * as vscode from "vscode";
 import * as path from "path";
-import * as futils from "./file";
+import * as vscode from "vscode";
 import { Config } from "./config";
+import * as futils from "./file";
 
 /**
  * returns your workspace path. if you have set a value for the "custom mod path" setting, will return that instead

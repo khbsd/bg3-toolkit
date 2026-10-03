@@ -1,5 +1,5 @@
 import * as fs from "fs";
-import { FileFormats, File, ConvertCommon } from "./formats";
+import { ConvertCommon, File, FileFormats } from "./formats";
 
 export class Lsx extends ConvertCommon {
   constructor(wsPath: string, modPath?: string | undefined) {

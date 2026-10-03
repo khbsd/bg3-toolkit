@@ -1,10 +1,10 @@
 import * as fs from "fs";
+import * as lsPak from "larian-formats-wasm";
 import * as path from "path";
+import { GlobPattern } from "vscode";
+import { Config } from "../config";
 import * as eutils from "../enum";
 import * as futils from "../file";
-import * as lsPak from "larian-formats-wasm";
-import { Config } from "../config";
-import { GlobPattern } from "vscode";
 
 export enum FileFormats {
   none,

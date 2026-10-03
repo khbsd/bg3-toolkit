@@ -2,12 +2,12 @@ import * as fs from "fs";
 import * as path from "path";
 import * as vscode from "vscode";
 
-import { getWorkspacePath } from "../utils/ws";
-import { HtmlDataUtils, HtmlData } from "../utils/html";
 import * as futils from "../utils/file";
-import { Pak, Unpak } from "../utils/ls-formats/pak";
+import { HtmlData, HtmlDataUtils } from "../utils/html";
 import { FileFormats } from "../utils/ls-formats/formats";
-import { convertAll } from "../registrar/junction";
+import { convertAll, pack } from "../utils/ls-formats/junction";
+import { Unpak } from "../utils/ls-formats/pak";
+import { getWorkspacePath } from "../utils/ws";
 
 export class ToolkitWebviewViewProvider implements vscode.WebviewViewProvider {
   public static readonly viewType = "toolkitWebviewView";
@@ -112,8 +112,7 @@ export class ToolkitWebviewViewProvider implements vscode.WebviewViewProvider {
           }),
         );
       } else if (type === FileFormats.pak) {
-        let pak = new Pak(getWorkspacePath());
-        pak.build();
+        pack()
       } else if (type !== FileFormats.count && type !== FileFormats.none) {
         convertAll(getWorkspacePath(), type);
       } else {

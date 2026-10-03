@@ -1,6 +1,5 @@
 import * as vscode from "vscode";
-import { pack } from "../junction";
-import { CommandCommon } from "../command_common";
+import { pack } from "../../utils/ls-formats/junction";
 
 export class Command {
   get(): vscode.Disposable {

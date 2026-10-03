@@ -1,17 +1,18 @@
 import * as fs from "fs";
-import * as path from "path";
-import * as vscode from "vscode";
-import {
-  FileFormats,
-  LsfCompressionFormats,
-  File,
-  isEditable,
-  isLoca,
-} from "./ls-formats/formats";
-import { Config } from "./config";
 import { FileHandle } from "fs/promises";
 import { EOL } from "os";
-import { getSelectionOrCursorWord, getWorkspacePath, sleep } from "./ws";
+import * as path from "path";
+import * as vscode from "vscode";
+import { Config } from "./config";
+import
+{
+  File,
+  FileFormats,
+    isEditable,
+    isLoca,
+    LsfCompressionFormats,
+} from "./ls-formats/formats";
+import { getSelectionOrCursorWord, getWorkspacePath } from "./ws";
 
 const enum XmlTag {
   VersionEncoding,

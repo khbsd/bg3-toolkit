@@ -1,5 +1,5 @@
-import * as vscode from "vscode";
 import * as path from "path";
+import * as vscode from "vscode";
 
 export class WorkspaceTreeViewProvider implements vscode.TreeDataProvider<ToolkitTreeView> {
   constructor(private workspaceRoot: string) {}

@@ -1,7 +1,6 @@
 import * as vscode from "vscode";
-import { getWorkspacePath } from "../../utils/ws";
 import { mergeXmlFiles } from "../../utils/file";
-import { CommandCommon } from "../command_common";
+import { getWorkspacePath } from "../../utils/ws";
 
 export class Command {
   get(): vscode.Disposable {

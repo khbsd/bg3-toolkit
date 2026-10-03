@@ -1,7 +1,6 @@
 import * as vscode from "vscode";
 import { Uuid } from "../../utils/uuid_handle";
 import { insertAt } from "../../utils/ws";
-import { CommandCommon } from "../command_common";
 
 export class Command {
   get(): vscode.Disposable {

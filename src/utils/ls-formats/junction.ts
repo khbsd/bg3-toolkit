@@ -1,10 +1,10 @@
-import { FileFormats, File } from "../utils/ls-formats/formats";
-import { Lsx, Lsf } from "../utils/ls-formats/lsx";
-import { Pak, Unpak } from "../utils/ls-formats/pak";
-import { Loca, Xml } from "../utils/ls-formats/loca_xml";
-import * as futils from "../utils/file";
 import * as fs from "fs";
-import { getWorkspacePath } from "../utils/ws";
+import * as futils from "../file";
+import { getWorkspacePath } from "../ws";
+import { File, FileFormats } from "./formats";
+import { Loca, Xml } from "./loca_xml";
+import { Lsf, Lsx } from "./lsx";
+import { Pak, Unpak } from "./pak";
 
 export function convertAll(dirPath: string, type: FileFormats) {
   let path: string = dirPath;

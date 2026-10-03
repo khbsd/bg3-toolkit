@@ -2,7 +2,7 @@
   "name": "bg3-toolkit",
   "displayName": "bg3-toolkit",
   "description": "",
-  "version": "0.5.0",
+  "version": "0.6.0",
   "repository": {
     "type": "git",
     "url": "https://github.com/khbsd/bg3-toolkit"
@@ -129,7 +129,7 @@
         "bg3-toolkit.mergedLocalizationName": {
           "type": "string",
           "default": "",
-          "description": "name for the merged localization file. if supplied, the extension will:\n1) attempt to merge xml files when packing a mod, writing the merged files to `name_you_added.xml`\n2) convert and add only that xml file to the pak.\n!! does nothing if left blank."
+          "description": "name for the merged localization file. if supplied, and there are multiple xml files in your workspace, the extension will:\n1) attempt to merge xml files when packing a mod, writing the merged files to `name_you_added.xml`\n2) convert and add only that xml file to the pak.\n!! does nothing if left blank."
         },
         "bg3-toolkit.mergedLocalizationAllowDuplicates": {
           "type": "boolean",
@@ -194,7 +194,7 @@
         {
           "id": "bg3-toolkit",
           "title": "bg3 toolkit",
-          "icon": "resources/icon/icon_sm.png"
+          "icon": "resources/icon/icon.svg"
         }
       ]
     },
