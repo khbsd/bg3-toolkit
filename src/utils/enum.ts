@@ -4,8 +4,6 @@ export type EnumObj = {
   data: string | undefined;
 };
 
-// TODO: re-evaluate if we need these
-
 export function getNames(e: object): string[] {
   let names: string[] = [];
   Object.values(e).forEach((value) => {

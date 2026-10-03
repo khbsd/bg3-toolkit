@@ -38,6 +38,7 @@ export class ToolkitWebviewViewProvider implements vscode.WebviewViewProvider {
 
     this._view.webview.onDidReceiveMessage(async (data) => {
       console.log("message recieved: ", data.message);
+
       const type: FileFormats =
         FileFormats[data.type as keyof typeof FileFormats];
       if (data.type === "unpack") {
@@ -79,6 +80,7 @@ export class ToolkitWebviewViewProvider implements vscode.WebviewViewProvider {
               title: "Select a location to unpack to",
             })
             .then((p) => p?.toString());
+
           if (unpakPath === undefined) {
             let warning;
             await vscode.window
@@ -90,6 +92,7 @@ export class ToolkitWebviewViewProvider implements vscode.WebviewViewProvider {
               .then((value) => {
                 warning = value;
               });
+
             if (warning !== "oops") {
               return;
             }
@@ -108,11 +111,40 @@ export class ToolkitWebviewViewProvider implements vscode.WebviewViewProvider {
             console.log(file.name, fs.statSync(file.path).mtimeMs);
           }),
         );
+      } else if (
+        data.type.includes("mouseenter") ||
+        data.type.includes("mouseleave")
+      ) {
+        return;
+        /* 
+        console.log("attempting to set html");
+        let dataType: string = data.type;
+        let dataClass: string = data.class;
+        let dataMsg: string = data.msg;
+
+        if (this._view !== undefined && data !== undefined) {
+          console.log("setting html");
+          this._view.webview.html = this._getHtmlForWebview(
+            this._view.webview,
+          ).replace(dataClass.toString().slice(1), dataMsg.toString().slice(1));
+        }
+        return;*/
+      } else if (data.type === "text-button-lsf-mouseenter") {
+        console.log();
+        return;
+      } else if (data.type === "text-button-lsx-mouseleave") {
+        console.log();
+        return;
+      } else if (data.type === "text-button-lsf-mouseleave") {
+        console.log();
+        return;
       } else if (type === FileFormats.pak) {
         let pak = new Pak(getWorkspacePath());
         pak.build();
-      } else {
+      } else if (type !== FileFormats.count && type !== FileFormats.none) {
         convertAll(getWorkspacePath(), type);
+      } else {
+        console.log("unrecognized type");
       }
     });
   }

@@ -5,7 +5,6 @@ import * as futils from "../file";
 import * as lsPak from "larian-formats-wasm";
 import { Config } from "../config";
 import { GlobPattern } from "vscode";
-import { EOL } from "os";
 
 export enum FileFormats {
   none,
@@ -157,7 +156,7 @@ export class File {
   }
 }
 
-class ConvertCommonOpts {
+type ConvertCommonOpts = {
   type?: FileFormats;
   modPath?: string;
   conf?: Config;

@@ -11,7 +11,7 @@ import {
 import { Config } from "./config";
 import { FileHandle } from "fs/promises";
 import { EOL } from "os";
-import { getSelectionOrCursorWord, getWorkspacePath } from "./ws";
+import { getSelectionOrCursorWord, getWorkspacePath, sleep } from "./ws";
 
 const enum XmlTag {
   VersionEncoding,
@@ -149,11 +149,15 @@ export async function addHandleToXml(handle?: string, fileIndex?: number) {
   }
 
   if (xmlFile !== undefined) {
-    let lines = mergeXmlLines(getLinesFromFileSync(xmlFile.path));
+    let lines = getLinesFromFileSync(xmlFile.path);
     lines.splice(lines.length - 1, 0, handle);
 
-    fs.writeFile(xmlFile.path, lines.join(EOL), { flag: "w+" }, (err) => {
-      console.log(err);
+    fs.writeFile(xmlFile.path, lines.join(EOL), { flag: "w" }, (err) => {
+      if (err) {
+        console.log(err);
+        return;
+      }
+      console.log(xmlFile?.path + "saved");
     });
   }
 }
@@ -268,7 +272,7 @@ function filterLocalizations(dirents: fs.Dirent[]): fs.Dirent[] {
 /**
  * @param type: string | undefined
  */
-class getFilesOpts {
+type getFilesOpts = {
   type?: string;
   forConversion?: boolean;
   conf?: Config;

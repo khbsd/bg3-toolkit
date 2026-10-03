@@ -37,6 +37,17 @@ li {
   display: none;
 }
 
+.text-button {
+  color: var(--vscode-button-foreground);
+  display: inline;
+  background-color: var(--vscode-button-background);
+  border-radius: 0.3rem;
+  border-style: solid;
+} .text-button:hover {
+  background-color: var(--vscode-button-hoverBackground);
+  cursor: pointer;
+}
+
 .debug {
   display: none;
 }
@@ -62,6 +73,10 @@ li {
 .left-button {
   flex: 1;
   flex-grow: 2;
+}
+
+.lsf-button-highlight {
+  background-color: aliceblue;
 }
 
 .center-arrows {

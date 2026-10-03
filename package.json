@@ -129,12 +129,12 @@
         "bg3-toolkit.mergedLocalizationName": {
           "type": "string",
           "default": "",
-          "description": "name for the merged localization file. if supplied, the extension will:\n1) attempt to merge xml files when packing a mod, writing the merged files to 'name_you_added.xml'\n2) convert and add only that xml file to the pak.\n!! does nothing if left blank."
+          "description": "name for the merged localization file. if supplied, the extension will:\n1) attempt to merge xml files when packing a mod, writing the merged files to `name_you_added.xml`\n2) convert and add only that xml file to the pak.\n!! does nothing if left blank."
         },
         "bg3-toolkit.mergedLocalizationAllowDuplicates": {
           "type": "boolean",
           "default": false,
-          "description": "whether the extension should keep duplicate entries when merging localization files."
+          "description": "whether the extension should keep duplicate entries when merging localization files.\n!! probably keep this unchecked unless you know what youre doing."
         }
       }
     },
@@ -194,7 +194,7 @@
         {
           "id": "bg3-toolkit",
           "title": "bg3 toolkit",
-          "icon": "resources/icon/icon.svg"
+          "icon": "resources/icon/icon_sm.png"
         }
       ]
     },
