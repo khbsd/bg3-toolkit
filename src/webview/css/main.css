@@ -22,8 +22,33 @@ button {
   cursor: pointer;
 }
 
+p {
+  display: inline; 
+}
+
 li {
   list-style-type: none;
+}
+
+.toggle input {
+  position: absolute;
+  opacity: 0;
+  cursor: pointer;
+  height: 0;
+  width: 0;
+}
+
+body:has(.info .text-button.lsx:hover) .buttons-arrows .lsx-button.left-button,
+body:has(.info .text-button.lsf:hover) .buttons-arrows .lsf-button.right-button {
+  background-color: var(--vscode-button-hoverBackground);
+}
+
+body:has(.info .toggle input) .info.toggled {
+  display: none;
+}
+
+body:has(.info .toggle input:checked) .info.toggled {
+  display: block;
 }
 
 .info::before {
@@ -37,12 +62,24 @@ li {
   display: none;
 }
 
+.toggle-text {
+  display: inline;
+  cursor: pointer;
+  font-weight: bold;
+}
+
+.toggled {
+  margin-top: 3%;
+  display: none;
+}
+
 .text-button {
   color: var(--vscode-button-foreground);
   display: inline;
   background-color: var(--vscode-button-background);
-  border-radius: 0.3rem;
+  border-radius: 0.4rem;
   border-style: solid;
+  padding: 0.05rem;
 } .text-button:hover {
   background-color: var(--vscode-button-hoverBackground);
   cursor: pointer;
@@ -75,15 +112,7 @@ li {
   flex-grow: 2;
 }
 
-.lsf-button-highlight {
-  background-color: aliceblue;
-}
-
 .center-arrows {
   flex: 1;
   text-align: center;
-}
-
-.toggle {
-  display: none;
 }

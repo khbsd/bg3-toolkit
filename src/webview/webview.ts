@@ -37,7 +37,7 @@ export class ToolkitWebviewViewProvider implements vscode.WebviewViewProvider {
     this._view.webview.html = this._getHtmlForWebview(this._view.webview);
 
     this._view.webview.onDidReceiveMessage(async (data) => {
-      console.log("message recieved: ", data.message);
+      console.log("message recieved: ", data.msg);
 
       const type: FileFormats =
         FileFormats[data.type as keyof typeof FileFormats];
@@ -111,33 +111,6 @@ export class ToolkitWebviewViewProvider implements vscode.WebviewViewProvider {
             console.log(file.name, fs.statSync(file.path).mtimeMs);
           }),
         );
-      } else if (
-        data.type.includes("mouseenter") ||
-        data.type.includes("mouseleave")
-      ) {
-        return;
-        /* 
-        console.log("attempting to set html");
-        let dataType: string = data.type;
-        let dataClass: string = data.class;
-        let dataMsg: string = data.msg;
-
-        if (this._view !== undefined && data !== undefined) {
-          console.log("setting html");
-          this._view.webview.html = this._getHtmlForWebview(
-            this._view.webview,
-          ).replace(dataClass.toString().slice(1), dataMsg.toString().slice(1));
-        }
-        return;*/
-      } else if (data.type === "text-button-lsf-mouseenter") {
-        console.log();
-        return;
-      } else if (data.type === "text-button-lsx-mouseleave") {
-        console.log();
-        return;
-      } else if (data.type === "text-button-lsf-mouseleave") {
-        console.log();
-        return;
       } else if (type === FileFormats.pak) {
         let pak = new Pak(getWorkspacePath());
         pak.build();

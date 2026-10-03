@@ -173,6 +173,12 @@ export function mergeXmlFiles(wsPath: string): boolean {
     type: FileFormats[FileFormats.xml],
     forXmlMerging: true,
   });
+
+  // cant merge one file
+  if (files.length < 2) {
+    return false;
+  }
+
   files.forEach((file) => {
     lines.push("<!--" + file.name + "." + file.ext + "-->");
     lines = lines.concat(getLinesFromFileSync(file.path));
@@ -279,7 +285,7 @@ type getFilesOpts = {
   forRemovingEditables?: boolean;
   forXmlMerging?: boolean;
   forPacking?: boolean;
-}
+};
 
 export function getFiles(wsPath: string, opts?: getFilesOpts): File[] {
   let files: File[] = [];

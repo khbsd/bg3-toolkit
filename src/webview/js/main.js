@@ -41,30 +41,6 @@
       msg: "converting loca files",
     },
     {
-      class: ".lsx",
-      listener: "mouseenter",
-      type: "text-button-lsx-mouseenter",
-      msg: ".lsx-button-highlight",
-    },
-    {
-      class: ".lsf",
-      listener: "mouseenter",
-      type: "text-button-lsf-mouseenter",
-      msg: ".lsf-button-highlight",
-    },
-    {
-      class: ".lsx",
-      listener: "mouseleave",
-      type: "text-button-lsx-mouseleave",
-      msg: ".lsx-button",
-    },
-    {
-      class: ".lsf",
-      listener: "mouseleave",
-      type: "text-button-lsf-mouseleave",
-      msg: ".lsf-button",
-    },
-    {
       class: ".debug",
       listener: "click",
       type: "debug",
@@ -77,7 +53,7 @@
   for (let i = 0; i < buttonInfo.length && !listenersAdded; i++) {
     let b = buttonInfo[i];
     document.querySelector(b.class).addEventListener(b.listener, () => {
-      vscode.postMessage({ type: b.type, message: b.msg });
+      vscode.postMessage(b);
     });
 
     listenersAdded = buttonInfo.length - 1 === i;
