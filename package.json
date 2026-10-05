@@ -81,7 +81,7 @@
       },
       {
         "command": "bg3-toolkit.xmlMerge",
-        "title": "Merge .xml files into one file."
+        "title": "Merge .xml files into one file"
       },
       {
         "command": "bg3-toolkit.addToXml",
