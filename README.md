@@ -11,7 +11,7 @@ file conversion and packing backend by [saghm](https://gitlab.com/saghm/xiba#rea
 icon component attribution:
 
 - square brackets ("[", "]"): https://github.com/tonsky/FiraCode, Fira Code OFL license
-- d20 vector: https://opensvg.dev/icons/action?prefix=fa-solid&icon=dice-d20, by dave gandy (c) CC BY 4.0
+- d20 vector: https://fontawesome.com/v5/icons/classic/solid/dice-d20 (c) CC BY 4.0 https://github.com/FortAwesome/Font-Awesome/blob/5.x/LICENSE.txt
 
 ## what:
 
@@ -28,6 +28,9 @@ here atm, but after more polishing and a few more features, on both ([open-vsx.o
 ## how:
 
 - workspace wide uuid/handle replacement
+- "add as handle" to xml file
+- xml merge support
+- multi-mod workspace support
 - conversion for \*.ls{b, bc, bs, f, fex, fx, x} files to and from editable and binary formats
 - pack and unpack mods
 

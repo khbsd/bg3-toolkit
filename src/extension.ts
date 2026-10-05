@@ -6,7 +6,10 @@ import { ToolkitWebviewViewProvider } from "./webview/webview";
 
 // icon attribution:
 // - square brackets ("[", "]"): https://github.com/tonsky/FiraCode, Fira Code OFL license
-// - d20 vector: https://opensvg.dev/icons/action?prefix=fa-solid&icon=dice-d20, by dave gandy (c) CC BY 4.0
+// - d20 vector: https://fontawesome.com/v5/icons/classic/solid/dice-d20 (c) CC BY 4.0 https://github.com/FortAwesome/Font-Awesome/blob/5.x/LICENSE.txt
+
+// TODO:
+// - webview console
 
 export async function activate(context: vscode.ExtensionContext) {
   let isModWorkspace: boolean = true;
@@ -39,4 +42,4 @@ export async function activate(context: vscode.ExtensionContext) {
   );
 }
 
-export function deactivate() {}
+export function deactivate() { }
