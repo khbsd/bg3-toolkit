@@ -4,13 +4,12 @@ import { EOL } from "os";
 import * as path from "path";
 import * as vscode from "vscode";
 import { Config } from "./config";
-import
-{
+import {
   File,
   FileFormats,
-    isEditable,
-    isLoca,
-    LsfCompressionFormats,
+  isEditable,
+  isLoca,
+  LsfCompressionFormats,
 } from "./ls-formats/formats";
 import { getSelectionOrCursorWord, getWorkspacePath } from "./ws";
 
@@ -150,8 +149,9 @@ export async function addHandleToXml(handle?: string, fileIndex?: number) {
   }
 
   if (xmlFile !== undefined) {
-    let lines = getLinesFromFileSync(xmlFile.path);
-    lines.splice(lines.length - 1, 0, handle);
+    let lines = stripOpeningClosingTags(getLinesFromFileSync(xmlFile.path));
+    lines.push(handle);
+    lines = addOpeningClosingTags(lines);
 
     fs.writeFile(xmlFile.path, lines.join(EOL), { flag: "w" }, (err) => {
       if (err) {
@@ -161,6 +161,47 @@ export async function addHandleToXml(handle?: string, fileIndex?: number) {
       console.log(xmlFile?.path + "saved");
     });
   }
+}
+
+export function stripOpeningClosingTags(lines: string[]): string[] {
+  let linesToDelete: number[] = [];
+
+  for (let i = 0; i < lines.length; i++) {
+    const line = lines[i].trim().toLowerCase();
+
+    for (const tag of xmlFileTags) {
+      const tagLower = tag.toLowerCase();
+      if (line.includes(tagLower)) {
+        if (line.toLowerCase() !== tagLower) {
+          let tmpLine = lines[i].replace(tagLower, "");
+          if (tmpLine === lines[i]) {
+            tmpLine = lines[i].replace(tag, "");
+          }
+          lines[i] = tmpLine;
+        } else {
+          linesToDelete.push(i);
+        }
+      }
+    }
+  }
+
+  for (const line of linesToDelete.toReversed()) {
+    console.log("removing line", line, lines[line]);
+    lines.splice(line, 1);
+  }
+
+  return lines;
+}
+
+export function addOpeningClosingTags(lines: string[]): string[] {
+  let openingTags: string[] = [
+    xmlFileTags[XmlTag.VersionEncoding],
+    xmlFileTags[XmlTag.OpenContentList],
+  ];
+  let closingTag: string[] = [
+    xmlFileTags[XmlTag.CloseContentList],
+  ];
+  return openingTags.concat(lines).concat(closingTag);
 }
 
 export function mergeXmlFiles(wsPath: string): boolean {
@@ -182,6 +223,7 @@ export function mergeXmlFiles(wsPath: string): boolean {
 
   files.forEach((file) => {
     lines.push("<!--" + file.name + "." + file.ext + "-->");
+    lines.push("");
     lines = lines.concat(getLinesFromFileSync(file.path));
   });
   lines = mergeXmlLines(lines);
@@ -214,25 +256,12 @@ export function mergedLocaExists(
 
 export function mergeXmlLines(lines: string[]): string[] {
   const conf: Config = new Config();
+  let mergedLines: string[] = [];
 
-  let mergedLines: string[] = [
-    xmlFileTags[XmlTag.VersionEncoding],
-    xmlFileTags[XmlTag.OpenContentList],
-  ];
+  lines = stripOpeningClosingTags(lines);
 
   for (let i = 0; i < lines.length; i++) {
     const line = lines[i].trim();
-
-    for (const tag of xmlFileTags) {
-      if (line.toLowerCase().includes(tag.toLowerCase())) {
-        if (line !== tag) {
-          lines[i] = lines[i].replace(tag, "");
-        } else {
-          lines[i] = "";
-        }
-      }
-    }
-
     if (
       !mergedLines.includes(lines[i]) ||
       conf.mergedLocalizationAllowDuplicates ||
@@ -241,12 +270,9 @@ export function mergeXmlLines(lines: string[]): string[] {
     ) {
       mergedLines.push(lines[i]);
     }
-
-    if (i === lines.length - 1) {
-      mergedLines.push(xmlFileTags[XmlTag.CloseContentList]);
-    }
   }
 
+  mergedLines = addOpeningClosingTags(mergedLines);
   return mergedLines;
 }
 
