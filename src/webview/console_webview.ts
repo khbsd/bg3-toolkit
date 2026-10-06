@@ -1,0 +1,197 @@
+import * as fs from "fs";
+import * as path from "path";
+import * as vscode from "vscode";
+
+import * as futils from "../utils/file";
+import { HtmlData, HtmlDataUtils } from "../utils/html";
+import { FileFormats } from "../utils/ls-formats/formats";
+import { convertAll, pack } from "../utils/ls-formats/junction";
+import { Unpak } from "../utils/ls-formats/pak";
+import { getWorkspacePath } from "../utils/ws";
+
+export class ConsoleWebviewViewProvider implements vscode.WebviewViewProvider {
+  public static readonly viewType = "toolkitWebviewView";
+  private _view?: vscode.WebviewView;
+  isModWorkspace: boolean;
+
+  constructor(
+    private readonly _extensionUri: vscode.Uri,
+    isModWorkspace?: boolean,
+  ) {
+    this.isModWorkspace = isModWorkspace ?? true;
+  }
+
+  public resolveWebviewView(
+    webviewView: vscode.WebviewView,
+    _context: vscode.WebviewViewResolveContext,
+    _token: vscode.CancellationToken,
+  ) {
+    this._view = webviewView;
+
+    this._view.webview.options = {
+      enableScripts: true,
+
+      localResourceRoots: [this._extensionUri],
+    };
+
+    this._view.webview.html = this._getHtmlForWebview(this._view.webview);
+
+    this._view.webview.onDidReceiveMessage(async (data) => {
+      console.log("message recieved: ", data.msg);
+
+      const type: FileFormats =
+        FileFormats[data.type as keyof typeof FileFormats];
+      if (data.type === "unpack") {
+        let pakPath: string | undefined;
+        let unpakPath: string | undefined;
+        while (pakPath === undefined) {
+          pakPath = await vscode.window
+            .showOpenDialog({
+              canSelectFiles: true,
+              canSelectFolders: false,
+              canSelectMany: false,
+              filters: { "PAK Files": ["pak"] },
+              title: "Select a .pak file to unpack",
+            })
+            .then((p) => p?.toString());
+
+          if (pakPath === undefined) {
+            let warning;
+            await vscode.window
+              .showWarningMessage(
+                "You must select a pak!",
+                "oops",
+                "never mind",
+              )
+              .then((value) => {
+                warning = value;
+              });
+            if (warning !== "oops") {
+              return;
+            }
+          }
+        }
+        while (unpakPath === undefined) {
+          unpakPath = await vscode.window
+            .showOpenDialog({
+              canSelectFiles: false,
+              canSelectFolders: true,
+              canSelectMany: false,
+              title: "Select a location to unpack to",
+            })
+            .then((p) => p?.toString());
+
+          if (unpakPath === undefined) {
+            let warning;
+            await vscode.window
+              .showWarningMessage(
+                "You must select a destination!",
+                "oops",
+                "never mind",
+              )
+              .then((value) => {
+                warning = value;
+              });
+
+            if (warning !== "oops") {
+              return;
+            }
+          }
+        }
+
+        let unpak = new Unpak(pakPath, unpakPath);
+        await unpak.unpack();
+        return;
+      } else if (data.type === "debug") {
+        let xmls = futils.getFiles(getWorkspacePath(), {
+          type: FileFormats[FileFormats.xml],
+        });
+        console.log(
+          xmls.forEach((file) => {
+            console.log(file.name, fs.statSync(file.path).mtimeMs);
+          }),
+        );
+      } else if (type === FileFormats.pak) {
+        pack()
+      } else if (type !== FileFormats.count && type !== FileFormats.none) {
+        convertAll(getWorkspacePath(), type);
+      } else {
+        console.log("unrecognized type");
+      }
+    });
+  }
+
+  private _getHtmlForWebview(webview: vscode.Webview) {
+    const wv: vscode.Webview = webview;
+    const hd: HtmlDataUtils = new HtmlDataUtils();
+    const nonce = hd.getNonce();
+    let htmlUri: string;
+
+    // file to read html from
+    if (!this.isModWorkspace) {
+      htmlUri = path.resolve(
+        __dirname,
+        "..",
+        "..",
+        "src",
+        "webview",
+        "html",
+        "no_mod_workspace.html",
+      );
+    } else {
+      htmlUri = path.resolve(
+        __dirname,
+        "..",
+        "..",
+        "src",
+        "webview",
+        "html",
+        "main.html",
+      );
+    }
+
+    // path to js script
+    const scriptUri = wv.asWebviewUri(
+      vscode.Uri.joinPath(
+        this._extensionUri,
+        "src",
+        "webview",
+        "js",
+        "main.js",
+      ),
+    );
+
+    // path to css file
+    const styleMainUri = wv.asWebviewUri(
+      vscode.Uri.joinPath(
+        this._extensionUri,
+        "src",
+        "webview",
+        "css",
+        "main.css",
+      ),
+    );
+
+    // content security policy or whatever. who cares.
+    const csp = wv.cspSource;
+
+    // make this data into an array for hd.getObjs()
+    const data: string[] = [];
+    {
+      data[HtmlData.Nonce] = nonce;
+      data[HtmlData.ScriptSrc] = scriptUri.toString();
+      data[HtmlData.StyleSrc] = styleMainUri.toString();
+      data[HtmlData.CspSrc] = csp;
+      data[HtmlData.WorkspacePath] = getWorkspacePath();
+    }
+
+    let html = "";
+    try {
+      html = fs.readFileSync(htmlUri.toString()).toString();
+    } catch (err) {
+      console.log(err);
+      return "";
+    }
+    return hd.formatHtml(html, data);
+  }
+}

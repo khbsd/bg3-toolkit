@@ -51,12 +51,17 @@ export class Pak extends ConvertCommon {
       this.vscode.window.showInformationMessage(name + " packed!");
 
       let installPath: string = this.conf.installedModsPath;
+      let verb: string = "copied";
       if (installPath.length > 0) {
         installPath = path.join(installPath, name);
         fs.copyFileSync(modDestPath, installPath);
+        if (this.conf.copyOrMoveOnPak === "move") {
+          fs.rmSync(modDestPath);
+          verb = "moved";
+        }
 
         this.vscode.window.showInformationMessage(
-          name + " copied to " + installPath,
+          name + " " + verb + " to " + installPath,
         );
       }
     } catch (err) {

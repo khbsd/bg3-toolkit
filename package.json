@@ -124,7 +124,14 @@
         "bg3-toolkit.installedModsPath": {
           "type": "string",
           "default": "",
-          "description": "location of your installed mods. if supplied, this extension will attempt to copy any mods you pack up into the installed mods folder, replacing any files of the same name.\n!! if left blank, will do nothing."
+          "description": "location of your installed mods. if supplied, this extension will attempt to copy any mods you pack up into the installed mods folder, replacing any files of the same name.\n!! does nothing if left blank."
+        },
+        "bg3-toolkit.copyOrMoveOnPak": {
+          "type":"string",
+          "enum": ["copy", "move"],
+          "markdownEnumDescriptions": ["copy the packed mod to the location in `installed mods path`", "move the packed mod to the location in `installed mods path`"],
+          "default": "copy",
+          "description": "controls whether the extension copies or moves a newly created pack to the location listed in `installed mods path.`\n!! does nothing if the `installed mods path` setting is left blank."
         },
         "bg3-toolkit.mergedLocalizationName": {
           "type": "string",

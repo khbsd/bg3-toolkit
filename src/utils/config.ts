@@ -15,6 +15,7 @@ export class Config extends Object {
   customModPath: string = "";
   gameDataPath: string = "";
   installedModsPath: string = "";
+  copyOrMoveOnPak: string = "";
   mergedLocalizationName: string = "";
   mergedLocalizationAllowDuplicates: boolean = false;
 
