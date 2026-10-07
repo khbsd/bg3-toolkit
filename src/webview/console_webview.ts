@@ -164,6 +164,8 @@ export function consoleWebviewLog(args: string | string[] | any): void {
     text = args.join(" ");
   } else if (typeof args === "string") {
     text = args;
+  } else if (typeof args === "object"){
+    text = JSON.stringify(args);
   } else {
     text = args.toString();
   }

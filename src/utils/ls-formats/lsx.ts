@@ -1,6 +1,6 @@
 import * as fs from "fs";
+import { consoleWebviewLog } from "../../webview/console_webview";
 import { ConvertCommon, File, FileFormats } from "./formats";
-import { consoleWebviewLog } from "../../webview/console_webview"
 
 export class Lsx extends ConvertCommon {
   constructor(wsPath: string, modPath?: string | undefined) {
