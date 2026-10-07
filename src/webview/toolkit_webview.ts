@@ -2,12 +2,12 @@ import * as fs from "fs";
 import * as path from "path";
 import * as vscode from "vscode";
 
-import * as futils from "../utils/file";
 import { HtmlData, HtmlDataUtils } from "../utils/html";
 import { FileFormats } from "../utils/ls-formats/formats";
 import { convertAll, pack } from "../utils/ls-formats/junction";
 import { Unpak } from "../utils/ls-formats/pak";
 import { getWorkspacePath } from "../utils/ws";
+import { consoleWebviewLog } from "./console_webview";
 
 export class ToolkitWebviewViewProvider implements vscode.WebviewViewProvider {
   public static readonly viewType = "toolkitWebviewView";
@@ -37,7 +37,7 @@ export class ToolkitWebviewViewProvider implements vscode.WebviewViewProvider {
     this._view.webview.html = this._getHtmlForWebview(this._view.webview);
 
     this._view.webview.onDidReceiveMessage(async (data) => {
-      console.log("message recieved: ", data.msg);
+      consoleWebviewLog(["message recieved:", data.msg]);
 
       const type: FileFormats =
         FileFormats[data.type as keyof typeof FileFormats];
@@ -103,20 +103,13 @@ export class ToolkitWebviewViewProvider implements vscode.WebviewViewProvider {
         await unpak.unpack();
         return;
       } else if (data.type === "debug") {
-        let xmls = futils.getFiles(getWorkspacePath(), {
-          type: FileFormats[FileFormats.xml],
-        });
-        console.log(
-          xmls.forEach((file) => {
-            console.log(file.name, fs.statSync(file.path).mtimeMs);
-          }),
-        );
+        consoleWebviewLog(data.msg);
       } else if (type === FileFormats.pak) {
-        pack()
+        pack();
       } else if (type !== FileFormats.count && type !== FileFormats.none) {
         convertAll(getWorkspacePath(), type);
       } else {
-        console.log("unrecognized type");
+        consoleWebviewLog("unrecognized type");
       }
     });
   }
@@ -146,7 +139,7 @@ export class ToolkitWebviewViewProvider implements vscode.WebviewViewProvider {
         "src",
         "webview",
         "html",
-        "main.html",
+        "toolkit.html",
       );
     }
 
@@ -157,7 +150,7 @@ export class ToolkitWebviewViewProvider implements vscode.WebviewViewProvider {
         "src",
         "webview",
         "js",
-        "main.js",
+        "toolkit.js",
       ),
     );
 
@@ -168,7 +161,7 @@ export class ToolkitWebviewViewProvider implements vscode.WebviewViewProvider {
         "src",
         "webview",
         "css",
-        "main.css",
+        "toolkit.css",
       ),
     );
 
@@ -189,7 +182,7 @@ export class ToolkitWebviewViewProvider implements vscode.WebviewViewProvider {
     try {
       html = fs.readFileSync(htmlUri.toString()).toString();
     } catch (err) {
-      console.log(err);
+      consoleWebviewLog(err);
       return "";
     }
     return hd.formatHtml(html, data);

@@ -3,6 +3,7 @@ import { Registrar } from "./registrar/registrar";
 import { getModPath } from "./utils/file";
 import { getWorkspacePath } from "./utils/ws";
 import { ToolkitWebviewViewProvider } from "./webview/toolkit_webview";
+import { ConsoleWebviewViewProvider } from "./webview/console_webview";
 
 // icon attribution:
 // - square brackets ("[", "]"): https://github.com/tonsky/FiraCode, Fira Code OFL license
@@ -30,7 +31,7 @@ export async function activate(context: vscode.ExtensionContext) {
   }
 
   // webview
-  let wvToolkit = new ToolkitWebviewViewProvider(
+  const wvToolkit = new ToolkitWebviewViewProvider(
     context.extensionUri,
     isModWorkspace,
   );
@@ -40,6 +41,17 @@ export async function activate(context: vscode.ExtensionContext) {
       wvToolkit,
     ),
   );
+  const csToolkit = new ConsoleWebviewViewProvider(
+    context.extensionUri,
+    isModWorkspace,
+  );
+  context.subscriptions.push(
+    vscode.window.registerWebviewViewProvider(
+      ConsoleWebviewViewProvider.viewType,
+      csToolkit,
+    ),
+  );
+
 }
 
 export function deactivate() { }

@@ -1,4 +1,6 @@
 import * as vscode from "vscode";
+import { consoleWebviewLog } from "../../webview/console_webview";
+
 
 export class Command {
   get(): vscode.Disposable {
@@ -6,7 +8,7 @@ export class Command {
       "bg3-toolkit.hrtRemind",
       () => {
         vscode.window.showInformationMessage("take ya hrt weirdo");
-        console.log("hi");
+        consoleWebviewLog("hi");
       },
     );
     return disposable;

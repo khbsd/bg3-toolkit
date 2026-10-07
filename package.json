@@ -212,6 +212,13 @@
           "icon": "",
           "id": "toolkitWebviewView",
           "name": "toolkit"
+        },
+        {
+          "type": "webview",
+          "icon": "",
+          "id": "consoleWebviewView",
+          "name": "console",
+          "visibility":"hidden"
         }
       ]
     },

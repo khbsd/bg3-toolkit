@@ -7,6 +7,8 @@ import { ConvertCommon, FileFormats } from "./formats";
 import { Xml } from "./loca_xml";
 import { Lsx } from "./lsx";
 
+import { consoleWebviewLog } from "../../webview/console_webview";
+
 function convertFilesForPacking(wsPath: string): void {
   new Lsx(wsPath).convertModDir();
   new Xml(wsPath).convertModDir();
@@ -33,11 +35,11 @@ export class Pak extends ConvertCommon {
         this.modPath,
         file.path,
       );
-      console.log("adding file: ", relPath);
+      consoleWebviewLog("adding file: " + relPath);
       try {
         builder.add_file(relPath, new Uint8Array(fContents));
       } catch (err) {
-        console.log(err);
+        consoleWebviewLog(err);
       }
     }
 
@@ -60,12 +62,15 @@ export class Pak extends ConvertCommon {
           verb = "moved";
         }
 
+        let consoleText = name + " " + verb + " to " + installPath;
+
+        consoleWebviewLog(consoleText);
         this.vscode.window.showInformationMessage(
-          name + " " + verb + " to " + installPath,
+          consoleText,
         );
       }
     } catch (err) {
-      console.log(err);
+      consoleWebviewLog(err);
     }
   }
 }
@@ -87,13 +92,13 @@ export class Unpak {
     }
     let unpacked: lsPak.ModFile[];
 
-    console.log(".pak file found at " + this.wsPath + ", unpacking");
+    consoleWebviewLog(".pak file found at " + this.wsPath + ", unpacking");
 
     try {
       unpacked = lsPak.unpack(fs.readFileSync(this.wsPath));
-      console.log(unpacked);
+      consoleWebviewLog(unpacked);
     } catch (err) {
-      console.log(err);
+      consoleWebviewLog(err);
       return;
     }
 
@@ -101,13 +106,13 @@ export class Unpak {
       let fullPath: string = path.join(this.unpakPath, file.extract_path());
       try {
         fs.mkdir(path.resolve(fullPath, ".."), { recursive: true }, (err) => {
-          console.log(err);
+          consoleWebviewLog(err);
         });
         fs.writeFile(fullPath, Buffer.from(file.extract_contents()), (err) => {
-          console.log(err);
+          consoleWebviewLog(err);
         });
       } catch (err) {
-        console.log(err);
+        consoleWebviewLog(err);
       }
     }
   }

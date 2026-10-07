@@ -5,6 +5,7 @@ export enum HtmlData {
   StyleSrc,
   CspSrc,
   WorkspacePath,
+  LogText,
   count,
 }
 

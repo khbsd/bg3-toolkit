@@ -1,5 +1,6 @@
 import * as fs from "fs";
 import { ConvertCommon, File, FileFormats } from "./formats";
+import { consoleWebviewLog } from "../../webview/console_webview";
 
 export class Xml extends ConvertCommon {
   constructor(wsPath: string, modPath?: string | undefined) {
@@ -16,9 +17,9 @@ export class Xml extends ConvertCommon {
       fs.writeFileSync(f.out_path, Buffer.from(outContents), {
         flag: "w",
       });
-      console.log("wrote loca file: ", f.out_path);
+      consoleWebviewLog("wrote loca file: " + f.out_path);
     } catch (err) {
-      console.log(err);
+      consoleWebviewLog(err);
     }
   }
 }
@@ -38,9 +39,9 @@ export class Loca extends ConvertCommon {
       fs.writeFileSync(f.out_path, outContents, {
         flag: "w",
       });
-      console.log("wrote xml file: ", f.out_path);
+      consoleWebviewLog("wrote xml file: " + f.out_path);
     } catch (err) {
-      console.log(err);
+      consoleWebviewLog(err);
     }
   }
 }

@@ -2,6 +2,7 @@ import * as path from "path";
 import * as vscode from "vscode";
 import { Config } from "./config";
 import * as futils from "./file";
+import { consoleWebviewLog } from "../webview/console_webview";
 
 /**
  * returns your workspace path. if you have set a value for the "custom mod path" setting, will return that instead
@@ -12,7 +13,7 @@ export function getWorkspacePath(short: boolean = false): string {
   let wsPath = "";
   const conf: Config = new Config();
   if (conf.customModPath.length > 0) {
-    console.log(conf.customModPath);
+    consoleWebviewLog(conf.customModPath);
     wsPath = conf.customModPath;
   } else {
     if (
@@ -59,7 +60,7 @@ export async function replaceInFiles(
 
   if (await vscode.workspace.applyEdit(edit)) {
     editedDocs.forEach(async (doc) => {
-      console.log(doc.fileName, " saved");
+      consoleWebviewLog(doc.fileName + " saved");
       doc.save();
     });
   }
@@ -68,7 +69,7 @@ export async function replaceInFiles(
 // keeping because this might be nice to have later, though idk for what
 export async function sleep(time: number): Promise<void> {
   return new Promise((resolve) => {
-    console.log("waiting for: " + time + "ms");
+    consoleWebviewLog("waiting for: " + time + "ms");
     setTimeout(resolve, time);
   });
 }

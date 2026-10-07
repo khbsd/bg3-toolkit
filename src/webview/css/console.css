@@ -1,0 +1,62 @@
+body {
+  width: 88%;
+  overflow: hidden;
+  align-items: center;
+  justify-content: center;
+  counter-reset: log-line 0;
+}
+
+button {
+  color: var(--vscode-button-foreground);
+  border-radius: 0.4rem;
+  border-style: solid;
+  font-family: var(--vscode-editor-font-family);
+  font-size: var(--vscode-editor-font-weight);
+  font-weight: var(--vscode-editor-font-size);
+  height: 1.875rem;
+  width: 50%;
+  min-width: 5%;
+  display: inline;
+  background-color: var(--vscode-button-background);
+} button:hover {
+  background-color: var(--vscode-button-hoverBackground);
+  cursor: pointer;
+}
+
+p {
+  display: inline;
+}
+
+li {
+  list-style-type: none;
+}
+
+.console {
+  background-color: var(--vscode-titleBar-activeBackground);
+  overflow-y: scroll;
+  overflow-x: visible;
+  overflow-wrap:anywhere;
+  font-family: monospace;
+  max-height: 25rem;
+  min-height: 25rem;
+  border-color: var(--vscode-titleBar-activeBackground);
+  border-style: solid;
+  border-radius: 0.4rem;
+  border-width: 0.15rem;
+  padding: 1rem;
+}
+
+.line:hover::before {
+  color: var(--vscode-button-hoverBackground);
+}
+
+.line::before {
+  counter-increment: log-line;
+  content: counter(log-line);
+  color: var(--vscode-button-background);
+  padding-right: 0.75rem;
+}
+
+.copy-button, .clear-button {
+  width: 100%;
+}

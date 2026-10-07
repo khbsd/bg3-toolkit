@@ -2,23 +2,35 @@ import * as fs from "fs";
 import * as path from "path";
 import * as vscode from "vscode";
 
-import * as futils from "../utils/file";
+import { EOL } from "os";
 import { HtmlData, HtmlDataUtils } from "../utils/html";
-import { FileFormats } from "../utils/ls-formats/formats";
-import { convertAll, pack } from "../utils/ls-formats/junction";
-import { Unpak } from "../utils/ls-formats/pak";
 import { getWorkspacePath } from "../utils/ws";
 
+let webview: ConsoleWebviewViewProvider | undefined = undefined;
+const openingText = "hi !! i love you!";
+const consoleTags: string[] = [
+  '<p class="line">',
+  "</p>",
+  "<br>"
+];
+const enum ConsoleTags {
+  OpenPTag,
+  ClosePTag,
+  LineBreak
+}
+
 export class ConsoleWebviewViewProvider implements vscode.WebviewViewProvider {
-  public static readonly viewType = "toolkitWebviewView";
+  public static readonly viewType = "consoleWebviewView";
   private _view?: vscode.WebviewView;
   isModWorkspace: boolean;
+  consoleText: string;
 
   constructor(
     private readonly _extensionUri: vscode.Uri,
     isModWorkspace?: boolean,
   ) {
     this.isModWorkspace = isModWorkspace ?? true;
+    this.consoleText = openingText;
   }
 
   public resolveWebviewView(
@@ -27,101 +39,34 @@ export class ConsoleWebviewViewProvider implements vscode.WebviewViewProvider {
     _token: vscode.CancellationToken,
   ) {
     this._view = webviewView;
-
     this._view.webview.options = {
       enableScripts: true,
-
       localResourceRoots: [this._extensionUri],
     };
-
     this._view.webview.html = this._getHtmlForWebview(this._view.webview);
+
+    webview = this;
 
     this._view.webview.onDidReceiveMessage(async (data) => {
       console.log("message recieved: ", data.msg);
-
-      const type: FileFormats =
-        FileFormats[data.type as keyof typeof FileFormats];
-      if (data.type === "unpack") {
-        let pakPath: string | undefined;
-        let unpakPath: string | undefined;
-        while (pakPath === undefined) {
-          pakPath = await vscode.window
-            .showOpenDialog({
-              canSelectFiles: true,
-              canSelectFolders: false,
-              canSelectMany: false,
-              filters: { "PAK Files": ["pak"] },
-              title: "Select a .pak file to unpack",
-            })
-            .then((p) => p?.toString());
-
-          if (pakPath === undefined) {
-            let warning;
-            await vscode.window
-              .showWarningMessage(
-                "You must select a pak!",
-                "oops",
-                "never mind",
-              )
-              .then((value) => {
-                warning = value;
-              });
-            if (warning !== "oops") {
-              return;
-            }
+      if (data.type === "copy" && this.consoleText !== openingText) {
+        let cbText = this.consoleText;
+        consoleTags.forEach((tag) => {
+          if (tag === consoleTags[ConsoleTags.ClosePTag]) {
+            cbText = cbText.replaceAll(tag, EOL);
+          } else {
+            cbText = cbText.replaceAll(tag, "");
           }
-        }
-        while (unpakPath === undefined) {
-          unpakPath = await vscode.window
-            .showOpenDialog({
-              canSelectFiles: false,
-              canSelectFolders: true,
-              canSelectMany: false,
-              title: "Select a location to unpack to",
-            })
-            .then((p) => p?.toString());
-
-          if (unpakPath === undefined) {
-            let warning;
-            await vscode.window
-              .showWarningMessage(
-                "You must select a destination!",
-                "oops",
-                "never mind",
-              )
-              .then((value) => {
-                warning = value;
-              });
-
-            if (warning !== "oops") {
-              return;
-            }
-          }
-        }
-
-        let unpak = new Unpak(pakPath, unpakPath);
-        await unpak.unpack();
-        return;
-      } else if (data.type === "debug") {
-        let xmls = futils.getFiles(getWorkspacePath(), {
-          type: FileFormats[FileFormats.xml],
         });
-        console.log(
-          xmls.forEach((file) => {
-            console.log(file.name, fs.statSync(file.path).mtimeMs);
-          }),
-        );
-      } else if (type === FileFormats.pak) {
-        pack()
-      } else if (type !== FileFormats.count && type !== FileFormats.none) {
-        convertAll(getWorkspacePath(), type);
-      } else {
-        console.log("unrecognized type");
+        vscode.env.clipboard.writeText(cbText);
+      } else if (data.type === "clear") {
+        this.consoleText = openingText;
+        this.updateConsoleText();
       }
     });
   }
 
-  private _getHtmlForWebview(webview: vscode.Webview) {
+  private _getHtmlForWebview(webview: vscode.Webview,) {
     const wv: vscode.Webview = webview;
     const hd: HtmlDataUtils = new HtmlDataUtils();
     const nonce = hd.getNonce();
@@ -146,7 +91,7 @@ export class ConsoleWebviewViewProvider implements vscode.WebviewViewProvider {
         "src",
         "webview",
         "html",
-        "main.html",
+        "console.html",
       );
     }
 
@@ -157,7 +102,7 @@ export class ConsoleWebviewViewProvider implements vscode.WebviewViewProvider {
         "src",
         "webview",
         "js",
-        "main.js",
+        "console.js",
       ),
     );
 
@@ -168,7 +113,7 @@ export class ConsoleWebviewViewProvider implements vscode.WebviewViewProvider {
         "src",
         "webview",
         "css",
-        "main.css",
+        "console.css",
       ),
     );
 
@@ -183,6 +128,7 @@ export class ConsoleWebviewViewProvider implements vscode.WebviewViewProvider {
       data[HtmlData.StyleSrc] = styleMainUri.toString();
       data[HtmlData.CspSrc] = csp;
       data[HtmlData.WorkspacePath] = getWorkspacePath();
+      data[HtmlData.LogText] = this.consoleText;
     }
 
     let html = "";
@@ -194,4 +140,34 @@ export class ConsoleWebviewViewProvider implements vscode.WebviewViewProvider {
     }
     return hd.formatHtml(html, data);
   }
+
+  public updateConsoleText(text?: string): void {
+    if (text !== undefined) {
+      text = '<p class="line">' + text + "</p>";
+      if (this.consoleText === openingText) {
+        this.consoleText = text;
+      } else {
+        this.consoleText = this.consoleText.concat("<br>" + text);
+      }
+    }
+
+    if (this._view !== undefined) {
+      this._view.webview.html = this._getHtmlForWebview(this._view.webview);
+    }
+  }
+}
+
+export function consoleWebviewLog(args: string | string[] | any): void {
+  let text: string = "";
+
+  if (Array.isArray(args)) {
+    text = args.join(" ");
+  } else if (typeof args === "string") {
+    text = args;
+  } else {
+    text = args.toString();
+  }
+
+  webview?.updateConsoleText(text);
+  console.log(text);
 }

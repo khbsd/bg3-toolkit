@@ -12,6 +12,7 @@ import {
   LsfCompressionFormats,
 } from "./ls-formats/formats";
 import { getSelectionOrCursorWord, getWorkspacePath } from "./ws";
+import { consoleWebviewLog } from "../webview/console_webview";
 
 const enum XmlTag {
   VersionEncoding,
@@ -92,7 +93,7 @@ export function isModPath(path: string): boolean {
   let files = fs.readdirSync(path);
 
   for (let file in files) {
-    console.log(file);
+    consoleWebviewLog(file);
     hasMetaLsx = file.toLowerCase().includes("meta.lsx");
     if (hasMetaLsx) {
       break;
@@ -103,8 +104,8 @@ export function isModPath(path: string): boolean {
 }
 
 export function getModName(modPath: string): string {
-  console.log("getting mod name from mod path: ", modPath);
-  console.log(modPath.split(path.sep).at(-1));
+  consoleWebviewLog(["getting mod name from mod path: ", modPath]);
+  consoleWebviewLog(modPath.split(path.sep).at(-1));
   return modPath.split(path.sep).at(-1) ?? "";
 }
 
@@ -155,10 +156,10 @@ export async function addHandleToXml(handle?: string, fileIndex?: number) {
 
     fs.writeFile(xmlFile.path, lines.join(EOL), { flag: "w" }, (err) => {
       if (err) {
-        console.log(err);
+        consoleWebviewLog(err);
         return;
       }
-      console.log(xmlFile?.path + "saved");
+      consoleWebviewLog(xmlFile?.path + "saved");
     });
   }
 }
@@ -186,7 +187,7 @@ export function stripOpeningClosingTags(lines: string[]): string[] {
   }
 
   for (const line of linesToDelete.toReversed()) {
-    console.log("removing line", line, lines[line]);
+    consoleWebviewLog(["removing line", line, lines[line]]);
     lines.splice(line, 1);
   }
 
@@ -319,7 +320,6 @@ export function getFiles(wsPath: string, opts?: getFilesOpts): File[] {
   let type = opts?.type ?? "";
   let conf = opts?.conf ?? new Config();
 
-  console.log(conf);
   wsPath = fixPath(wsPath);
 
   let dirents = fs.readdirSync(wsPath, {
@@ -328,7 +328,7 @@ export function getFiles(wsPath: string, opts?: getFilesOpts): File[] {
   });
 
   if (conf.mergedLocalizationName.length > 0 && opts?.forPacking) {
-    console.log("removing non-merged loca files");
+    consoleWebviewLog("removing non-merged loca files");
     dirents = filterLocalizations(dirents);
   }
 
@@ -409,7 +409,7 @@ export function getFiles(wsPath: string, opts?: getFilesOpts): File[] {
 
     if (pathOk) {
       files.push(new File(path.join(entry.parentPath, entry.name)));
-      console.log("added", entry.name);
+      consoleWebviewLog(["added", entry.name]);
     }
   }
 
@@ -433,7 +433,7 @@ export function getLinesFromFileSync(filePath: string): string[] {
 
   // length of 1 means nothing was split
   if (lines.length === 1) {
-    console.log("trying unix newlines");
+    consoleWebviewLog("trying unix newlines");
     lines = text.split("\n");
   }
 

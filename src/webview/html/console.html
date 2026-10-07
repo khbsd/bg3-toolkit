@@ -1,0 +1,19 @@
+<!DOCTYPE html>
+<html lang="en">
+    <head>
+        <meta charset="UTF-8">
+        <meta http-equiv="Content-Security-Policy" content="default-src 'none'; style-src ${CspSrc}; script-src 'nonce-${Nonce}';">
+
+        <meta name="viewport" content="width=device-width, initial-scale=1.0">
+        <link href="${StyleSrc}" rel="stylesheet">
+    </head>
+    <body>
+        <div class="console">${LogText}</div>
+
+        <br>
+
+        <button class="copy-button">COPY</button>
+        <button class="clear-button">CLEAR</button>
+        <script nonce="${Nonce}" src="${ScriptSrc}"></script>
+    </body>
+</html>
