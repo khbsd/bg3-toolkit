@@ -1,9 +1,10 @@
+import * as fs from "fs";
 import * as vscode from "vscode";
 import { Registrar } from "./registrar/registrar";
 import { getModPath } from "./utils/file";
-import { getWorkspacePath } from "./utils/ws";
+import { getWorkspacePath, sleep } from "./utils/ws";
+import { consoleWebviewLog, ConsoleWebviewViewProvider } from "./webview/console_webview";
 import { ToolkitWebviewViewProvider } from "./webview/toolkit_webview";
-import { ConsoleWebviewViewProvider } from "./webview/console_webview";
 
 // icon attribution:
 // - square brackets ("[", "]"): https://github.com/tonsky/FiraCode, Fira Code OFL license
@@ -11,9 +12,17 @@ import { ConsoleWebviewViewProvider } from "./webview/console_webview";
 
 
 export async function activate(context: vscode.ExtensionContext) {
-  let isModWorkspace: boolean = true;
+  let isModWorkspace: boolean = false;
   try {
-    getModPath(getWorkspacePath());
+    const dirs = fs.readdirSync(getWorkspacePath(), { withFileTypes: true, recursive: true });
+
+    for (const dir of dirs) {
+      isModWorkspace = dir.name.toLowerCase() === "meta.lsx";
+      if (isModWorkspace) {
+        break;
+      }
+    }
+
   } catch (err) {
     isModWorkspace = false;
   }
@@ -40,18 +49,17 @@ export async function activate(context: vscode.ExtensionContext) {
     ),
   );
 
-  // console webview
-  const csToolkit = new ConsoleWebviewViewProvider(
-    context.extensionUri,
-    isModWorkspace,
-  );
-  context.subscriptions.push(
-    vscode.window.registerWebviewViewProvider(
-      ConsoleWebviewViewProvider.viewType,
-      csToolkit,
-    ),
-  );
-
+  if (isModWorkspace) {
+    // console webview
+    const csToolkit = new ConsoleWebviewViewProvider(
+      context.extensionUri);
+    context.subscriptions.push(
+      vscode.window.registerWebviewViewProvider(
+        ConsoleWebviewViewProvider.viewType,
+        csToolkit,
+      ),
+    );
+  }
 }
 
 export function deactivate() { }

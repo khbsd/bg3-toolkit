@@ -4,9 +4,9 @@ import * as vscode from "vscode";
 
 import { EOL } from "os";
 import * as util from "util";
+import { Config } from "../utils/config";
 import { HtmlData, HtmlDataUtils } from "../utils/html";
 import { getWorkspacePath } from "../utils/ws";
-import { Config } from "../utils/config";
 
 let webview: ConsoleWebviewViewProvider | undefined = undefined;
 const openingText = "hi !! i love you!";
@@ -24,14 +24,11 @@ const enum ConsoleTags {
 export class ConsoleWebviewViewProvider implements vscode.WebviewViewProvider {
   public static readonly viewType = "consoleWebviewView";
   private _view?: vscode.WebviewView;
-  isModWorkspace: boolean;
   consoleText: string;
 
   constructor(
-    private readonly _extensionUri: vscode.Uri,
-    isModWorkspace?: boolean,
+    private readonly _extensionUri: vscode.Uri
   ) {
-    this.isModWorkspace = isModWorkspace ?? true;
     this.consoleText = openingText;
   }
 
@@ -70,31 +67,19 @@ export class ConsoleWebviewViewProvider implements vscode.WebviewViewProvider {
   private _getHtmlForWebview(webview: vscode.Webview,) {
     const wv: vscode.Webview = webview;
     const hd: HtmlDataUtils = new HtmlDataUtils();
-    const nonce = hd.getNonce();
-    let htmlUri: string;
 
+    const nonce = hd.getNonce();
+    
     // file to read html from
-    if (!this.isModWorkspace) {
-      htmlUri = path.resolve(
-        __dirname,
-        "..",
-        "..",
-        "src",
-        "webview",
-        "html",
-        "no_mod_workspace.html",
-      );
-    } else {
-      htmlUri = path.resolve(
-        __dirname,
-        "..",
-        "..",
-        "src",
-        "webview",
-        "html",
-        "console.html",
-      );
-    }
+    const htmlUri = path.resolve(
+      __dirname,
+      "..",
+      "..",
+      "src",
+      "webview",
+      "html",
+      "console.html",
+    );
 
     // path to js script
     const scriptUri = wv.asWebviewUri(

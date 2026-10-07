@@ -3,6 +3,7 @@ import { FileHandle } from "fs/promises";
 import { EOL } from "os";
 import * as path from "path";
 import * as vscode from "vscode";
+import { consoleWebviewLog } from "../webview/console_webview";
 import { Config } from "./config";
 import {
   File,
@@ -12,7 +13,6 @@ import {
   LsfCompressionFormats,
 } from "./ls-formats/formats";
 import { getSelectionOrCursorWord, getWorkspacePath } from "./ws";
-import { consoleWebviewLog } from "../webview/console_webview";
 
 const enum XmlTag {
   VersionEncoding,
