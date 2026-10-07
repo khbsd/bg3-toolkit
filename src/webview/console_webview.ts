@@ -160,6 +160,8 @@ export class ConsoleWebviewViewProvider implements vscode.WebviewViewProvider {
 export function consoleWebviewLog(args: string | string[] | any): void {
   let text: string = "";
 
+  console.log(args);
+
   if (Array.isArray(args)) {
     text = args.join(" ");
   } else if (typeof args === "string") {
@@ -171,5 +173,4 @@ export function consoleWebviewLog(args: string | string[] | any): void {
   }
 
   webview?.updateConsoleText(text);
-  console.log(text);
 }

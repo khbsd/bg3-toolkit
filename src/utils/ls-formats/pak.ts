@@ -81,7 +81,7 @@ export class Unpak {
   unpakPath: string;
   constructor(wsPath: string, unpakPath?: string) {
     this.wsPath = futils.fixPath(wsPath);
-    this.unpakPath = unpakPath ?? path.resolve(this.wsPath, "..");
+    this.unpakPath = futils.fixPath(unpakPath ?? path.resolve(this.wsPath, ".."));
   }
 
   public async unpack(): Promise<void> {
@@ -90,13 +90,12 @@ export class Unpak {
     ) {
       return;
     }
-    let unpacked: lsPak.ModFile[];
 
     consoleWebviewLog(".pak file found at " + this.wsPath + ", unpacking");
 
+    let unpacked: lsPak.ModFile[];
     try {
       unpacked = lsPak.unpack(fs.readFileSync(this.wsPath));
-      consoleWebviewLog(unpacked);
     } catch (err) {
       consoleWebviewLog(err);
       return;
@@ -104,16 +103,19 @@ export class Unpak {
 
     for (const file of unpacked) {
       let fullPath: string = path.join(this.unpakPath, file.extract_path());
-      try {
-        fs.mkdir(path.resolve(fullPath, ".."), { recursive: true }, (err) => {
+      fs.mkdir(path.resolve(fullPath, ".."), { recursive: true }, (err) => {
+        if (err) {
           consoleWebviewLog(err);
-        });
-        fs.writeFile(fullPath, Buffer.from(file.extract_contents()), (err) => {
+          return;
+        }
+      });
+      fs.writeFile(fullPath, Buffer.from(file.extract_contents()), (err) => {
+        if (err) {
           consoleWebviewLog(err);
-        });
-      } catch (err) {
-        consoleWebviewLog(err);
-      }
+          return;
+        }
+      });
+      consoleWebviewLog("wrote file: " + fullPath);
     }
   }
 }
