@@ -9,8 +9,6 @@ import { ConsoleWebviewViewProvider } from "./webview/console_webview";
 // - square brackets ("[", "]"): https://github.com/tonsky/FiraCode, Fira Code OFL license
 // - d20 vector: https://fontawesome.com/v5/icons/classic/solid/dice-d20 (c) CC BY 4.0 https://github.com/FortAwesome/Font-Awesome/blob/5.x/LICENSE.txt
 
-// TODO:
-// - webview console
 
 export async function activate(context: vscode.ExtensionContext) {
   let isModWorkspace: boolean = true;
@@ -30,7 +28,7 @@ export async function activate(context: vscode.ExtensionContext) {
     context.subscriptions.push(disposable);
   }
 
-  // webview
+  // toolkit webview
   const wvToolkit = new ToolkitWebviewViewProvider(
     context.extensionUri,
     isModWorkspace,
@@ -41,6 +39,8 @@ export async function activate(context: vscode.ExtensionContext) {
       wvToolkit,
     ),
   );
+
+  // console webview
   const csToolkit = new ConsoleWebviewViewProvider(
     context.extensionUri,
     isModWorkspace,
