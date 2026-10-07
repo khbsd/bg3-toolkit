@@ -2,14 +2,13 @@ import * as fs from "fs";
 import * as vscode from "vscode";
 import { Registrar } from "./registrar/registrar";
 import { getModPath } from "./utils/file";
-import { getWorkspacePath, sleep } from "./utils/ws";
-import { consoleWebviewLog, ConsoleWebviewViewProvider } from "./webview/console_webview";
+import { getWorkspacePath } from "./utils/ws";
+import { ConsoleWebviewViewProvider } from "./webview/console_webview";
 import { ToolkitWebviewViewProvider } from "./webview/toolkit_webview";
 
 // icon attribution:
 // - square brackets ("[", "]"): https://github.com/tonsky/FiraCode, Fira Code OFL license
 // - d20 vector: https://fontawesome.com/v5/icons/classic/solid/dice-d20 (c) CC BY 4.0 https://github.com/FortAwesome/Font-Awesome/blob/5.x/LICENSE.txt
-
 
 export async function activate(context: vscode.ExtensionContext) {
   let isModWorkspace: boolean = false;
@@ -19,6 +18,8 @@ export async function activate(context: vscode.ExtensionContext) {
     for (const dir of dirs) {
       isModWorkspace = dir.name.toLowerCase() === "meta.lsx";
       if (isModWorkspace) {
+        // mostly here to double check that it wont error out
+        getModPath(dir.parentPath);
         break;
       }
     }
