@@ -37,7 +37,7 @@ export class ToolkitWebviewViewProvider implements vscode.WebviewViewProvider {
     this._view.webview.html = this._getHtmlForWebview(this._view.webview);
 
     this._view.webview.onDidReceiveMessage(async (data) => {
-      consoleWebviewLog(["message recieved:", data.msg]);
+      consoleWebviewLog("message recieved: " + data.msg);
 
       const type: FileFormats =
         FileFormats[data.type as keyof typeof FileFormats];

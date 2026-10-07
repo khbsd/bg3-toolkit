@@ -104,7 +104,7 @@ export function isModPath(path: string): boolean {
 }
 
 export function getModName(modPath: string): string {
-  consoleWebviewLog(["getting mod name from mod path: ", modPath]);
+  consoleWebviewLog("getting mod name from mod path: " + modPath);
   consoleWebviewLog(modPath.split(path.sep).at(-1));
   return modPath.split(path.sep).at(-1) ?? "";
 }
@@ -187,7 +187,7 @@ export function stripOpeningClosingTags(lines: string[]): string[] {
   }
 
   for (const line of linesToDelete.toReversed()) {
-    consoleWebviewLog(["removing line", line, lines[line]]);
+    consoleWebviewLog("removing line " + line + lines[line]);
     lines.splice(line, 1);
   }
 
@@ -409,7 +409,7 @@ export function getFiles(wsPath: string, opts?: getFilesOpts): File[] {
 
     if (pathOk) {
       files.push(new File(path.join(entry.parentPath, entry.name)));
-      consoleWebviewLog(["added", entry.name]);
+      consoleWebviewLog("added", entry.name);
     }
   }
 

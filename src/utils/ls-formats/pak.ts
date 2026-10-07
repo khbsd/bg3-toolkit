@@ -4,14 +4,13 @@ import * as path from "path";
 
 import * as futils from "../file";
 import { ConvertCommon, FileFormats } from "./formats";
-import { Xml } from "./loca_xml";
-import { Lsx } from "./lsx";
 
 import { consoleWebviewLog } from "../../webview/console_webview";
+import { convertAll } from "./junction";
 
 function convertFilesForPacking(wsPath: string): void {
-  new Lsx(wsPath).convertModDir();
-  new Xml(wsPath).convertModDir();
+  convertAll(wsPath, FileFormats.lsx);
+  convertAll(wsPath, FileFormats.xml);
 }
 
 export class Pak extends ConvertCommon {

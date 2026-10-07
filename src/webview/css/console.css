@@ -35,7 +35,7 @@ li {
   background-color: var(--vscode-titleBar-activeBackground);
   overflow-y: scroll;
   overflow-x: visible;
-  overflow-wrap:anywhere;
+  overflow-wrap: anywhere;
   font-family: monospace;
   max-height: 25rem;
   min-height: 25rem;
@@ -54,7 +54,10 @@ li {
   counter-increment: log-line;
   content: counter(log-line);
   color: var(--vscode-button-background);
-  padding-right: 0.75rem;
+  display: inline-block;
+  padding-right: 0.25rem;
+  min-width: 2rem;
+  max-width: 2rem;
 }
 
 .copy-button, .clear-button {

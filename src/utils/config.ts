@@ -18,6 +18,7 @@ export class Config extends Object {
   copyOrMoveOnPak: string = "";
   mergedLocalizationName: string = "";
   mergedLocalizationAllowDuplicates: boolean = false;
+  consoleLineLimit: number = 0;
 
   constructor() {
     super();

@@ -3,8 +3,10 @@ import * as path from "path";
 import * as vscode from "vscode";
 
 import { EOL } from "os";
+import * as util from "util";
 import { HtmlData, HtmlDataUtils } from "../utils/html";
 import { getWorkspacePath } from "../utils/ws";
+import { Config } from "../utils/config";
 
 let webview: ConsoleWebviewViewProvider | undefined = undefined;
 const openingText = "hi !! i love you!";
@@ -60,8 +62,7 @@ export class ConsoleWebviewViewProvider implements vscode.WebviewViewProvider {
         });
         vscode.env.clipboard.writeText(cbText);
       } else if (data.type === "clear") {
-        this.consoleText = openingText;
-        this.updateConsoleText();
+        clearWebviewLog();
       }
     });
   }
@@ -142,35 +143,39 @@ export class ConsoleWebviewViewProvider implements vscode.WebviewViewProvider {
   }
 
   public updateConsoleText(text?: string): void {
+    const conf: Config = new Config();
     if (text !== undefined) {
-      text = '<p class="line">' + text + "</p>";
+      text = consoleTags[ConsoleTags.OpenPTag] + text + consoleTags[ConsoleTags.ClosePTag];
       if (this.consoleText === openingText) {
         this.consoleText = text;
       } else {
-        this.consoleText = this.consoleText.concat("<br>" + text);
+        this.consoleText = this.consoleText.concat(consoleTags[ConsoleTags.LineBreak] + text);
       }
+    }
+
+    let textArray: string[] = this.consoleText.split(consoleTags[ConsoleTags.LineBreak]);
+    if (textArray.length > conf.consoleLineLimit) {
+      textArray = textArray.slice(textArray.length - conf.consoleLineLimit);
+      this.consoleText = textArray.join(consoleTags[ConsoleTags.LineBreak]);
     }
 
     if (this._view !== undefined) {
       this._view.webview.html = this._getHtmlForWebview(this._view.webview);
     }
+    this._view?.webview.postMessage("scroll-update");
   }
 }
 
-export function consoleWebviewLog(args: string | string[] | any): void {
-  let text: string = "";
+export function consoleWebviewLog(...args: any): void {
+  let text: string = util.format(...args);
 
-  console.log(args);
-
-  if (Array.isArray(args)) {
-    text = args.join(" ");
-  } else if (typeof args === "string") {
-    text = args;
-  } else if (typeof args === "object"){
-    text = JSON.stringify(args);
-  } else {
-    text = args.toString();
-  }
-
+  console.log(...args);
   webview?.updateConsoleText(text);
+}
+
+export function clearWebviewLog(): void {
+  if (webview !== undefined) {
+    webview.consoleText = openingText;
+  }
+  webview?.updateConsoleText();
 }
