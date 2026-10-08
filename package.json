@@ -2,7 +2,12 @@
   "name": "bg3-toolkit",
   "displayName": "bg3-toolkit",
   "description": "",
-  "version": "0.8.0",
+  "version": "0.8.3",
+  "publisher": "kayabeans",
+  "icon": "resources/icon/icon.png",
+  "galleryBanner": {
+    "color": "C993EC"
+  },
   "repository": {
     "type": "git",
     "url": "https://github.com/khbsd/bg3-toolkit"
@@ -12,6 +17,15 @@
   },
   "categories": [
     "Other"
+  ],
+  "keywords": [
+    "bg3",
+    "mod",
+    "mods",
+    "toolkit",
+    "bg3-toolkit",
+    "baldurs gate 3",
+    "games"
   ],
   "activationEvents": [
     "onStartupFinished"
@@ -127,9 +141,15 @@
           "description": "location of your installed mods. if supplied, this extension will attempt to copy any mods you pack up into the installed mods folder, replacing any files of the same name.\n!! does nothing if left blank."
         },
         "bg3-toolkit.copyOrMoveOnPak": {
-          "type":"string",
-          "enum": ["copy", "move"],
-          "markdownEnumDescriptions": ["copy the packed mod to the location in `installed mods path`", "move the packed mod to the location in `installed mods path`"],
+          "type": "string",
+          "enum": [
+            "copy",
+            "move"
+          ],
+          "markdownEnumDescriptions": [
+            "copy the packed mod to the location in `installed mods path`",
+            "move the packed mod to the location in `installed mods path`"
+          ],
           "default": "copy",
           "description": "controls whether the extension copies or moves a newly created pack to the location listed in `installed mods path.`\n!! does nothing if the `installed mods path` setting is left blank."
         },
@@ -144,7 +164,7 @@
           "description": "whether the extension should keep duplicate entries when merging localization files.\n!! probably keep this unchecked unless you know what youre doing."
         },
         "bg3-toolkit.consoleLineLimit": {
-          "type":"number",
+          "type": "number",
           "default": 1500,
           "description": "the number of lines the console view keeps. values above 3000 may be laggy."
         }
@@ -223,7 +243,7 @@
           "icon": "",
           "id": "consoleWebviewView",
           "name": "console",
-          "visibility":"hidden"
+          "visibility": "hidden"
         }
       ]
     },
