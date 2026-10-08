@@ -77,7 +77,7 @@ export function getModPath(wsPath: string): string {
     if (!p.isFile()) {
       continue;
     }
-    if (p.name.toLowerCase().includes("meta.lsx")) {
+    if (hasMetaFile(p.name)) {
       retPath = path.resolve(p.parentPath, "..", "..");
     }
   }
@@ -88,19 +88,8 @@ export function getModPath(wsPath: string): string {
 }
 
 // maybe unneeded tbh
-export function isModPath(path: string): boolean {
-  let hasMetaLsx: boolean = false;
-  let files = fs.readdirSync(path);
-
-  for (let file in files) {
-    consoleWebviewLog(file);
-    hasMetaLsx = file.toLowerCase().includes("meta.lsx");
-    if (hasMetaLsx) {
-      break;
-    }
-  }
-
-  return hasMetaLsx;
+export function hasMetaFile(path: string): boolean {
+  return path.toLowerCase().includes("meta.lsx");
 }
 
 export function getModName(modPath: string): string {

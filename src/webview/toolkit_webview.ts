@@ -8,6 +8,7 @@ import { convertAll, pack } from "../utils/ls-formats/junction";
 import { Unpak } from "../utils/ls-formats/pak";
 import { getWorkspacePath } from "../utils/ws";
 import { consoleWebviewLog } from "./console_webview";
+import { getModPath } from "../utils/file";
 
 export class ToolkitWebviewViewProvider implements vscode.WebviewViewProvider {
   public static readonly viewType = "toolkitWebviewView";
@@ -175,12 +176,12 @@ export class ToolkitWebviewViewProvider implements vscode.WebviewViewProvider {
       data[HtmlData.ScriptSrc] = scriptUri.toString();
       data[HtmlData.StyleSrc] = styleMainUri.toString();
       data[HtmlData.CspSrc] = csp;
-      data[HtmlData.WorkspacePath] = getWorkspacePath();
+      data[HtmlData.WorkspacePath] = getModPath(getWorkspacePath());
     }
 
     let html = "";
     try {
-      html = fs.readFileSync(htmlUri.toString()).toString();
+      html = fs.readFileSync(htmlUri).toString();
     } catch (err) {
       consoleWebviewLog(err);
       return "";

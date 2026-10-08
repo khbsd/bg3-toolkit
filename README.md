@@ -37,3 +37,8 @@ here atm, but after more polishing and a few more features, on both ([open-vsx.o
 ## why:
 
 because modding this game on linux and other platforms needed some love <3
+
+## planned features:
+- game data unpacking
+- mod base builder
+  - (based on https://raw.githubusercontent.com/PerplexedPeach/bg3-lewd-mods/master/initialize_new_mod.py)

@@ -1,7 +1,7 @@
 import * as fs from "fs";
 import * as vscode from "vscode";
 import { Registrar } from "./registrar/registrar";
-import { getModPath } from "./utils/file";
+import { getModPath, hasMetaFile } from "./utils/file";
 import { getWorkspacePath } from "./utils/ws";
 import { ConsoleWebviewViewProvider } from "./webview/console_webview";
 import { ToolkitWebviewViewProvider } from "./webview/toolkit_webview";
@@ -16,7 +16,7 @@ export async function activate(context: vscode.ExtensionContext) {
     const dirs = fs.readdirSync(getWorkspacePath(), { withFileTypes: true, recursive: true });
 
     for (const dir of dirs) {
-      isModWorkspace = dir.name.toLowerCase() === "meta.lsx";
+      isModWorkspace = hasMetaFile(dir.name);
       if (isModWorkspace) {
         // mostly here to double check that it wont error out
         getModPath(dir.parentPath);

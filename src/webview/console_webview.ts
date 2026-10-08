@@ -69,7 +69,7 @@ export class ConsoleWebviewViewProvider implements vscode.WebviewViewProvider {
     const hd: HtmlDataUtils = new HtmlDataUtils();
 
     const nonce = hd.getNonce();
-    
+
     // file to read html from
     const htmlUri = path.resolve(
       __dirname,
@@ -119,7 +119,7 @@ export class ConsoleWebviewViewProvider implements vscode.WebviewViewProvider {
 
     let html = "";
     try {
-      html = fs.readFileSync(htmlUri.toString()).toString();
+      html = fs.readFileSync(htmlUri).toString();
     } catch (err) {
       console.log(err);
       return "";
