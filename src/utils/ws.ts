@@ -13,7 +13,7 @@ export function getWorkspacePath(short: boolean = false): string {
   let wsPath = "";
   const conf: Config = new Config();
   if (conf.customModPath.length > 0) {
-    consoleWebviewLog(conf.customModPath);
+    console.log(conf.customModPath);
     wsPath = conf.customModPath;
   } else {
     if (
