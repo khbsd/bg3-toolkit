@@ -33,8 +33,11 @@ const xmlLineTags: string[] = [
   "</content>",
 ];
 
+const virtualTextureRegex: RegExp = /Textures_[\d]+/;
+const hotfixPatchRegex: RegExp = /Patch[\d]+_Hotfix[\d]+/;
+
 export function fixPath(wsPath: string): string {
-  const illegal_strings = ["file:"];
+  const illegal_strings = ["file:", "//"];
   for (let str of illegal_strings) {
     if (wsPath.includes(str)) {
       wsPath = wsPath.replace(str, "");
@@ -107,7 +110,7 @@ export async function addHandleToXml(handle?: string, fileIndex?: number) {
   fileIndex = fileIndex ?? 0;
 
   const xmlFiles: File[] = getFiles(getWorkspacePath(), {
-    type: FileFormats[FileFormats.xml],
+    type: FileFormats.xml,
   });
 
   let xmlFile: File | undefined = undefined;
@@ -199,14 +202,18 @@ export function mergeXmlFiles(wsPath: string): boolean {
   if (conf.mergedLocalizationName.length < 1) {
     return false;
   }
+  // cant merge a single file
+  else if (fs.statSync(wsPath).isFile()) {
+    return false;
+  }
 
   let lines: string[] = [];
   let files = getFiles(wsPath, {
-    type: FileFormats[FileFormats.xml],
+    type: FileFormats.xml,
     forXmlMerging: true,
   });
 
-  // cant merge one file
+  // still cant merge a single file
   if (files.length < 2) {
     return false;
   }
@@ -295,21 +302,26 @@ function filterLocalizations(dirents: fs.Dirent[]): fs.Dirent[] {
 /**
  * @param type: string | undefined
  */
-type getFilesOpts = {
-  type?: string;
+export type getFilesOpts = {
+  type?: FileFormats;
   forConversion?: boolean;
   conf?: Config;
   forRemovingEditables?: boolean;
   forXmlMerging?: boolean;
   forPacking?: boolean;
+  forUnpackingGameFiles?: boolean;
 };
 
 export function getFiles(wsPath: string, opts?: getFilesOpts): File[] {
   let files: File[] = [];
-  let type = opts?.type ?? "";
+  let type: string = "";
   let conf = opts?.conf ?? new Config();
+  if (opts?.type !== undefined) {
+    type = FileFormats[opts.type];
+  }
 
   wsPath = fixPath(wsPath);
+  console.log(wsPath);
 
   let dirents = fs.readdirSync(wsPath, {
     recursive: true,
@@ -319,6 +331,11 @@ export function getFiles(wsPath: string, opts?: getFilesOpts): File[] {
   if (conf.mergedLocalizationName.length > 0 && opts?.forPacking) {
     consoleWebviewLog("removing non-merged loca files");
     dirents = filterLocalizations(dirents);
+  }
+
+  function pushToFiles(entry: fs.Dirent) {
+    files.push(new File(path.join(entry.parentPath, entry.name)));
+    consoleWebviewLog("added", entry.name);
   }
 
   for (let entry of dirents) {
@@ -336,6 +353,13 @@ export function getFiles(wsPath: string, opts?: getFilesOpts): File[] {
         }
       } else {
         filter = entry.name.includes("." + type);
+        // unpacking game data
+        if (opts?.forUnpackingGameFiles && filter) {
+          if (!hotfixPatchRegex.test(entry.name) && !virtualTextureRegex.test(entry.name)) {
+            pushToFiles(entry);
+            continue;
+          }
+        }
       }
     }
 
@@ -396,9 +420,9 @@ export function getFiles(wsPath: string, opts?: getFilesOpts): File[] {
       }
     }
 
+    console.log(entry.name);
     if (pathOk) {
-      files.push(new File(path.join(entry.parentPath, entry.name)));
-      consoleWebviewLog("added", entry.name);
+      pushToFiles(entry);
     }
   }
 

@@ -1,11 +1,13 @@
 import * as fs from "fs";
 import * as lsPak from "larian-formats-wasm";
 import * as path from "path";
+import * as vscode from "vscode";
 
 import * as futils from "../file";
 import { ConvertCommon, FileFormats } from "./formats";
 
 import { consoleWebviewLog } from "../../webview/console_webview";
+import { Config } from "../config";
 import { convertAll } from "./junction";
 
 function convertFilesForPacking(wsPath: string): void {
@@ -14,15 +16,14 @@ function convertFilesForPacking(wsPath: string): void {
 }
 
 export class Pak extends ConvertCommon {
-  vscode: any;
+  type: FileFormats = FileFormats.pak;
   constructor(wsPath: string, modPath?: string | undefined) {
     wsPath = futils.fixPath(wsPath);
 
     // needs to be called before super() so that converted files exist before the ConvertCommon class collects them.
     convertFilesForPacking(wsPath);
 
-    super(wsPath, { type: FileFormats.pak, modPath: modPath });
-    this.vscode = require("vscode");
+    super(wsPath, { modPath: modPath }, { forPacking: true, forRemovingEditables: new Config().doNotPackEditables });
   }
 
   public build(): void {
@@ -49,7 +50,7 @@ export class Pak extends ConvertCommon {
       const modDestPath: string = path.join(this.wsPath, name);
 
       fs.writeFileSync(modDestPath, Buffer.from(packed), { flag: "w+" });
-      this.vscode.window.showInformationMessage(name + " packed!");
+      vscode.window.showInformationMessage(name + " packed!");
 
       let installPath: string = this.conf.installedModsPath;
       let verb: string = "copied";
@@ -64,7 +65,7 @@ export class Pak extends ConvertCommon {
         let consoleText = name + " " + verb + " to " + installPath;
 
         consoleWebviewLog(consoleText);
-        this.vscode.window.showInformationMessage(
+        vscode.window.showInformationMessage(
           consoleText,
         );
       }
@@ -83,7 +84,7 @@ export class Unpak {
     this.unpakPath = futils.fixPath(unpakPath ?? path.resolve(this.wsPath, ".."));
   }
 
-  public async unpack(): Promise<void> {
+  public unpack(): void {
     if (
       !path.basename(this.wsPath).includes("." + FileFormats[FileFormats.pak])
     ) {
@@ -102,19 +103,16 @@ export class Unpak {
 
     for (const file of unpacked) {
       let fullPath: string = path.join(this.unpakPath, file.extract_path());
-      fs.mkdir(path.resolve(fullPath, ".."), { recursive: true }, (err) => {
-        if (err) {
-          consoleWebviewLog(err);
-          return;
-        }
-      });
-      fs.writeFile(fullPath, Buffer.from(file.extract_contents()), (err) => {
-        if (err) {
-          consoleWebviewLog(err);
-          return;
-        }
-      });
-      consoleWebviewLog("wrote file: " + fullPath);
+      let dirPath: string = path.resolve(fullPath, "..");
+      try {
+        fs.mkdirSync(dirPath, { recursive: true });
+        if (fs.statSync(dirPath).isDirectory()) {
+          fs.writeFileSync(fullPath, Buffer.from(file.extract_contents()));
+        };
+        consoleWebviewLog("wrote file: " + fullPath);
+      } catch (err) {
+        consoleWebviewLog(err);
+      }
     }
   }
 }

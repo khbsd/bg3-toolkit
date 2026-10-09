@@ -20,6 +20,7 @@ export enum FileFormats {
   lsj,
   loca,
   pak,
+  gamepak,
   count,
 }
 
@@ -157,10 +158,15 @@ export class File {
 }
 
 type ConvertCommonOpts = {
-  type?: FileFormats;
   modPath?: string;
   conf?: Config;
-}
+};
+
+type CombinedOpts = {
+  cOpts?: ConvertCommonOpts;
+  gOpts?: futils.getFilesOpts;
+
+};
 
 /**
  * THIS CLASS SHOULD ONLY BE EXTENDED, NOT INSTANTIATED.
@@ -188,42 +194,25 @@ export class ConvertCommon {
    * this class will assume you are converting a single file and skip populating
    * the 'files' array.
    */
-  constructor(wsPath: string, opts?: ConvertCommonOpts) {
+  constructor(wsPath: string, convertOpts?: ConvertCommonOpts, getFileOpts?: futils.getFilesOpts) {
+    const opts: CombinedOpts = {
+      cOpts: convertOpts,
+      gOpts: getFileOpts,
+    };
     this.builder = lsPak;
-    this.type = opts?.type || FileFormats.none;
+    this.type = opts.gOpts?.type ?? FileFormats.none;
     this.wsPath = futils.fixPath(wsPath);
-    this.modPath = opts?.modPath ?? futils.getModPath(this.wsPath);
-    this.conf = opts?.conf ?? new Config();
+    this.modPath = opts.cOpts?.modPath ?? futils.getModPath(this.wsPath);
+    this.conf = opts.cOpts?.conf ?? new Config();
     if (fs.statSync(this.wsPath).isDirectory()) {
-      if (this.type === FileFormats.pak) {
-        this.files = futils.getFiles(this.modPath, {
-          forRemovingEditables: this.conf.doNotPackEditables,
-          forPacking: true,
-        });
-      } else if (this.type === FileFormats.xml) {
-        futils.mergeXmlFiles(this.wsPath);
-        this.files = futils.getFiles(this.modPath, {
-          type: FileFormats[this.type],
-          forConversion: true,
-        });
-      } else if (this.type !== FileFormats.none) {
-        this.files = futils.getFiles(this.modPath, {
-          type: FileFormats[this.type],
-          forConversion: true,
-        });
-      } else {
-        this.files = futils.getFiles(this.modPath, {
-          type: FileFormats[this.type],
-          forConversion: true,
-        });
-      }
+      this.files = futils.getFiles(this.modPath, opts.gOpts);
     }
   }
 
   /**
    * make sure you have assigned 'this._cf' in your extended class before calling this function.
    */
-  public convertModDir() {
+  public convertModDir(): void {
     for (let f of this.files) {
       this._cf(f);
     }

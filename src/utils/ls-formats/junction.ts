@@ -7,20 +7,32 @@ import { Lsf, Lsx } from "./lsx";
 import { Pak, Unpak } from "./pak";
 
 export function convertAll(dirPath: string, type: FileFormats) {
-  let path: string = dirPath;
   if (fs.statSync(dirPath).isFile()) {
-    path = futils.getModPath(dirPath);
+    convert(new File(dirPath));
+    return;
   }
 
-  futils
-    .getFiles(dirPath, {
-      type: FileFormats[type],
-      forConversion: true,
-    })
-    .forEach((file) => {
-      convert(file);
-    });
-}
+  let c = undefined;
+  switch (type) {
+    case FileFormats.lsx:
+      c = new Lsx(dirPath);
+      break;
+    default:
+    case FileFormats.lsf:
+      c = new Lsf(dirPath);
+      break;
+    case FileFormats.xml:
+      c = new Xml(dirPath);
+      break;
+    case FileFormats.loca:
+      c = new Loca(dirPath);
+      break;
+  }
+
+  if (c !== undefined) {
+    c.convertModDir();
+  }
+ }
 
 export function convert(file: File) {
   let c = undefined;
@@ -50,5 +62,6 @@ export function convert(file: File) {
 
 export function pack(wsPath?: string) {
   wsPath = wsPath ?? getWorkspacePath();
+  console.log(wsPath);
   new Pak(wsPath).build();
 }

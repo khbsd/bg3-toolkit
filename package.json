@@ -62,6 +62,10 @@
         "title": "Unpack this mod into its current folder"
       },
       {
+        "command": "bg3-toolkit.unpackGameData",
+        "title": "Unpack Game Data"
+      },
+      {
         "command": "bg3-toolkit.lsxConvertAll",
         "title": "Convert all .lsx files to .lsf binary format"
       },

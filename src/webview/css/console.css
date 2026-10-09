@@ -1,5 +1,5 @@
 body {
-  width: 88%;
+  width: auto;
   overflow: hidden;
   align-items: center;
   justify-content: center;
@@ -37,6 +37,7 @@ li {
   overflow-x: visible;
   overflow-wrap: anywhere;
   font-family: monospace;
+  font-size: 0.75rem;
   max-height: 25rem;
   min-height: 25rem;
   border-color: var(--vscode-titleBar-activeBackground);
@@ -44,13 +45,20 @@ li {
   border-radius: 0.4rem;
   border-width: 0.15rem;
   padding: 1rem;
+} .console:hover {
+  color: var(--vscode-editorLineNumber-foreground);
 }
 
-.line:hover::before {
-  color: var(--vscode-button-hoverBackground);
-}
-
-.line::before {
+.line {
+  margin: 0.05rem;
+  padding: 0rem;
+  margin-block: 0rem;
+  display: inline-block;
+  width: 100%;
+} .line:hover {
+  background-color: var(--vscode-editor-lineHighlightBackground);
+  color: var(--vscode-editor-foreground);
+} .line::before {
   counter-increment: log-line;
   content: counter(log-line);
   color: var(--vscode-button-background);
@@ -58,7 +66,10 @@ li {
   padding-right: 0.25rem;
   min-width: 2rem;
   max-width: 2rem;
-}
+} .line:hover::before {
+   color: var(--vscode-button-hoverBackground);
+
+ }
 
 .copy-button, .clear-button {
   width: 100%;
