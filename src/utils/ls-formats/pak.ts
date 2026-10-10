@@ -75,44 +75,38 @@ export class Pak extends ConvertCommon {
   }
 }
 
-// doesnt need to extend anything since its all contained in the pak
-export class Unpak {
-  wsPath: string;
-  unpakPath: string;
-  constructor(wsPath: string, unpakPath?: string) {
-    this.wsPath = futils.fixPath(wsPath);
-    this.unpakPath = futils.fixPath(unpakPath ?? path.resolve(this.wsPath, ".."));
+
+export function Unpak(wsPath: string, unpakPath?: string) {
+  wsPath = futils.fixPath(wsPath);
+  unpakPath = futils.fixPath(unpakPath ?? path.resolve(wsPath, ".."));
+
+  if (
+    !path.basename(wsPath).includes("." + FileFormats[FileFormats.pak])
+  ) {
+    return;
   }
 
-  public unpack(): void {
-    if (
-      !path.basename(this.wsPath).includes("." + FileFormats[FileFormats.pak])
-    ) {
-      return;
-    }
+  consoleWebviewLog(".pak file found at " + wsPath + ", unpacking");
 
-    consoleWebviewLog(".pak file found at " + this.wsPath + ", unpacking");
+  let unpacked: lsPak.ModFile[];
+  try {
+    unpacked = lsPak.unpack(fs.readFileSync(wsPath));
+  } catch (err) {
+    consoleWebviewLog(err);
+    return;
+  }
 
-    let unpacked: lsPak.ModFile[];
+  for (const file of unpacked) {
+    let fullPath: string = path.join(unpakPath, file.extract_path());
+    let dirPath: string = path.resolve(fullPath, "..");
     try {
-      unpacked = lsPak.unpack(fs.readFileSync(this.wsPath));
+      fs.mkdirSync(dirPath, { recursive: true });
+      if (fs.statSync(dirPath).isDirectory()) {
+        fs.writeFileSync(fullPath, Buffer.from(file.extract_contents()));
+      };
+      consoleWebviewLog("wrote file: " + fullPath);
     } catch (err) {
       consoleWebviewLog(err);
-      return;
-    }
-
-    for (const file of unpacked) {
-      let fullPath: string = path.join(this.unpakPath, file.extract_path());
-      let dirPath: string = path.resolve(fullPath, "..");
-      try {
-        fs.mkdirSync(dirPath, { recursive: true });
-        if (fs.statSync(dirPath).isDirectory()) {
-          fs.writeFileSync(fullPath, Buffer.from(file.extract_contents()));
-        };
-        consoleWebviewLog("wrote file: " + fullPath);
-      } catch (err) {
-        consoleWebviewLog(err);
-      }
     }
   }
 }

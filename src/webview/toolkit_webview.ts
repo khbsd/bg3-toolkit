@@ -2,13 +2,13 @@ import * as fs from "fs";
 import * as path from "path";
 import * as vscode from "vscode";
 
+import { getModPath } from "../utils/file";
 import { HtmlData, HtmlDataUtils } from "../utils/html";
 import { FileFormats } from "../utils/ls-formats/formats";
 import { convertAll, pack } from "../utils/ls-formats/junction";
 import { Unpak } from "../utils/ls-formats/pak";
 import { getWorkspacePath } from "../utils/ws";
 import { consoleWebviewLog } from "./console_webview";
-import { getModPath } from "../utils/file";
 
 export class ToolkitWebviewViewProvider implements vscode.WebviewViewProvider {
   public static readonly viewType = "toolkitWebviewView";
@@ -100,8 +100,7 @@ export class ToolkitWebviewViewProvider implements vscode.WebviewViewProvider {
           }
         }
 
-        let unpak = new Unpak(pakPath, unpakPath);
-        await unpak.unpack();
+        Unpak(pakPath, unpakPath);
         return;
       } else if (data.type === "debug") {
         consoleWebviewLog(data.msg);
