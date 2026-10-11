@@ -1,8 +1,9 @@
 import * as path from "path";
 import * as vscode from "vscode";
-import { Config } from "./config";
 import * as futils from "./file";
+
 import { consoleWebviewLog } from "../webview/console_webview";
+import { Config } from "./config";
 
 /**
  * returns your workspace path. if you have set a value for the "custom mod path" setting, will return that instead

@@ -1,4 +1,5 @@
 import * as fs from "fs";
+
 import { consoleWebviewLog } from "../../webview/console_webview";
 import { fixPath, mergeXmlFiles } from "../file";
 import { ConvertCommon, File, FileFormats } from "./formats";

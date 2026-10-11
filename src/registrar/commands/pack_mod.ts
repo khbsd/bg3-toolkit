@@ -1,4 +1,5 @@
 import * as vscode from "vscode";
+
 import { pack } from "../../utils/ls-formats/junction";
 
 export class Command {

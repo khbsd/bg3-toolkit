@@ -1,8 +1,9 @@
 import * as fs from "fs";
-import { FileHandle } from "fs/promises";
-import { EOL } from "os";
 import * as path from "path";
 import * as vscode from "vscode";
+
+import { FileHandle } from "fs/promises";
+import { EOL } from "os";
 import { consoleWebviewLog } from "../webview/console_webview";
 import { Config } from "./config";
 import {

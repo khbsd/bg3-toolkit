@@ -1,5 +1,6 @@
 import * as fs from "fs";
 import * as vscode from "vscode";
+
 import { Registrar } from "./registrar/registrar";
 import { getModPath, hasMetaFile } from "./utils/file";
 import { getWorkspacePath } from "./utils/ws";

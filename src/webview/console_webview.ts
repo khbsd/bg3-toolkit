@@ -1,9 +1,9 @@
 import * as fs from "fs";
 import * as path from "path";
+import * as util from "util";
 import * as vscode from "vscode";
 
 import { EOL } from "os";
-import * as util from "util";
 import { Config } from "../utils/config";
 import { HtmlData, HtmlDataUtils } from "../utils/html";
 import { getWorkspacePath } from "../utils/ws";

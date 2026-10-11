@@ -74,7 +74,6 @@ export class Pak extends ConvertCommon {
   }
 }
 
-
 export function Unpak(wsPath: string, unpakPath?: string) {
   wsPath = futils.fixPath(wsPath);
   unpakPath = futils.fixPath(unpakPath ?? path.resolve(wsPath, ".."));
