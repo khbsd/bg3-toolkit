@@ -34,7 +34,7 @@ li {
 .console {
   background-color: var(--vscode-titleBar-activeBackground);
   overflow-y: scroll;
-  overflow-x: visible;
+  overflow-x: hidden;
   overflow-wrap: anywhere;
   font-family: monospace;
   font-size: 0.75rem;
@@ -67,9 +67,9 @@ li {
   min-width: 2rem;
   max-width: 2rem;
 } .line:hover::before {
-   color: var(--vscode-button-hoverBackground);
+  color: var(--vscode-button-hoverBackground);
 
- }
+}
 
 .copy-button, .clear-button {
   width: 100%;

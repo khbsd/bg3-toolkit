@@ -22,11 +22,6 @@ const illegal = "fag";
 const value_length: number = 36;
 const dash_pos: number[] = [8, 13, 18, 23];
 
-export enum UuidHandle {
-  Uuid,
-  Enum,
-}
-
 export function getChar(): string {
   return chars[Math.floor(Math.random() * chars.length)];
 }

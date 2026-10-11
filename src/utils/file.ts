@@ -321,7 +321,6 @@ export function getFiles(wsPath: string, opts?: getFilesOpts): File[] {
   }
 
   wsPath = fixPath(wsPath);
-  console.log(wsPath);
 
   let dirents = fs.readdirSync(wsPath, {
     recursive: true,

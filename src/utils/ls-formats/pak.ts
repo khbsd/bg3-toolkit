@@ -2,12 +2,11 @@ import * as fs from "fs";
 import * as lsPak from "larian-formats-wasm";
 import * as path from "path";
 import * as vscode from "vscode";
-
 import * as futils from "../file";
-import { ConvertCommon, FileFormats } from "./formats";
 
 import { consoleWebviewLog } from "../../webview/console_webview";
 import { Config } from "../config";
+import { ConvertCommon, FileFormats } from "./formats";
 import { convertAll } from "./junction";
 
 function convertFilesForPacking(wsPath: string): void {

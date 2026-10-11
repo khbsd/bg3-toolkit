@@ -1,8 +1,8 @@
 import * as vscode from "vscode";
-import { Xml } from "../../utils/ls-formats/loca_xml";
+import { FileFormats } from "../../utils/ls-formats/formats";
+import { convertAll } from "../../utils/ls-formats/junction";
 import { getWorkspacePath } from "../../utils/ws";
 import { consoleWebviewLog } from "../../webview/console_webview";
-
 
 export class Command {
   get(): vscode.Disposable {
@@ -10,7 +10,7 @@ export class Command {
       "bg3-toolkit.xmlConvertAll",
       () => {
         consoleWebviewLog(getWorkspacePath());
-        new Xml(getWorkspacePath()).convertModDir();
+        convertAll(getWorkspacePath(), FileFormats.xml);
       },
     );
     return disposable;

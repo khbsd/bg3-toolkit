@@ -8,7 +8,6 @@ export class Command {
     const disposable = vscode.commands.registerCommand(
       "bg3-toolkit.unpackMod",
       (uri) => {
-        consoleWebviewLog(uri.path);
         convert(new File(uri.path));
       },
     );
