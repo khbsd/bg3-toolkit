@@ -6,7 +6,6 @@ import * as vscode from "vscode";
 import { EOL } from "os";
 import { Config } from "../utils/config";
 import { HtmlData, HtmlDataUtils } from "../utils/html";
-import { getWorkspacePath } from "../utils/ws";
 
 let webview: ConsoleWebviewViewProvider | undefined = undefined;
 const openingText = "hi !! i love you!";
@@ -26,6 +25,13 @@ export class ConsoleWebviewViewProvider implements vscode.WebviewViewProvider {
   private _view?: vscode.WebviewView;
   consoleText: string;
 
+  hd: HtmlDataUtils = new HtmlDataUtils();
+  nonce = this.hd.getNonce();
+
+  htmlUri: string = "";
+  scriptUri: string = "";
+  styleMainUri: string = "";
+
   constructor(
     private readonly _extensionUri: vscode.Uri
   ) {
@@ -42,6 +48,39 @@ export class ConsoleWebviewViewProvider implements vscode.WebviewViewProvider {
       enableScripts: true,
       localResourceRoots: [this._extensionUri],
     };
+
+    this.htmlUri = path.resolve(
+      __dirname,
+      "..",
+      "..",
+      "src",
+      "webview",
+      "html",
+      "console.html",
+    );
+
+    // path to js script
+    this.scriptUri = this._view?.webview.asWebviewUri(
+      vscode.Uri.joinPath(
+        this._extensionUri,
+        "src",
+        "webview",
+        "js",
+        "console.js",
+      ),
+    ).toString();
+
+    // path to css file
+    this.styleMainUri = this._view?.webview.asWebviewUri(
+      vscode.Uri.joinPath(
+        this._extensionUri,
+        "src",
+        "webview",
+        "css",
+        "console.css",
+      ),
+    ).toString();
+
     this._view.webview.html = this._getHtmlForWebview(this._view.webview);
 
     webview = this;
@@ -64,67 +103,28 @@ export class ConsoleWebviewViewProvider implements vscode.WebviewViewProvider {
     });
   }
 
-  private _getHtmlForWebview(webview: vscode.Webview,) {
-    const wv: vscode.Webview = webview;
-    const hd: HtmlDataUtils = new HtmlDataUtils();
-
-    const nonce = hd.getNonce();
-
-    // file to read html from
-    const htmlUri = path.resolve(
-      __dirname,
-      "..",
-      "..",
-      "src",
-      "webview",
-      "html",
-      "console.html",
-    );
-
-    // path to js script
-    const scriptUri = wv.asWebviewUri(
-      vscode.Uri.joinPath(
-        this._extensionUri,
-        "src",
-        "webview",
-        "js",
-        "console.js",
-      ),
-    );
-
-    // path to css file
-    const styleMainUri = wv.asWebviewUri(
-      vscode.Uri.joinPath(
-        this._extensionUri,
-        "src",
-        "webview",
-        "css",
-        "console.css",
-      ),
-    );
-
+  private _getHtmlForWebview(webview: vscode.Webview) {
     // content security policy or whatever. who cares.
-    const csp = wv.cspSource;
+    const csp = webview.cspSource;
 
     // make this data into an array for hd.getObjs()
     const data: string[] = [];
     {
-      data[HtmlData.Nonce] = nonce;
-      data[HtmlData.ScriptSrc] = scriptUri.toString();
-      data[HtmlData.StyleSrc] = styleMainUri.toString();
+      data[HtmlData.Nonce] = this.nonce;
+      data[HtmlData.ScriptSrc] = this.scriptUri;
+      data[HtmlData.StyleSrc] = this.styleMainUri;
       data[HtmlData.CspSrc] = csp;
-      data[HtmlData.WorkspacePath] = getWorkspacePath();
       data[HtmlData.LogText] = this.consoleText;
     }
 
     let html = "";
     try {
-      html = fs.readFileSync(htmlUri).toString();
+      html = fs.readFileSync(this.htmlUri).toString();
     } catch (err) {
       console.log(err);
       return "";
     }
-    return hd.formatHtml(html, data);
+    return this.hd.formatHtml(html, data);
   }
 
   public updateConsoleText(text?: string): void {
