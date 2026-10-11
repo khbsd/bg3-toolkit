@@ -200,6 +200,7 @@ export function addOpeningClosingTags(lines: string[]): string[] {
 
 export function mergeXmlFiles(wsPath: string): boolean {
   const conf = new Config();
+  wsPath = getModPath(wsPath);
   if (conf.mergedLocalizationName.length < 1) {
     return false;
   }
