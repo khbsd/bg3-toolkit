@@ -1,8 +1,4 @@
-on:
-  push:
-    tags:
-      - "*"
-
+name: Deploy Extension
 permissions:
   contents: read
   id-token: write
