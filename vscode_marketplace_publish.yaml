@@ -2,12 +2,6 @@
 steps:
 - checkout: self
 - script: |
-    ls -la
-    cd ../
-    ls -la
-    cd ../
-    ls -la
-    
     npm install -g @vscode/vsce
     npm install
   displayName: "Install vsce and dependencies"
@@ -20,5 +14,4 @@ steps:
     scriptType: pscore
     scriptLocation: inlineScript
     inlineScript: |
-      cd bg3-toolkit
       vsce publish --azure-credential
