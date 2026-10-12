@@ -1,3 +1,8 @@
+on:
+  push:
+    branches:
+      - domina
+      
 name: Deploy Extension
 permissions:
   contents: read
