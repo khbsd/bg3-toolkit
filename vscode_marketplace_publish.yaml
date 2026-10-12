@@ -1,6 +1,8 @@
 # Install VS Code Extension Manager (vsce >= v2.26.1 needed) and dependencies
 steps:
 - script: |
+    cd /
+    ls -la
     cd ./bg3-toolkit
     npm install -g @vscode/vsce
     npm install
