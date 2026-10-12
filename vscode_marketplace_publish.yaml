@@ -2,7 +2,12 @@
 steps:
 - checkout: self
 - script: |
-    cd bg3-toolkit
+    ls -la
+    cd ../
+    ls -la
+    cd ../
+    ls -la
+    
     npm install -g @vscode/vsce
     npm install
   displayName: "Install vsce and dependencies"
