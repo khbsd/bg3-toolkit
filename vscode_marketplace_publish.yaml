@@ -14,4 +14,4 @@ steps:
     scriptType: pscore
     scriptLocation: inlineScript
     inlineScript: |
-      vsce publish patch --azure-credential
+      vsce publish --azure-credential
