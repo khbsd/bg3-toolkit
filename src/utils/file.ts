@@ -4,7 +4,7 @@ import * as vscode from "vscode";
 
 import { FileHandle } from "fs/promises";
 import { EOL } from "os";
-import { consoleWebviewLog } from "../webview/console_webview";
+import { consoleWebviewLog } from "../webview/console";
 import { Config } from "./config";
 import {
   File,
@@ -91,9 +91,18 @@ export function getModPath(wsPath: string): string {
   return retPath;
 }
 
-// maybe unneeded tbh
 export function hasMetaFile(path: string): boolean {
   return path.toLowerCase().includes("meta.lsx");
+}
+
+export function getMetaFile(): File | undefined {
+  for (const entry of fs.readdirSync(getModPath(getWorkspacePath()), { recursive: true, withFileTypes: true })) {
+    let fpath: string = path.join(entry.parentPath, entry.name);
+    if (hasMetaFile(fpath)) {
+      return new File(fpath);
+    }
+  }
+  return undefined;
 }
 
 export function getModName(modPath: string): string {

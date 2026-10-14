@@ -4,7 +4,7 @@ import * as path from "path";
 import * as vscode from "vscode";
 import * as futils from "../file";
 
-import { consoleWebviewLog } from "../../webview/console_webview";
+import { consoleWebviewLog } from "../../webview/console";
 import { Config } from "../config";
 import { ConvertCommon, FileFormats } from "./formats";
 import { convertAll } from "./junction";

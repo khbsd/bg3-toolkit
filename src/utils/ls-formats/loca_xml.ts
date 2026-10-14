@@ -1,6 +1,6 @@
 import * as fs from "fs";
 
-import { consoleWebviewLog } from "../../webview/console_webview";
+import { consoleWebviewLog } from "../../webview/console";
 import { fixPath, mergeXmlFiles } from "../file";
 import { ConvertCommon, File, FileFormats } from "./formats";
 
@@ -11,6 +11,11 @@ export class Xml extends ConvertCommon {
   }
 
   public convertFile(f: File) {
+    if (f.out_ext === FileFormats[FileFormats.none]) {
+      consoleWebviewLog("not converting Fileformats.none file. returning...");
+      return;
+    }
+
     let outContents: Uint8Array;
     try {
       outContents = this.builder.convert_xml_to_loca(
@@ -33,6 +38,11 @@ export class Loca extends ConvertCommon {
   }
 
   public convertFile(f: File) {
+    if (f.out_ext === FileFormats[FileFormats.none]) {
+      consoleWebviewLog("not converting Fileformats.none file. returning...");
+      return;
+    }
+
     let outContents: string;
     try {
       outContents = this.builder

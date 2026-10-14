@@ -1,6 +1,6 @@
 import * as vscode from "vscode";
 
-import { consoleWebviewLog } from "../../webview/console_webview";
+import { consoleWebviewLog } from "../../webview/console";
 
 
 export class Command {

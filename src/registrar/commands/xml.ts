@@ -2,7 +2,7 @@ import * as vscode from "vscode";
 
 import { File } from "../../utils/ls-formats/formats";
 import { convert } from "../../utils/ls-formats/junction";
-import { consoleWebviewLog } from "../../webview/console_webview";
+import { consoleWebviewLog } from "../../webview/console";
 
 
 export class Command {

@@ -4,8 +4,8 @@ import * as vscode from "vscode";
 import { Registrar } from "./registrar/registrar";
 import { getModPath, hasMetaFile } from "./utils/file";
 import { getWorkspacePath } from "./utils/ws";
-import { ConsoleWebviewViewProvider } from "./webview/console_webview";
-import { ToolkitWebviewViewProvider } from "./webview/toolkit_webview";
+import { ConsoleWebviewViewProvider } from "./webview/console";
+import { ToolkitWebviewViewProvider } from "./webview/toolkit";
 
 // icon attribution:
 // - square brackets ("[", "]"): https://github.com/tonsky/FiraCode, Fira Code OFL license

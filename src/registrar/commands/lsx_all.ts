@@ -3,7 +3,7 @@ import * as vscode from "vscode";
 import { FileFormats } from "../../utils/ls-formats/formats";
 import { convertAll } from "../../utils/ls-formats/junction";
 import { getWorkspacePath } from "../../utils/ws";
-import { consoleWebviewLog } from "../../webview/console_webview";
+import { consoleWebviewLog } from "../../webview/console";
 
 export class Command {
   get(): vscode.Disposable {

@@ -18,8 +18,10 @@ button {
   min-width: 5%;
   display: inline;
   background-color: var(--vscode-button-background);
+  border-color: var(--vscode-button-background);
 } button:hover {
   background-color: var(--vscode-button-hoverBackground);
+  border-color: var(--vscode-button-hoverBackground);
   cursor: pointer;
 }
 
@@ -38,8 +40,8 @@ li {
   overflow-wrap: anywhere;
   font-family: monospace;
   font-size: 0.75rem;
-  max-height: 25rem;
-  min-height: 25rem;
+  max-height: 20rem;
+  min-height: 20rem;
   border-color: var(--vscode-titleBar-activeBackground);
   border-style: solid;
   border-radius: 0.4rem;

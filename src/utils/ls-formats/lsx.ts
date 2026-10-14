@@ -1,6 +1,6 @@
 import * as fs from "fs";
 
-import { consoleWebviewLog } from "../../webview/console_webview";
+import { consoleWebviewLog } from "../../webview/console";
 import { ConvertCommon, File, FileFormats } from "./formats";
 
 export class Lsx extends ConvertCommon {
@@ -10,6 +10,11 @@ export class Lsx extends ConvertCommon {
   }
 
   public convertFile(f: File) {
+    if (f.out_ext === FileFormats[FileFormats.none]) {
+      consoleWebviewLog("not converting Fileformats.none file. returning...");
+      return;
+    }
+
     let outContents: Uint8Array;
     try {
       outContents = this.builder.convert_lsx_to_lsf(
@@ -32,6 +37,11 @@ export class Lsf extends ConvertCommon {
   }
 
   public convertFile(f: File) {
+    if (f.out_ext === FileFormats[FileFormats.none]) {
+      consoleWebviewLog("not converting Fileformats.none file. returning...");
+      return;
+    }
+
     let outContents: string;
     try {
       outContents = this.builder

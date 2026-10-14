@@ -7,8 +7,9 @@ import { HtmlData, HtmlDataUtils } from "../utils/html";
 import { FileFormats } from "../utils/ls-formats/formats";
 import { convertAll, pack } from "../utils/ls-formats/junction";
 import { Unpak } from "../utils/ls-formats/pak";
+import { Version64 } from "../utils/version";
 import { getWorkspacePath } from "../utils/ws";
-import { consoleWebviewLog } from "./console_webview";
+import { consoleWebviewLog } from "./console";
 
 export class ToolkitWebviewViewProvider implements vscode.WebviewViewProvider {
   public static readonly viewType = "toolkitWebviewView";
@@ -103,7 +104,15 @@ export class ToolkitWebviewViewProvider implements vscode.WebviewViewProvider {
         Unpak(pakPath, unpakPath);
         return;
       } else if (data.type === "debug") {
-        consoleWebviewLog(data.msg);
+        const v64 = new Version64();
+        let nums = [];
+        for (let i = 0; i < v64.def.length; i++) {
+          nums.push(BigInt(Math.floor(Math.random() * 10)));
+        }
+        let ver64 = v64.version64Build(nums);
+        consoleWebviewLog(v64.version64Extract(ver64));
+        v64.updateVersionInMeta(ver64);
+
       } else if (type === FileFormats.pak) {
         pack();
       } else if (type !== FileFormats.count && type !== FileFormats.none) {

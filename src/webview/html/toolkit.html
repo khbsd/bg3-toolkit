@@ -8,19 +8,36 @@
         <link href="${StyleSrc}" rel="stylesheet">
     </head>
     <body>
-        <li class="info">pack ya mod babes !!!</li>
+        <li class="info">pack ya mod babes !!! <label class="toggle-version"><input type="checkbox" /><span class="toggle-version">(edit version)</span></label></li>
+        <li class="toggled-version">
+            <span class="version-text">major:</span><input class="major" default="0" aria-label="major" type="quantity" />
+
+            <br>
+
+            <span class="version-text">minor:</span><input class="minor" default="0" aria-label="minor" type="quantity" />
+
+            <br>
+
+            <span class="version-text">revision:</span><input class="revision" default="0" aria-label="revision" type="quantity" />
+
+            <br>
+
+            <span class="version-text">build:</span><input class="build" default="0" aria-label="build" type="quantity" />
+
+            <br>
+        </li
+        >
         <button class="pack-button" title="Pack your mod, starting from '${WorkspacePath}'">PACK</button>
 
         <br>
 
         <br>
 
-        <li class="info">click on these to convert files. <label class="toggle"><input type="checkbox"/><span class="toggle-text">(?)</span></label></li>
-        <li class="info toggled">ie: clicking on the <p class="text-button lsx">*.lsx</p> button will convert all files ending in ".lsx" to their appropriate binary forms.
+        <li class="info">click on these to convert files. <label class="toggle-text"><input type="checkbox"/><span class="toggle-text">(?)</span></label></li>
+        <li class="info toggled-text">ie: clicking on the <p class="text-button lsx">*.lsx</p> button will convert all files ending in ".lsx" to their appropriate binary forms.
         <br>
         clicking on the <p class="text-button lsf">*.lsf</p> button will convert all binary files to their appropriate editable forms.
         </li>
-        <br>
         <div class="buttons-arrows">
             <button class="lsx-button left-button" title="Convert editable (*.lsx) files">*.lsx</button><div class="center-arrows"><-></div><button class="lsf-button right-button" title="Convert binary files (*.lsb, *.lsbc, *.lsbs, *.lsf, *.lsfx, *.lsfex)">*.lsf</button>
         </div>
@@ -38,12 +55,12 @@
         <button class="unpack-button" title="Unpack a mod!">UNPACK</button>
 
         <br>
-        
+
         <br>
 
         <li class="info-debug">debug</li>
         <button class="debug" title="Unpack a mod!">debug hehe</button>
-        
+
         <script nonce="${Nonce}" src="${ScriptSrc}"></script>
     </body>
 </html>

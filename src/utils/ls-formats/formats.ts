@@ -106,13 +106,16 @@ export class File {
     let sourceExt: string = ext ?? this.ext;
     let tempPath: string = path.resolve(this.path, "..");
     let targetFile: string = "";
+    if (futils.hasMetaFile(this.path)) {
+      return this.name, ".", FileFormats[FileFormats.none];
+    }
     fs.readdirSync(tempPath, { withFileTypes: true }).forEach((entry) => {
       if (
         !entry.name.includes("." + sourceExt) &&
         entry.name.includes(this.name) &&
         !entry.name.includes(".bak")
       ) {
-        targetFile = path.join(entry.parentPath, entry.name);
+        targetFile = entry.name;
       }
     });
 
