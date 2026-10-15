@@ -2,14 +2,33 @@ import * as fs from "fs";
 import * as path from "path";
 import * as vscode from "vscode";
 
+import { getNames } from "../utils/enum";
 import { getModPath } from "../utils/file";
 import { HtmlData, HtmlDataUtils } from "../utils/html";
 import { FileFormats } from "../utils/ls-formats/formats";
 import { convertAll, pack } from "../utils/ls-formats/junction";
-import { Unpak } from "../utils/ls-formats/pak";
-import { Version64 } from "../utils/version";
+import { unpackChoose } from "../utils/ls-formats/pak";
+import { Version64, Version64Parts } from "../utils/version";
 import { getWorkspacePath } from "../utils/ws";
 import { consoleWebviewLog } from "./console";
+
+function versionStringNotEmpty(version: string[]): boolean {
+  for (const v of version) {
+    if (v.length !== 0) {
+      return true;
+    }
+  }
+  return false;
+}
+
+function versionBigIntNotEmpty(version: bigint[]): boolean {
+  for (const v of version) {
+    if (v !== 0n) {
+      return true;
+    }
+  }
+  return false;
+}
 
 export class ToolkitWebviewViewProvider implements vscode.WebviewViewProvider {
   public static readonly viewType = "toolkitWebviewView";
@@ -39,87 +58,70 @@ export class ToolkitWebviewViewProvider implements vscode.WebviewViewProvider {
     this._view.webview.html = this._getHtmlForWebview(this._view.webview);
 
     this._view.webview.onDidReceiveMessage(async (data) => {
-      consoleWebviewLog("message recieved: " + data.msg);
+      if (data.type === "version-load") {
+        let version: number[] = [];
+        const v64: Version64 = new Version64();
 
-      const type: FileFormats =
-        FileFormats[data.type as keyof typeof FileFormats];
-      if (data.type === "unpack") {
-        let pakPath: string | undefined;
-        let unpakPath: string | undefined;
-        while (pakPath === undefined) {
-          pakPath = await vscode.window
-            .showOpenDialog({
-              canSelectFiles: true,
-              canSelectFolders: false,
-              canSelectMany: false,
-              filters: { "PAK Files": ["pak"] },
-              title: "Select a .pak file to unpack",
-            })
-            .then((p) => p?.toString());
-
-          if (pakPath === undefined) {
-            let warning;
-            await vscode.window
-              .showWarningMessage(
-                "You must select a pak!",
-                "oops",
-                "never mind",
-              )
-              .then((value) => {
-                warning = value;
-              });
-            if (warning !== "oops") {
-              return;
-            }
-          }
-        }
-        while (unpakPath === undefined) {
-          unpakPath = await vscode.window
-            .showOpenDialog({
-              canSelectFiles: false,
-              canSelectFolders: true,
-              canSelectMany: false,
-              title: "Select a location to unpack to",
-            })
-            .then((p) => p?.toString());
-
-          if (unpakPath === undefined) {
-            let warning;
-            await vscode.window
-              .showWarningMessage(
-                "You must select a destination!",
-                "oops",
-                "never mind",
-              )
-              .then((value) => {
-                warning = value;
-              });
-
-            if (warning !== "oops") {
-              return;
-            }
+        if (!versionStringNotEmpty(data.version)) {
+          version = v64.getVersionInMeta();
+          for (let i = 0; i < version.length; i++) {
+            //console.log(version[i]);
+            this._view?.webview.postMessage({ content: version[i], type: getNames(Version64Parts)[i] });
           }
         }
 
-        Unpak(pakPath, unpakPath);
+        //console.log(version);
         return;
-      } else if (data.type === "debug") {
-        const v64 = new Version64();
-        let nums = [];
-        for (let i = 0; i < v64.def.length; i++) {
-          nums.push(BigInt(Math.floor(Math.random() * 10)));
-        }
-        let ver64 = v64.version64Build(nums);
-        consoleWebviewLog(v64.version64Extract(ver64));
-        v64.updateVersionInMeta(ver64);
+      } else if (data.type === "version-update") {
+        const v64: Version64 = new Version64();
+        console.log(data.version);
+        let version: bigint[] = [0n, 0n, 0n, 0n];
 
-      } else if (type === FileFormats.pak) {
-        pack();
-      } else if (type !== FileFormats.count && type !== FileFormats.none) {
-        convertAll(getWorkspacePath(), type);
-      } else {
-        consoleWebviewLog("unrecognized type");
+        for (let i = 0; i < data.version.length; i++) {
+          let ver: bigint = 0n;
+          try {
+            ver = BigInt(data.version[i]);
+          } catch (err) {
+            //console.log(err);
+            this._view?.webview.postMessage({ content: version[i], type: getNames(Version64Parts)[i] });
+          }
+
+          version[i] = ver;
+        }
+        v64.updateVersionInMeta(v64.version64Build(version));
+
+      } else if (data.msg !== undefined) {
+        consoleWebviewLog("message recieved: " + data.msg, data.type);
       }
+      else {
+        console.log("message recieved: " + data);
+      }
+
+      if (getNames(FileFormats).includes(data.type)) {
+        const type: FileFormats =
+          FileFormats[data.type as keyof typeof FileFormats];
+        if (type === FileFormats.unpak) {
+          await unpackChoose();
+          return;
+        } else if (data.type === "debug") {
+          const v64 = new Version64();
+          let nums = [];
+          for (let i = 0; i < v64.def.length; i++) {
+            nums.push(BigInt(Math.floor(Math.random() * 10)));
+          }
+          let ver64 = v64.version64Build(nums);
+          consoleWebviewLog(v64.version64Extract(ver64));
+          v64.updateVersionInMeta(ver64);
+
+        } else if (type === FileFormats.pak) {
+          pack();
+        } else if (type !== FileFormats.count && type !== FileFormats.none) {
+          convertAll(getWorkspacePath(), type);
+        } else {
+          consoleWebviewLog("unrecognized type");
+        }
+      }
+
     });
   }
 

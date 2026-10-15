@@ -41,6 +41,7 @@ li {
 .toggled-version {
   content: "";
   margin-right: 1.5rem;
+  margin-bottom: 0.5rem;
 }
 
 body:has(.info .text-button.lsx:hover) .buttons-arrows .lsx-button.left-button,
@@ -73,8 +74,8 @@ body:has(.info .toggle-version input:checked) .toggled-version {
   border-radius: 0.3rem;
   border-bottom-left-radius: 0;
   border-bottom-right-radius: 0;
-  width: 2rem;
-  height: 1.5rem;
+  width: 3rem;
+  height: 1.25rem;
   color: var(--vscode-editor-foreground);
   margin-left: 0.25rem;
   line-height: 3rem;

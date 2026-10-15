@@ -1,7 +1,6 @@
 (function () {
   //@ts-ignore
   const vscode = acquireVsCodeApi();
-  let window = vscode.window;
 
   const buttonInfo = [
     {
@@ -13,7 +12,7 @@
     {
       class: ".unpack-button",
       listener: "click",
-      type: "unpack",
+      type: "unpak",
       msg: "select a .pak file and its destination",
     },
     {
@@ -48,14 +47,86 @@
     },
   ];
 
-  let listenersAdded = false;
+  const versionInfo = [
+    {
+      class: ".major",
+      listener: "input",
+      type: "version",
+      msg: "major version changed",
+      version: [],
+    },
+    {
+      class: ".minor",
+      listener: "input",
+      type: "version",
+      msg: "minor version changed",
+      version: [],
+    },
+    {
+      class: ".revision",
+      listener: "input",
+      type: "version",
+      msg: "revision version changed",
+      version: [],
+    },
+    {
+      class: ".build",
+      listener: "input",
+      type: "version",
+      msg: "build version changed",
+      version: [],
+    },
+  ];
 
-  for (let i = 0; i < buttonInfo.length && !listenersAdded; i++) {
+  let msg = {
+    type: "version-load",
+    version: [],
+  };
+  for (let i = 0; i < versionInfo.length; i++) {
+    msg.version.push((document.querySelector(versionInfo[i].class).innerText));
+  }
+  vscode.postMessage(msg);
+
+  window.addEventListener("message", (event) => {
+    if (event.data.type === "major"
+      || event.data.type === "minor"
+      || event.data.type === "revision"
+      || event.data.type === "build") {
+      document.querySelector("." + event.data.type).value = event.data.content;
+      vscode.postMessage(event.data.content);
+    }
+
+  });
+
+  for (let i = 0, buttonListenersAdded = false; i < buttonInfo.length && !buttonListenersAdded; i++) {
     let b = buttonInfo[i];
     document.querySelector(b.class).addEventListener(b.listener, () => {
       vscode.postMessage(b);
     });
 
-    listenersAdded = buttonInfo.length - 1 === i;
+    buttonListenersAdded = buttonInfo.length - 1 === i;
+  }
+
+  for (let i = 0, versionListenersAdded = false; i < versionInfo.length && !versionListenersAdded; i++) {
+    let v = versionInfo[i];
+    document.querySelector(v.class).addEventListener(v.listener, () => {
+      try {
+        Number(document.querySelector(v.class).value);
+      } catch (err) {
+        document.querySelector(v.class).value = 0;
+        return;
+      }
+      let msg = {
+        type: "version-update",
+        version: [],
+      };
+      for (let i = 0; i < versionInfo.length; i++) {
+        let val = document.querySelector(versionInfo[i].class).value;
+        msg.version.push(val);
+        //vscode.postMessage(val);
+      }
+      vscode.postMessage(msg);
+    });
+    versionListenersAdded = versionInfo.length - 1 === i;
   }
 })();

@@ -21,6 +21,7 @@ export enum FileFormats {
   lsj,
   loca,
   pak,
+  unpak,
   gamepak,
   count,
 }

@@ -3,7 +3,7 @@ import * as fs from "fs";
 import { consoleWebviewLog } from "../webview/console";
 import { getMetaFile } from "./file";
 
-export const enum Version64Parts {
+export enum Version64Parts {
   major,
   minor,
   revision,
@@ -91,6 +91,23 @@ export class Version64 {
     return nums;
   }
 
+  public getVersionInMeta(): number[] {
+    const metaPath: string = getMetaFile()?.path ?? "";
+    let metaFileContents: string = fs.readFileSync(metaPath).toString();
+    let firstResult = "";
+
+    for (const result of metaFileContents.matchAll(this.re)) {
+      if (firstResult.length === 0) {
+        firstResult = result.groups?.version ?? "";
+      }
+
+      if (firstResult !== result.groups?.version) {
+        break;
+      }
+    }
+    return this.version64Extract(BigInt(firstResult));
+  }
+
   public updateVersionInMeta(version: bigint | string): void {
     if (typeof version === "bigint") {
       version = version.toString();
@@ -100,8 +117,13 @@ export class Version64 {
     let metaFileContents: string = fs.readFileSync(metaPath).toString();
 
     for (const result of metaFileContents.matchAll(this.re)) {
-      consoleWebviewLog("replacing", result.groups?.version, "with", version);
-      metaFileContents = metaFileContents.replace(result.groups?.version ?? "", version);
+      if (result.groups === undefined) {
+        return;
+      }
+      const resultVersion = result.groups.version;
+      const line = result[0].slice(0, result[0].length - resultVersion.length);
+      consoleWebviewLog("replacing", resultVersion, "with", version);
+      metaFileContents = metaFileContents.replace(line + resultVersion, line + version);
     }
     fs.writeFileSync(metaPath, metaFileContents, { flag: "w" });
   }

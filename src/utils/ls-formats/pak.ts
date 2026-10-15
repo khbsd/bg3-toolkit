@@ -74,6 +74,73 @@ export class Pak extends ConvertCommon {
   }
 }
 
+
+/**
+ *
+ * wrapper func for Unpak() that grabs the pak path and the destination path from the user
+ */
+export async function unpackChoose(): Promise<void> {
+  let pakPath: string | undefined;
+  let unpakPath: string | undefined;
+  while (pakPath === undefined) {
+    pakPath = await vscode.window
+      .showOpenDialog({
+        canSelectFiles: true,
+        canSelectFolders: false,
+        canSelectMany: false,
+        filters: { "PAK Files": ["pak"] },
+        title: "Select a .pak file to unpack",
+      })
+      .then((p) => p?.toString());
+
+    if (pakPath === undefined) {
+      let warning;
+      await vscode.window
+        .showWarningMessage(
+          "You must select a pak!",
+          "oops",
+          "never mind",
+        )
+        .then((value) => {
+          warning = value;
+        });
+      if (warning !== "oops") {
+        return;
+      }
+    }
+  }
+  while (unpakPath === undefined) {
+    unpakPath = await vscode.window
+      .showOpenDialog({
+        canSelectFiles: false,
+        canSelectFolders: true,
+        canSelectMany: false,
+        title: "Select a location to unpack to",
+      })
+      .then((p) => p?.toString());
+
+    if (unpakPath === undefined) {
+      let warning;
+      await vscode.window
+        .showWarningMessage(
+          "You must select a destination!",
+          "oops",
+          "never mind",
+        )
+        .then((value) => {
+          warning = value;
+        });
+
+      if (warning !== "oops") {
+        return;
+      }
+    }
+  }
+
+  Unpak(pakPath, unpakPath);
+  return;
+}
+
 export function Unpak(wsPath: string, unpakPath?: string) {
   wsPath = futils.fixPath(wsPath);
   unpakPath = futils.fixPath(unpakPath ?? path.resolve(wsPath, ".."));
