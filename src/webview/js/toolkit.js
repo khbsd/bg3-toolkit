@@ -93,7 +93,12 @@
       || event.data.type === "minor"
       || event.data.type === "revision"
       || event.data.type === "build") {
-      document.querySelector("." + event.data.type).value = event.data.content;
+      let val = document.querySelector("." + event.data.type).value = event.data.content;
+
+      while (val.charAt(0) === "0" && val.length >= 2) {
+        document.querySelector("." + event.data.type).value = val = val.slice(1);
+      }
+
     }
 
   });

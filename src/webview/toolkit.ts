@@ -48,7 +48,7 @@ export class ToolkitWebviewViewProvider implements vscode.WebviewViewProvider {
 
     this._view.webview.html = this._getHtmlForWebview(this._view.webview);
 
-    this._view.webview.onDidReceiveMessage(async (data) => {
+    this._view.webview.onDidReceiveMessage((data) => {
       if (data.type === "version-load") {
         let version: number[] = [];
         const v64: Version64 = new Version64();
@@ -56,30 +56,51 @@ export class ToolkitWebviewViewProvider implements vscode.WebviewViewProvider {
         if (!versionStringNotEmpty(data.version)) {
           version = v64.getVersionInMeta();
           for (let i = 0; i < version.length; i++) {
-            //console.log(version[i]);
             this._view?.webview.postMessage({ content: version[i], type: getNames(Version64Parts)[i] });
           }
         }
 
-        //console.log(version);
         return;
       } else if (data.type === "version-update") {
+        // this can be simplified to just use data.version, .map() to remove empties, and join(".")
+        // will still need to remove letters and replace with 0 as well
+
         const v64: Version64 = new Version64();
-        console.log(data.version);
-        let version: bigint[] = [0n, 0n, 0n, 0n];
+        let version: string[] = [];
 
         for (let i = 0; i < data.version.length; i++) {
+          let part = data.version[i];
+          try {
+            if (!Number.isInteger(Number(part))) {
+              part = "0";
+            }
+            if (part.length === 0) {
+              part = "0";
+            }
+            this._view?.webview.postMessage({ content: part, type: getNames(Version64Parts)[i] });
+          } catch (err) {
+            part = "0";
+            this._view?.webview.postMessage({ content: part, type: getNames(Version64Parts)[i] });
+          }
+          if (part.length === 0) {
+            part = "0";
+          }
+          console.log("part", part);
+          //this._view?.webview.postMessage({ content: part, type: getNames(Version64Parts)[i] });
+          version.push(part);
+        }
+        console.log(version);
+        /*for (let i = 0; i < data.version.length; i++) {
           let ver: bigint = 0n;
           try {
             ver = BigInt(data.version[i]);
           } catch (err) {
-            //console.log(err);
             this._view?.webview.postMessage({ content: version[i], type: getNames(Version64Parts)[i] });
           }
 
           version[i] = ver;
-        }
-        v64.updateVersionInMeta(v64.version64Build(version));
+        }*/
+        v64.updateVersionInMeta(v64.version64Build(version.join(".")));
 
       } else if (data.type === "debug") {
         consoleWebviewLog("message received: " + data.msg);
@@ -90,7 +111,7 @@ export class ToolkitWebviewViewProvider implements vscode.WebviewViewProvider {
         const type: FileFormats =
           FileFormats[data.type as keyof typeof FileFormats];
         if (type === FileFormats.unpak) {
-          await unpackChoose();
+          unpackChoose();
           return;
         } else if (type === FileFormats.pak) {
           pack();

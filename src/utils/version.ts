@@ -116,13 +116,17 @@ export class Version64 {
     const metaPath: string = getMetaFile()?.path ?? "";
     let metaFileContents: string = fs.readFileSync(metaPath).toString();
 
+    let logged: boolean = false;
     for (const result of metaFileContents.matchAll(this.re)) {
       if (result.groups === undefined) {
         return;
       }
       const resultVersion = result.groups.version;
       const line = result[0].slice(0, result[0].length - resultVersion.length);
-      consoleWebviewLog("replacing", resultVersion, "with", version);
+      if (!logged) {
+        consoleWebviewLog("replacing", resultVersion, "with", version);
+        logged = true;
+      }
       metaFileContents = metaFileContents.replace(line + resultVersion, line + version);
     }
     fs.writeFileSync(metaPath, metaFileContents, { flag: "w" });
