@@ -21,15 +21,6 @@ function versionStringNotEmpty(version: string[]): boolean {
   return false;
 }
 
-function versionBigIntNotEmpty(version: bigint[]): boolean {
-  for (const v of version) {
-    if (v !== 0n) {
-      return true;
-    }
-  }
-  return false;
-}
-
 export class ToolkitWebviewViewProvider implements vscode.WebviewViewProvider {
   public static readonly viewType = "toolkitWebviewView";
   private _view?: vscode.WebviewView;
@@ -90,29 +81,17 @@ export class ToolkitWebviewViewProvider implements vscode.WebviewViewProvider {
         }
         v64.updateVersionInMeta(v64.version64Build(version));
 
-      } else if (data.msg !== undefined) {
-        consoleWebviewLog("message recieved: " + data.msg, data.type);
-      }
-      else {
-        console.log("message recieved: " + data);
+      } else if (data.type === "debug") {
+        consoleWebviewLog("message received: " + data.msg);
       }
 
       if (getNames(FileFormats).includes(data.type)) {
+        consoleWebviewLog("message received: " + data.msg);
         const type: FileFormats =
           FileFormats[data.type as keyof typeof FileFormats];
         if (type === FileFormats.unpak) {
           await unpackChoose();
           return;
-        } else if (data.type === "debug") {
-          const v64 = new Version64();
-          let nums = [];
-          for (let i = 0; i < v64.def.length; i++) {
-            nums.push(BigInt(Math.floor(Math.random() * 10)));
-          }
-          let ver64 = v64.version64Build(nums);
-          consoleWebviewLog(v64.version64Extract(ver64));
-          v64.updateVersionInMeta(ver64);
-
         } else if (type === FileFormats.pak) {
           pack();
         } else if (type !== FileFormats.count && type !== FileFormats.none) {

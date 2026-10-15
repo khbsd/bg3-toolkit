@@ -81,6 +81,7 @@
   let msg = {
     type: "version-load",
     version: [],
+    msg: "mod version found, doing"
   };
   for (let i = 0; i < versionInfo.length; i++) {
     msg.version.push((document.querySelector(versionInfo[i].class).innerText));
@@ -93,7 +94,6 @@
       || event.data.type === "revision"
       || event.data.type === "build") {
       document.querySelector("." + event.data.type).value = event.data.content;
-      vscode.postMessage(event.data.content);
     }
 
   });
