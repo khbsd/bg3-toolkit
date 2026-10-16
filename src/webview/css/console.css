@@ -19,7 +19,9 @@ button {
   display: inline;
   background-color: var(--vscode-button-background);
   border-color: var(--vscode-button-background);
-} button:hover {
+}
+
+button:hover {
   background-color: var(--vscode-button-hoverBackground);
   border-color: var(--vscode-button-hoverBackground);
   cursor: pointer;
@@ -47,7 +49,9 @@ li {
   border-radius: 0.4rem;
   border-width: 0.15rem;
   padding: 1rem;
-} .console:hover {
+}
+
+.console:hover {
   color: var(--vscode-editorLineNumber-foreground);
 }
 
@@ -57,10 +61,14 @@ li {
   margin-block: 0rem;
   display: inline-block;
   width: 100%;
-} .line:hover {
+}
+
+.line:hover {
   background-color: var(--vscode-editor-lineHighlightBackground);
   color: var(--vscode-editor-foreground);
-} .line::before {
+}
+
+.line::before {
   counter-increment: log-line;
   content: counter(log-line);
   color: var(--vscode-button-background);
@@ -68,11 +76,13 @@ li {
   padding-right: 0.25rem;
   min-width: 2rem;
   max-width: 2rem;
-} .line:hover::before {
-  color: var(--vscode-button-hoverBackground);
-
 }
 
-.copy-button, .clear-button {
+.line:hover::before {
+  color: var(--vscode-button-hoverBackground);
+}
+
+.copy-button,
+.clear-button {
   width: 100%;
 }

@@ -17,7 +17,9 @@ button {
   min-width: 5%;
   display: inline;
   background-color: var(--vscode-button-background);
-} button:hover {
+}
+
+button:hover {
   background-color: var(--vscode-button-hoverBackground);
   cursor: pointer;
 }
@@ -30,7 +32,8 @@ li {
   list-style-type: none;
 }
 
-.toggle-text input, .toggle-version input {
+.toggle-text input,
+.toggle-version input {
   position: absolute;
   opacity: 0;
   cursor: pointer;
@@ -39,9 +42,14 @@ li {
 }
 
 .toggled-version {
-  content: "";
-  margin-right: 1.5rem;
+  color: var(--vscode-editor-foreground);
+  width: 100%;
   margin-bottom: 0.5rem;
+}
+
+.toggled-version:hover {
+  color: var(--vscode-editorLineNumber-foreground);
+
 }
 
 body:has(.info .text-button.lsx:hover) .buttons-arrows .lsx-button.left-button,
@@ -49,23 +57,29 @@ body:has(.info .text-button.lsf:hover) .buttons-arrows .lsf-button.right-button 
   background-color: var(--vscode-button-hoverBackground);
 }
 
-body:has(.info .toggle-text input) .info.toggled-text {
-  display: none;
-}
-
-body:has(.info .toggle-text input:checked) .info.toggled-text {
-  display: block;
-}
-
+body:has(.info .toggle-text input) .info.toggled-text,
 body:has(.info .toggle-version input) .toggled-version {
   display: none;
 }
 
+body:has(.info .toggle-text input:checked) .info.toggled-text,
 body:has(.info .toggle-version input:checked) .toggled-version {
   display: block;
 }
 
-.major, .minor, .revision, .build {
+.major-input,
+.minor-input,
+.revision-input,
+.build-input {
+  width: 100%;
+  display: flex;
+  justify-content: flex-end;
+}
+
+.major-input input,
+.minor-input input,
+.revision-input input,
+.build-input input {
   background-color: var(--vscode-titleBar-activeBackground);
   border-bottom-color: var(--vscode-button-background);
   border-style: none;
@@ -77,25 +91,54 @@ body:has(.info .toggle-version input:checked) .toggled-version {
   width: 3rem;
   height: 1.25rem;
   color: var(--vscode-editor-foreground);
-  margin-left: 0.25rem;
-  line-height: 3rem;
-  margin-bottom: 0.25rem;
   font-family: monospace;
-  padding-bottom: 0rem;
   text-align: center;
   outline: none;
 }
-.major:hover, .minor:hover, .revision:hover, .build:hover{
+
+.major-input input:hover,
+.minor-input input:hover,
+.revision-input input:hover,
+.build-input input:hover,
+.major-input input:focus,
+.minor-input input:focus,
+.revision-input input:focus,
+.build-input input:focus {
   border-style: none;
   border-bottom-style: solid;
-  border-bottom-color: var(--vscode-button-background);
+  border-bottom-color: var(--vscode-button-hoverBackground);
+}
+
+.major-label,
+.minor-label,
+.revision-label,
+.build-label {
+  padding-top: 0.25rem;
+  display: inline;
+  margin-right: 0rem;
+  justify-content: center;
+}
+
+body:has(.version-text .major-input:hover) .version-text .major-label,
+body:has(.version-text .minor-input:hover) .version-text .minor-label,
+body:has(.version-text .revision-input:hover) .version-text .revision-label,
+body:has(.version-text .build-input:hover) .version-text .build-label {
+  color: var(--vscode-editor-foreground);
+}
+
+body:has(.version-text .major-input input:focus) .version-text .major-label,
+body:has(.version-text .minor-input input:focus) .version-text .minor-label,
+body:has(.version-text .revision-input input:focus) .version-text .revision-label,
+body:has(.version-text .build-input input:focus) .version-text .build-label {
+  color: var(--vscode-button-hoverBackground);
 }
 
 .version-text {
+  min-width: 7rem;
   margin-left: 1.5rem;
-  min-width: 5rem;
-  font-family: monospace;
-  display: inline-block;
+  margin-bottom: 0.35rem;
+  display: inline-flex;
+  justify-content: space-between;
 }
 
 .info {
@@ -107,21 +150,11 @@ body:has(.info .toggle-version input:checked) .toggled-version {
   margin-right: 1rem;
 }
 
-.info-debug {
-  content: ">";
-  margin-right: 1rem;
-  display: none;
-}
-
-.toggle-text, .toggle-version {
-  display: inline;
+.toggle-text,
+.toggle-version {
+  display: inline-block;
   cursor: pointer;
   font-weight: bold;
-}
-
-.toggled {
-  margin-top: 3%;
-  display: none;
 }
 
 .text-button {
@@ -132,13 +165,11 @@ body:has(.info .toggle-version input:checked) .toggled-version {
   border-style: solid;
   padding-left: 0.45rem;
   padding-right: 0.45rem;
-} .text-button:hover {
-  background-color: var(--vscode-button-hoverBackground);
-  cursor: pointer;
 }
 
-.debug {
-  display: inline;
+.text-button:hover {
+  background-color: var(--vscode-button-hoverBackground);
+  cursor: pointer;
 }
 
 .buttons-arrows {
@@ -148,7 +179,8 @@ body:has(.info .toggle-version input:checked) .toggled-version {
   justify-content: center;
 }
 
-.pack-button, .unpack-button {
+.pack-button,
+.unpack-button {
   display: block;
   height: 3rem;
   width: 100%;
@@ -167,4 +199,14 @@ body:has(.info .toggle-version input:checked) .toggled-version {
 .center-arrows {
   flex: 1;
   text-align: center;
+}
+
+.info-debug {
+  content: ">";
+  margin-right: 1rem;
+  display: none;
+}
+
+.debug {
+  display: inline;
 }

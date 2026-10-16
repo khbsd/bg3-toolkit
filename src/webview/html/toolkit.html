@@ -10,25 +10,20 @@
     <body>
         <li class="info">pack ya mod babes !!! <label class="toggle-version"><input type="checkbox" /><span class="toggle-version">(edit version)</span></label></li>
         <li class="toggled-version">
-            <span class="version-text">major:</span><input class="major" default="0" aria-label="major" type="quantity" />
-
+            <div class="version-text"> <label class="major-label">major:</label><div class="major-input"><input class="major" default="0" aria-label="major" type="quantity" /></div></div>
             <br>
 
-            <span class="version-text">minor:</span><input class="minor" default="0" aria-label="minor" type="quantity" />
-
+            <div class="version-text"> <label class="minor-label">minor:</label><div class="minor-input"><input class="minor" default="0" aria-label="minor" type="quantity" /></div></div>
             <br>
 
-            <span class="version-text">revision:</span><input class="revision" default="0" aria-label="revision" type="quantity" />
-
+            <div class="version-text"> <label class="revision-label">revision:</label><div class="revision-input"><input class="revision" default="0" aria-label="revision" type="quantity" /></div></div>
             <br>
 
-            <span class="version-text">build:</span><input class="build" default="0" aria-label="build" type="quantity" />
-
+            <div class="version-text"> <label class="build-label">build:</label><div class="build-input"><input class="build" default="0" aria-label="build" type="quantity" /></div></div>
             <br>
-        </li
-        >
+
+        </li>
         <button class="pack-button" title="Pack your mod, starting from '${WorkspacePath}'">PACK</button>
-
         <br>
 
         <br>
@@ -46,14 +41,12 @@
         <div class="buttons-arrows">
             <button class="xml-button left-button" title="Convert editable localization (*.xml) files">*.xml</button><div class="center-arrows"><-></div><button class="loca-button right-button" title="Convert binary localization (*.loca) files">*.loca</button>
         </div>
-
         <br>
 
         <br>
 
         <li class="info">unpack ya mod babes !!!</li>
         <button class="unpack-button" title="Unpack a mod!">UNPACK</button>
-
         <br>
 
         <br>

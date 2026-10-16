@@ -62,44 +62,22 @@ export class ToolkitWebviewViewProvider implements vscode.WebviewViewProvider {
 
         return;
       } else if (data.type === "version-update") {
-        // this can be simplified to just use data.version, .map() to remove empties, and join(".")
-        // will still need to remove letters and replace with 0 as well
-
         const v64: Version64 = new Version64();
         let version: string[] = [];
 
         for (let i = 0; i < data.version.length; i++) {
           let part = data.version[i];
           try {
-            if (!Number.isInteger(Number(part))) {
+            if (!Number.isInteger(Number(part)) || part.length === 0) {
               part = "0";
             }
-            if (part.length === 0) {
-              part = "0";
-            }
-            this._view?.webview.postMessage({ content: part, type: getNames(Version64Parts)[i] });
           } catch (err) {
-            part = "0";
-            this._view?.webview.postMessage({ content: part, type: getNames(Version64Parts)[i] });
-          }
-          if (part.length === 0) {
+            consoleWebviewLog(err);
             part = "0";
           }
-          console.log("part", part);
-          //this._view?.webview.postMessage({ content: part, type: getNames(Version64Parts)[i] });
+          this._view?.webview.postMessage({ content: part, type: getNames(Version64Parts)[i] });
           version.push(part);
         }
-        console.log(version);
-        /*for (let i = 0; i < data.version.length; i++) {
-          let ver: bigint = 0n;
-          try {
-            ver = BigInt(data.version[i]);
-          } catch (err) {
-            this._view?.webview.postMessage({ content: version[i], type: getNames(Version64Parts)[i] });
-          }
-
-          version[i] = ver;
-        }*/
         v64.updateVersionInMeta(v64.version64Build(version.join(".")));
 
       } else if (data.type === "debug") {
