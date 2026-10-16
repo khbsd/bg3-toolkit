@@ -49,7 +49,6 @@ li {
 
 .toggled-version:hover {
   color: var(--vscode-editorLineNumber-foreground);
-
 }
 
 body:has(.info .text-button.lsx:hover) .buttons-arrows .lsx-button.left-button,
@@ -71,9 +70,11 @@ body:has(.info .toggle-version input:checked) .toggled-version {
 .minor-input,
 .revision-input,
 .build-input {
+  margin-left: 3rem;
   width: 100%;
-  display: flex;
-  justify-content: flex-end;
+  position: sticky;
+  display: inline-flex;
+  justify-content: space-between;
 }
 
 .major-input input,
@@ -113,10 +114,18 @@ body:has(.info .toggle-version input:checked) .toggled-version {
 .minor-label,
 .revision-label,
 .build-label {
+  width: 5rem;
   padding-top: 0.25rem;
   display: inline;
   margin-right: 0rem;
   justify-content: center;
+}
+
+.major-label:hover,
+.minor-label:hover,
+.revision-label:hover,
+.build-label:hover {
+  color: var(--vscode-button-background);
 }
 
 body:has(.version-text .major-input:hover) .version-text .major-label,
@@ -134,6 +143,7 @@ body:has(.version-text .build-input input:focus) .version-text .build-label {
 }
 
 .version-text {
+  width: 100%;
   min-width: 7rem;
   margin-left: 1.5rem;
   margin-bottom: 0.35rem;
