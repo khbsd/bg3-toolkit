@@ -19,11 +19,11 @@ a cross-platform (linux and macos silicon included!!) extension for vscode and v
 
 ## when:
 
-i mean. now lmao? but `1.0.0` release in a few weeks probly
+now !!
 
 ## where:
 
-here atm, but after more polishing and a few more features, on both ([open-vsx.org](https://open-vsx.org/) and [marketplace.visualstudio.com/vscode](https://marketplace.visualstudio.com/vscode)) marketplaces!!
+here !! and both ([open-vsx.org](https://open-vsx.org/) and [marketplace.visualstudio.com/vscode](https://marketplace.visualstudio.com/vscode)) marketplaces!!
 
 ## how:
 
@@ -33,12 +33,13 @@ here atm, but after more polishing and a few more features, on both ([open-vsx.o
 - multi-mod workspace support
 - conversion for \*.ls{b, bc, bs, f, fex, fx, x} files to and from editable and binary formats
 - pack and unpack mods
+- game data unpacking
+- version editing
 
 ## why:
 
 because modding this game on linux and other platforms needed some love <3
 
 ## planned features:
-- game data unpacking
 - mod base builder
   - (based on https://raw.githubusercontent.com/PerplexedPeach/bg3-lewd-mods/master/initialize_new_mod.py)
