@@ -4,6 +4,9 @@ out/*
 # node modules
 node_modules/*
 
+# compiled extensions
+*.vsix
+
 # config stuff
 .vscode/settings.json
 .vscodeignore
