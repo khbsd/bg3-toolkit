@@ -363,6 +363,7 @@ export function getFiles(wsPath: string, opts?: getFilesOpts): File[] {
         }
       } else {
         filter = entry.name.includes("." + type);
+
         // unpacking game data
         if (opts?.forUnpackingGameFiles && filter) {
           if (!hotfixPatchRegex.test(entry.name) && !virtualTextureRegex.test(entry.name)) {
@@ -380,6 +381,11 @@ export function getFiles(wsPath: string, opts?: getFilesOpts): File[] {
       let unneeded: boolean = false;
 
       for (const dir of conf.conversionNeededDirectories) {
+        const fileOk: boolean = entry.parentPath.includes(dir) &&
+          !conf.conversionExcludeFiles.includes(
+            path.basename(entry.name, path.extname(entry.name)),
+          );
+
         if (opts?.forXmlMerging) {
           unneeded =
             entry.name.split(".")[0] === conf.mergedLocalizationName &&
@@ -391,11 +397,7 @@ export function getFiles(wsPath: string, opts?: getFilesOpts): File[] {
         }
 
         if (opts?.forConversion) {
-          conversion =
-            entry.parentPath.includes(dir) &&
-            !conf.conversionExcludeFiles.includes(
-              path.basename(entry.name, path.extname(entry.name)),
-            );
+          conversion = fileOk;
 
           if (conversion) {
             break;
@@ -405,12 +407,7 @@ export function getFiles(wsPath: string, opts?: getFilesOpts): File[] {
         // lets you omit editable files from the .pak that the game wont look for
         if (opts?.forRemovingEditables) {
           const f = new File(fp);
-          unneeded =
-            isEditable(f.ext) &&
-            entry.parentPath.includes(dir) &&
-            !conf.conversionExcludeFiles.includes(
-              path.basename(entry.name, path.extname(entry.name)),
-            );
+          unneeded = isEditable(f.ext) && fileOk;
 
           if (unneeded) {
             break;
