@@ -1,7 +1,5 @@
 on:
   release:
-    branches:
-      - domina
 
 name: Deploy Extension
 permissions:

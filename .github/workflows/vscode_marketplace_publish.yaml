@@ -1,7 +1,5 @@
 on:
   release:
-    branches:
-      - domina
 
 # Install VS Code Extension Manager (vsce >= v2.26.1 needed) and dependencies
 steps:
