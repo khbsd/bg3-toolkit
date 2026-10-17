@@ -32,25 +32,6 @@ li {
   list-style-type: none;
 }
 
-.toggle-text input,
-.toggle-version input {
-  position: absolute;
-  opacity: 0;
-  cursor: pointer;
-  height: 0;
-  width: 0;
-}
-
-.toggled-version {
-  color: var(--vscode-editor-foreground);
-  width: 100%;
-  margin-bottom: 0.5rem;
-}
-
-.toggled-version:hover {
-  color: var(--vscode-editorLineNumber-foreground);
-}
-
 body:has(.info .text-button.lsx:hover) .buttons-arrows .lsx-button.left-button,
 body:has(.info .text-button.lsf:hover) .buttons-arrows .lsf-button.right-button {
   background-color: var(--vscode-button-hoverBackground);
@@ -70,7 +51,7 @@ body:has(.info .toggle-version input:checked) .toggled-version {
 .minor-input,
 .revision-input,
 .build-input {
-  margin-left: 3rem;
+  margin-left: 1rem;
   width: 100%;
   position: sticky;
   display: inline-flex;
@@ -132,7 +113,7 @@ body:has(.version-text .major-input:hover) .version-text .major-label,
 body:has(.version-text .minor-input:hover) .version-text .minor-label,
 body:has(.version-text .revision-input:hover) .version-text .revision-label,
 body:has(.version-text .build-input:hover) .version-text .build-label {
-  color: var(--vscode-editor-foreground);
+  color: var(--vscode-button-background);
 }
 
 body:has(.version-text .major-input input:focus) .version-text .major-label,
@@ -165,6 +146,39 @@ body:has(.version-text .build-input input:focus) .version-text .build-label {
   display: inline-block;
   cursor: pointer;
   font-weight: bold;
+}
+
+.toggle-version {
+  margin-top: 0.3rem;
+}
+
+.toggle-text input,
+.toggle-version input {
+  position: absolute;
+  opacity: 0;
+  cursor: pointer;
+  height: 0;
+  width: 0;
+}
+
+.toggle-text:hover,
+.toggle-version:hover {
+  color: var(--vscode-button-background);
+}
+
+.toggle-text:active,
+.toggle-version:active {
+  color: var(--vscode-button-hoverBackground);
+}
+
+.toggled-version {
+  color: var(--vscode-editor-foreground);
+  width: 100%;
+  margin-bottom: 0.5rem;
+}
+
+.toggled-version:hover {
+  color: var(--vscode-editorLineNumber-foreground);
 }
 
 .text-button {
@@ -218,5 +232,5 @@ body:has(.version-text .build-input input:focus) .version-text .build-label {
 }
 
 .debug {
-  display: inline;
+  display: none;
 }
