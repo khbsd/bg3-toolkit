@@ -11,6 +11,7 @@ import { unpackChoose } from "../utils/ls-formats/pak";
 import { Version64, Version64Parts } from "../utils/version";
 import { getWorkspacePath } from "../utils/ws";
 import { consoleWebviewLog } from "./console";
+import { Config } from "../utils/config";
 
 function versionStringNotEmpty(version: string[]): boolean {
   for (const v of version) {
@@ -106,6 +107,7 @@ export class ToolkitWebviewViewProvider implements vscode.WebviewViewProvider {
   private _getHtmlForWebview(webview: vscode.Webview) {
     const wv: vscode.Webview = webview;
     const hd: HtmlDataUtils = new HtmlDataUtils();
+    const conf: Config = new Config();
     const nonce = hd.getNonce();
     let htmlUri: string;
 
@@ -157,6 +159,9 @@ export class ToolkitWebviewViewProvider implements vscode.WebviewViewProvider {
     // content security policy or whatever. who cares.
     const csp = wv.cspSource;
 
+    // babes ???????
+    const babes = conf.babes ? "babes " : " ";
+
     // make this data into an array for hd.getObjs()
     const data: string[] = [];
     {
@@ -165,6 +170,7 @@ export class ToolkitWebviewViewProvider implements vscode.WebviewViewProvider {
       data[HtmlData.StyleSrc] = styleMainUri.toString();
       data[HtmlData.CspSrc] = csp;
       data[HtmlData.WorkspacePath] = getModPath(getWorkspacePath());
+      data[HtmlData.babes] = babes;
     }
 
     let html = "";

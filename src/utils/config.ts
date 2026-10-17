@@ -16,6 +16,7 @@ export class Config extends Object {
   mergedLocalizationName: string = "";
   mergedLocalizationAllowDuplicates: boolean = false;
   consoleLineLimit: number = 0;
+  babes: boolean = true;
 
   constructor() {
     super();

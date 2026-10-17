@@ -171,6 +171,11 @@
           "type": "number",
           "default": 1500,
           "description": "the number of lines the console view keeps. values above 3000 may be laggy."
+        },
+        "bg3-toolkit.babes": {
+          "type": "boolean",
+          "default": true,
+          "description": "babes? (needs reload, command palette -> developer: reload window)"
         }
       }
     },

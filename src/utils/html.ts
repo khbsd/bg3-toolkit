@@ -7,6 +7,7 @@ export enum HtmlData {
   CspSrc,
   WorkspacePath,
   LogText,
+  babes,
   count,
 }
 
