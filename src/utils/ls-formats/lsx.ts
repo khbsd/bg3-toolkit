@@ -37,10 +37,10 @@ export class Lsf extends ConvertCommon {
   }
 
   public convertFile(f: File) {
-    if (f.out_ext === FileFormats[FileFormats.none]) {
-      consoleWebviewLog("not converting Fileformats.none file. returning...");
+    /*if (f.out_ext === FileFormats[FileFormats.none]) {
+      consoleWebviewLog("not converting FileFormats.none file. returning...");
       return;
-    }
+    }*/
 
     let outContents: string;
     try {
