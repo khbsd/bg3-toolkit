@@ -38,11 +38,12 @@ const xmlLineTags: string[] = [
   "</content>",
 ];
 
+const versionRegex: RegExp = /(?<version><\?[\s\w\=\"\d\.\-]*\?>)/;
+const openContentListRegex: RegExp = /(?<openContentList><contentList[\w\s\:\=\"\.\/\-]*>)/;
+const closeContentListRegex: RegExp = /(?<closeContentList><\/contentList+>)/;
+
 const virtualTextureRegex: RegExp = /Textures_[\d]+/;
 const hotfixPatchRegex: RegExp = /Patch[\d]+_Hotfix[\d]+/;
-const version: RegExp = /(?<version><\?[\s\w\=\"\d\.\-]*\?>)/;
-const openContentList: RegExp = /(?<openContentList><contentList[\w\s\:\=\"\.\/\-]*>)/;
-const closeContentList: RegExp = /(?<closeContentList><\/contentList+>)/;
 
 /**
  * TODO: xmlfile class that can hold opening tags and other data maybe
@@ -53,42 +54,71 @@ const closeContentList: RegExp = /(?<closeContentList><\/contentList+>)/;
  * closeContentList regex /(?<closeContentList><\/[\w]+>)/
 */
 
-class XmlFile {
-  versionTag: string = "";
-  openContentListTag: string = "";
-  closeContentListTag: string = "";
-  content: string[] = [];
+type XmlFileTags = {
+  version: string;
+  openContentList: string;
+  closeContentList: string;
+};
 
-  constructor(filePath: string) {
-    this.content.push("<!-- " + path.basename(filePath) + " --->");
-    this.content.push("");
-    this.content = this.content.concat(getLinesFromFileSync(filePath));
-    this.getTags();
+class XmlFile {
+  name: string;
+  path: string;
+  tags: XmlFileTags;
+  content: string[];
+  strippedContent: string[] = [];
+
+  constructor(filePath: string, addNameTag?: boolean) {
+    this.path = filePath;
+    this.name = path.basename(this.path);
+    this.content = this.setUpContent(getLinesFromFileSync(this.path), addNameTag ?? false);
+    this.tags = this.getTags();
+    this.strippedContent = stripOpeningClosingTags(this);
   }
 
-  private getTags(): void {
+  private setUpContent(content: string[], addNameTag: boolean): string[] {
+    const conf: Config = new Config();
+    let tmpContent: string[] = [];
+    let fileString: string = "<!-- " + this.name + " --> ";
+    if (!content.includes(fileString)
+      && !this.name.includes(conf.mergedLocalizationName)
+      && addNameTag) {
+      tmpContent.push(fileString);
+      tmpContent.push("");
+    }
+
+    tmpContent = tmpContent.concat(content);
+    return tmpContent;
+  }
+
+  private getTags(): XmlFileTags {
+    let tags: XmlFileTags = {
+      version: "",
+      openContentList: "",
+      closeContentList: "",
+    };
     for (const line of this.content) {
-      if (this.versionTag.length < 1) {
-        let match = line.match(version);
+      if (tags.version.length < 1) {
+        let match = line.match(versionRegex);
         if (match?.groups !== undefined) {
-          this.versionTag = match.groups?.version;
+          tags.version = match.groups?.version;
         }
       }
 
-      if (this.openContentListTag.length < 1) {
-        let match = line.match(openContentList);
+      if (tags.openContentList.length < 1) {
+        let match = line.match(openContentListRegex);
         if (match?.groups !== undefined) {
-          this.openContentListTag = match.groups.openContentList;
+          tags.openContentList = match.groups.openContentList;
         }
       }
 
-      if (this.closeContentListTag.length < 1) {
-        let match = line.match(closeContentList);
+      if (tags.closeContentList.length < 1) {
+        let match = line.match(closeContentListRegex);
         if (match?.groups !== undefined) {
-          this.closeContentListTag = match.groups.closeContentList;
+          tags.closeContentList = match.groups.closeContentList;
         }
       }
     }
+    return tags;
   }
 }
 
@@ -205,17 +235,16 @@ export async function addHandleToXml(handle?: string, fileIndex?: number) {
     tab += " ";
   }
 
-  handle =
-    tab +
-    xmlLineTags[XmlTag.OpenContent].replace("${handle}", handle) +
-    xmlLineTags[XmlTag.CloseContent];
   fileIndex = fileIndex ?? 0;
 
-  const xmlFiles: File[] = getFiles(getWorkspacePath(), {
+  const xmlFiles: XmlFile[] = [];
+  getFiles(getWorkspacePath(), {
     type: FileFormats.xml,
+  }).forEach((file) => {
+    xmlFiles.push(new XmlFile(file.path));
   });
 
-  let xmlFile: File | undefined = undefined;
+  let xmlFile: XmlFile | undefined = undefined;
 
   switch (xmlFiles.length) {
     case 0: {
@@ -244,14 +273,15 @@ export async function addHandleToXml(handle?: string, fileIndex?: number) {
   }
 
   if (xmlFile !== undefined) {
-    let lines = getLinesFromFileSync(xmlFile.path);
-    let openingTags = getTagVariants(lines);
+    handle =
+      tab +
+      xmlLineTags[XmlTag.OpenContent].replace("${handle}", handle) +
+      xmlLineTags[XmlTag.CloseContent];
+    xmlFile.strippedContent.push(handle);
 
-    lines = stripOpeningClosingTags(lines);
-    lines.push(handle);
-    lines = addOpeningClosingTags(lines, openingTags);
+    xmlFile.content = addOpeningClosingTags(xmlFile.strippedContent, xmlFile.tags);
 
-    fs.writeFile(xmlFile.path, lines.join(EOL), { flag: "w" }, (err) => {
+    fs.writeFile(xmlFile.path, xmlFile.content.join(EOL), { flag: "w" }, (err) => {
       if (err) {
         consoleWebviewLog(err);
         return;
@@ -261,13 +291,14 @@ export async function addHandleToXml(handle?: string, fileIndex?: number) {
   }
 }
 
-export function stripOpeningClosingTags(lines: string[]): string[] {
+export function stripOpeningClosingTags(file: XmlFile): string[] {
   let linesToDelete: number[] = [];
+  let lines = file.content;
 
   for (let i = 0; i < lines.length; i++) {
     const line = lines[i].trim().toLowerCase();
 
-    for (const tag of xmlFileTags) {
+    for (const tag of Object.values(file.tags)) {
       const tagLower = tag.toLowerCase();
       if (line.includes(tagLower)) {
         if (line.toLowerCase() !== tagLower) {
@@ -284,24 +315,23 @@ export function stripOpeningClosingTags(lines: string[]): string[] {
   }
 
   for (const line of linesToDelete.toReversed()) {
-    consoleWebviewLog("removing line", line, lines[line]);
     lines.splice(line, 1);
   }
-
   return lines;
 }
 
-export function addOpeningClosingTags(lines: string[], openingTags?: string[]): string[] {
-  if (openingTags === undefined) {
-    openingTags = [
-      xmlFileTags[XmlTag.VersionEncoding],
-      xmlFileTags[XmlTag.OpenContentList],
-    ];
+export function addOpeningClosingTags(lines: string[], tags?: XmlFileTags): string[] {
+  if (tags === undefined) {
+    tags = {
+      version: xmlFileTags[XmlTag.VersionEncoding],
+      openContentList: xmlFileTags[XmlTag.OpenContentList],
+      closeContentList: xmlFileTags[XmlTag.CloseContentList],
+    };
   }
-  let closingTag: string[] = [
-    xmlFileTags[XmlTag.CloseContentList],
-  ];
-  return openingTags.concat(lines).concat(closingTag);
+
+  lines = [tags.version, tags.openContentList].concat(lines);
+  lines.push(tags.closeContentList);
+  return lines;
 }
 
 
@@ -318,9 +348,12 @@ export function mergeXmlFiles(wsPath: string): boolean {
   }
 
   let lines: string[] = [];
-  let files = getFiles(wsPath, {
+  let files: XmlFile[] = [];
+  getFiles(wsPath, {
     type: FileFormats.xml,
     forXmlMerging: true,
+  }).forEach((file) => {
+    files.push(new XmlFile(file.path, true));
   });
 
   // still cant merge a single file
@@ -329,11 +362,9 @@ export function mergeXmlFiles(wsPath: string): boolean {
   }
 
   files.forEach((file) => {
-    lines.push("<!--" + file.name + "." + file.ext + "-->");
-    lines.push("");
-    lines = lines.concat(getLinesFromFileSync(file.path));
+    lines = lines.concat(file.content);
   });
-  lines = mergeXmlLines(lines);
+  lines = mergeXmlLines(files);
 
   let text = lines.join(EOL);
   let locaPath = path.join(
@@ -361,12 +392,15 @@ export function mergedLocaExists(
   return mergedExists;
 }
 
-export function mergeXmlLines(lines: string[]): string[] {
+export function mergeXmlLines(files: XmlFile[]): string[] {
   const conf: Config = new Config();
   let mergedLines: string[] = [];
 
-  let openingTags: string[] = getTagVariants(lines);
-  lines = stripOpeningClosingTags(lines);
+  const openingTags: XmlFileTags = files[0].tags;
+  let lines: string[] = [];
+  for (const file of files) {
+    lines = lines.concat(file.strippedContent);
+  }
 
   for (let i = 0; i < lines.length; i++) {
     const line = lines[i].trim();
@@ -380,8 +414,7 @@ export function mergeXmlLines(lines: string[]): string[] {
     }
   }
 
-  mergedLines = addOpeningClosingTags(mergedLines, openingTags);
-  return mergedLines;
+  return addOpeningClosingTags(mergedLines, openingTags);
 }
 
 function filterLocalizations(dirents: fs.Dirent[]): fs.Dirent[] {

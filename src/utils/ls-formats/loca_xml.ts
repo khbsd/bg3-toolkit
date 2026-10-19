@@ -6,7 +6,7 @@ import { ConvertCommon, File, FileFormats } from "./formats";
 
 export class Xml extends ConvertCommon {
   constructor(wsPath: string, modPath?: string | undefined) {
-    super(wsPath, { modPath: modPath }, { type: FileFormats.xml, forConversion: true, forXmlMerging: mergeXmlFiles(fixPath(wsPath)) });
+    super(wsPath, { modPath: modPath }, { type: FileFormats.xml, forConversion: true });
     this._cf = this.convertFile;
   }
 

@@ -10,6 +10,7 @@ import { ConvertCommon, FileFormats } from "./formats";
 import { convertAll } from "./junction";
 
 function convertFilesForPacking(wsPath: string): void {
+  futils.mergeXmlFiles(wsPath);
   convertAll(wsPath, FileFormats.lsx);
   convertAll(wsPath, FileFormats.xml);
 }
