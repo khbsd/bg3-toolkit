@@ -40,9 +40,57 @@ const xmlLineTags: string[] = [
 
 const virtualTextureRegex: RegExp = /Textures_[\d]+/;
 const hotfixPatchRegex: RegExp = /Patch[\d]+_Hotfix[\d]+/;
+const version: RegExp = /(?<version><\?[\s\w\=\"\d\.\-]*\?>)/;
+const openContentList: RegExp = /(?<openContentList><contentList[\w\s\:\=\"\.\/\-]*>)/;
+const closeContentList: RegExp = /(?<closeContentList><\/contentList+>)/;
 
-// TODO: xmlfile class that can hold opening tags and other data maybe
-// also: regex for opening tag variants would be better
+/**
+ * TODO: xmlfile class that can hold opening tags and other data maybe
+ * also: regex for opening tag variants would be better
+ *
+ * version regex /(?<version><\?[\sa-zA-Z\=\"\d\.\-]*\?>)/
+ * openContentList regex /(?<openContentList><\w[\w\s\:\=\"\.\/\-]+>)/
+ * closeContentList regex /(?<closeContentList><\/[\w]+>)/
+*/
+
+class XmlFile {
+  versionTag: string = "";
+  openContentListTag: string = "";
+  closeContentListTag: string = "";
+  content: string[] = [];
+
+  constructor(filePath: string) {
+    this.content.push("<!-- " + path.basename(filePath) + " --->");
+    this.content.push("");
+    this.content = this.content.concat(getLinesFromFileSync(filePath));
+    this.getTags();
+  }
+
+  private getTags(): void {
+    for (const line of this.content) {
+      if (this.versionTag.length < 1) {
+        let match = line.match(version);
+        if (match?.groups !== undefined) {
+          this.versionTag = match.groups?.version;
+        }
+      }
+
+      if (this.openContentListTag.length < 1) {
+        let match = line.match(openContentList);
+        if (match?.groups !== undefined) {
+          this.openContentListTag = match.groups.openContentList;
+        }
+      }
+
+      if (this.closeContentListTag.length < 1) {
+        let match = line.match(closeContentList);
+        if (match?.groups !== undefined) {
+          this.closeContentListTag = match.groups.closeContentList;
+        }
+      }
+    }
+  }
+}
 
 export function fixPath(wsPath: string): string {
   const illegal_strings = ["file:", "//"];
@@ -256,6 +304,8 @@ export function addOpeningClosingTags(lines: string[], openingTags?: string[]): 
   return openingTags.concat(lines).concat(closingTag);
 }
 
+
+// TODO: convert to use XmlFile class
 export function mergeXmlFiles(wsPath: string): boolean {
   const conf = new Config();
   wsPath = getModPath(wsPath);
