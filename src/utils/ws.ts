@@ -21,6 +21,9 @@ export function getWorkspacePath(short: boolean = false): string {
       vscode.workspace.workspaceFolders.length > 0
     ) {
       wsPath = vscode.workspace.workspaceFolders[0].uri.toString();
+      if (wsPath.includes("%")) {
+        wsPath = decodeURIComponent(wsPath);
+      }
     } else {
       wsPath = "home";
     }

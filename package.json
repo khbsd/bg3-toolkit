@@ -2,7 +2,7 @@
   "name": "bg3-toolkit",
   "displayName": "bg3-toolkit",
   "description": "bg3 modmaking extension!! cross-platform and minimal. i love you!!",
-  "version": "1.0.6",
+  "version": "1.0.7",
   "publisher": "kayabeans",
   "icon": "resources/icon/icon_sm.png",
   "galleryBanner": {
@@ -126,7 +126,7 @@
         },
         "bg3-toolkit.conversionNeededDirectories": {
           "type": "string",
-          "default": "[PAK]_UI, [PAK]_Armor, [PAK]_GeneratedDialogTimelines, Assets, Content, Effects, Flags, LevelMapValues, Localization, MultiEffectInfos, RootTemplates, Timeline, UI",
+          "default": "[PAK]_UI, [PAK]_Armor, [PAK]_GeneratedDialogTimelines, Assets, Content, Effects, Flags, LevelMapValues, Localization, MultiEffectInfos, RootTemplates, Timeline, UI, Levels",
           "description": "list of directories that will have their files converted from editable to ls binary.\n!! if you dont know what youre doing probably leave this one as is."
         },
         "bg3-toolkit.customModPath": {
@@ -234,7 +234,7 @@
       "activitybar": [
         {
           "id": "bg3-toolkit",
-          "title": "bg3 toolkit",
+          "title": "BG3 TOOLKIT",
           "icon": "resources/icon/icon.png"
         }
       ]
@@ -245,13 +245,13 @@
           "type": "webview",
           "icon": "",
           "id": "toolkitWebviewView",
-          "name": "toolkit"
+          "name": "TOOLKIT"
         },
         {
           "type": "webview",
           "icon": "",
           "id": "consoleWebviewView",
-          "name": "console",
+          "name": "CONSOLE",
           "visibility": "hidden"
         }
       ]
