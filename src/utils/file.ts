@@ -17,7 +17,9 @@ import { getSelectionOrCursorWord, getWorkspacePath } from "./ws";
 
 const enum XmlTag {
   VersionEncoding,
+  Version,
   OpenContentList,
+  OpenContentListv2,
   CloseContentList,
   OpenContent = 0,
   CloseContent = 1,
@@ -25,7 +27,9 @@ const enum XmlTag {
 
 const xmlFileTags: string[] = [
   '<?xml version="1.0" encoding="UTF-8"?>',
+  '<?xml version="1.0"?>',
   "<contentList>",
+  '<contentList xmlns:xsd="http://www.w3.org/2001/XMLSchema" xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance">',
   "</contentList>",
 ];
 
@@ -36,6 +40,9 @@ const xmlLineTags: string[] = [
 
 const virtualTextureRegex: RegExp = /Textures_[\d]+/;
 const hotfixPatchRegex: RegExp = /Patch[\d]+_Hotfix[\d]+/;
+
+// TODO: xmlfile class that can hold opening tags and other data maybe
+// also: regex for opening tag variants would be better
 
 export function fixPath(wsPath: string): string {
   const illegal_strings = ["file:", "//"];
@@ -95,6 +102,31 @@ export function hasMetaFile(path: string): boolean {
   return path.toLowerCase().includes("meta.lsx");
 }
 
+export function getTagVariants(lines: string[]): string[] {
+  let testTags: XmlTag[] = [XmlTag.VersionEncoding, XmlTag.Version, XmlTag.OpenContentList, XmlTag.OpenContentListv2];
+  let openingTags: string[] = [];
+  for (const line of lines) {
+    if (openingTags.length < 3) {
+      let delLines: number[] = [];
+      for (let i = 0; i < testTags.length; i++) {
+        let tag = testTags[i];
+        if (line.toLowerCase() == xmlFileTags[tag].toLowerCase()) {
+          openingTags.push(xmlFileTags[tag]);
+          delLines.push(i);
+        }
+      }
+
+      for (let rmLine of delLines.toReversed()) {
+        testTags.splice(rmLine, 1);
+      }
+    } else {
+      break;
+    }
+  }
+
+  return openingTags;
+}
+
 export function getMetaFile(): File | undefined {
   for (const entry of fs.readdirSync(getModPath(getWorkspacePath()), { recursive: true, withFileTypes: true })) {
     let fpath: string = path.join(entry.parentPath, entry.name);
@@ -113,8 +145,20 @@ export function getModName(modPath: string): string {
 
 export async function addHandleToXml(handle?: string, fileIndex?: number) {
   handle = handle ?? getSelectionOrCursorWord();
+
+  let tabSize: number = 4;
+  try {
+    tabSize = Number(vscode.window.activeTextEditor?.options.tabSize);
+  } catch (err) {
+    console.log(err);
+  }
+  let tab = "";
+  while (tab.length < tabSize) {
+    tab += " ";
+  }
+
   handle =
-    "    " +
+    tab +
     xmlLineTags[XmlTag.OpenContent].replace("${handle}", handle) +
     xmlLineTags[XmlTag.CloseContent];
   fileIndex = fileIndex ?? 0;
@@ -152,16 +196,19 @@ export async function addHandleToXml(handle?: string, fileIndex?: number) {
   }
 
   if (xmlFile !== undefined) {
-    let lines = stripOpeningClosingTags(getLinesFromFileSync(xmlFile.path));
+    let lines = getLinesFromFileSync(xmlFile.path);
+    let openingTags = getTagVariants(lines);
+
+    lines = stripOpeningClosingTags(lines);
     lines.push(handle);
-    lines = addOpeningClosingTags(lines);
+    lines = addOpeningClosingTags(lines, openingTags);
 
     fs.writeFile(xmlFile.path, lines.join(EOL), { flag: "w" }, (err) => {
       if (err) {
         consoleWebviewLog(err);
         return;
       }
-      consoleWebviewLog(xmlFile?.path + "saved");
+      consoleWebviewLog(xmlFile?.path, "saved");
     });
   }
 }
@@ -189,18 +236,20 @@ export function stripOpeningClosingTags(lines: string[]): string[] {
   }
 
   for (const line of linesToDelete.toReversed()) {
-    consoleWebviewLog("removing line " + line + lines[line]);
+    consoleWebviewLog("removing line", line, lines[line]);
     lines.splice(line, 1);
   }
 
   return lines;
 }
 
-export function addOpeningClosingTags(lines: string[]): string[] {
-  let openingTags: string[] = [
-    xmlFileTags[XmlTag.VersionEncoding],
-    xmlFileTags[XmlTag.OpenContentList],
-  ];
+export function addOpeningClosingTags(lines: string[], openingTags?: string[]): string[] {
+  if (openingTags === undefined) {
+    openingTags = [
+      xmlFileTags[XmlTag.VersionEncoding],
+      xmlFileTags[XmlTag.OpenContentList],
+    ];
+  }
   let closingTag: string[] = [
     xmlFileTags[XmlTag.CloseContentList],
   ];
@@ -266,6 +315,7 @@ export function mergeXmlLines(lines: string[]): string[] {
   const conf: Config = new Config();
   let mergedLines: string[] = [];
 
+  let openingTags: string[] = getTagVariants(lines);
   lines = stripOpeningClosingTags(lines);
 
   for (let i = 0; i < lines.length; i++) {
@@ -280,7 +330,7 @@ export function mergeXmlLines(lines: string[]): string[] {
     }
   }
 
-  mergedLines = addOpeningClosingTags(mergedLines);
+  mergedLines = addOpeningClosingTags(mergedLines, openingTags);
   return mergedLines;
 }
 
@@ -427,7 +477,6 @@ export function getFiles(wsPath: string, opts?: getFilesOpts): File[] {
       }
     }
 
-    console.log(entry.name);
     if (pathOk) {
       pushToFiles(entry);
     }
