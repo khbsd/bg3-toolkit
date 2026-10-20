@@ -1,6 +1,6 @@
 import * as vscode from "vscode";
 
-import { mergeXmlFiles } from "../../utils/file";
+import { mergeXmlFiles } from "../../utils/xml";
 import { getWorkspacePath } from "../../utils/ws";
 
 export class Command {

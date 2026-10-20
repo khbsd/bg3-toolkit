@@ -2,7 +2,6 @@ import * as vscode from "vscode";
 
 import { consoleWebviewLog } from "../../webview/console";
 
-
 export class Command {
   get(): vscode.Disposable {
     const disposable = vscode.commands.registerCommand(

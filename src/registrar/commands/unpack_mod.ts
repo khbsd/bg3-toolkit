@@ -1,6 +1,6 @@
 import * as vscode from "vscode";
 
-import { File } from "../../utils/ls-formats/formats";
+import { LsFile } from "../../utils/ls-formats/formats";
 import { convert } from "../../utils/ls-formats/junction";
 
 export class Command {
@@ -8,7 +8,7 @@ export class Command {
     const disposable = vscode.commands.registerCommand(
       "bg3-toolkit.unpackMod",
       (uri) => {
-        convert(new File(uri.path));
+        convert(new LsFile(uri.path));
       },
     );
     return disposable;

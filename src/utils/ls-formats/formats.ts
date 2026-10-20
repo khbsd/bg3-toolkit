@@ -80,7 +80,7 @@ export function isLsFile(name: string): boolean {
   );
 }
 
-export class File {
+export class LsFile {
   name: string;
   path: string;
   parent: string;
@@ -180,14 +180,14 @@ export class ConvertCommon {
   builder;
   wsPath: string;
   modPath: string;
-  files: File[] = [];
+  files: LsFile[] = [];
   type: FileFormats;
   conf: Config;
 
   /**
    * placeholder for format specific file conversion funcs.
    */
-  protected _cf = (f: File) => {
+  protected _cf = (f: LsFile) => {
     return;
   };
   /**

@@ -1,8 +1,8 @@
 import * as fs from "fs";
 
 import { consoleWebviewLog } from "../../webview/console";
-import { fixPath, mergeXmlFiles } from "../file";
-import { ConvertCommon, File, FileFormats } from "./formats";
+import { mergeXmlFiles } from "../xml";
+import { ConvertCommon, LsFile, FileFormats } from "./formats";
 
 export class Xml extends ConvertCommon {
   constructor(wsPath: string, modPath?: string | undefined) {
@@ -10,7 +10,7 @@ export class Xml extends ConvertCommon {
     this._cf = this.convertFile;
   }
 
-  public convertFile(f: File) {
+  public convertFile(f: LsFile) {
     if (f.out_ext === FileFormats[FileFormats.none]) {
       consoleWebviewLog("not converting Fileformats.none file. returning...");
       return;
@@ -37,7 +37,7 @@ export class Loca extends ConvertCommon {
     this._cf = this.convertFile;
   }
 
-  public convertFile(f: File) {
+  public convertFile(f: LsFile) {
     if (f.out_ext === FileFormats[FileFormats.none]) {
       consoleWebviewLog("not converting Fileformats.none file. returning...");
       return;

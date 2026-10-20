@@ -1,19 +1,20 @@
 import * as fs from "fs";
 import * as path from "path";
-import * as vscode from "vscode";
 
 import { FileHandle } from "fs/promises";
-import { EOL } from "os";
 import { consoleWebviewLog } from "../webview/console";
 import { Config } from "./config";
 import {
-  File,
   FileFormats,
+  LsFile,
+  LsfCompressionFormats,
   isEditable,
   isLoca,
-  LsfCompressionFormats,
 } from "./ls-formats/formats";
-import { getSelectionOrCursorWord, getWorkspacePath } from "./ws";
+import { getWorkspacePath } from "./ws";
+
+const virtualTextureRegex: RegExp = /Textures_[\d]+/;
+const hotfixPatchRegex: RegExp = /Patch[\d]+_Hotfix[\d]+/;
 
 const enum XmlTag {
   VersionEncoding,
@@ -25,102 +26,6 @@ const enum XmlTag {
   CloseContent = 1,
 }
 
-const xmlFileTags: string[] = [
-  '<?xml version="1.0" encoding="UTF-8"?>',
-  '<?xml version="1.0"?>',
-  "<contentList>",
-  '<contentList xmlns:xsd="http://www.w3.org/2001/XMLSchema" xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance">',
-  "</contentList>",
-];
-
-const xmlLineTags: string[] = [
-  '<content contentuid="${handle}" version="1">',
-  "</content>",
-];
-
-const versionRegex: RegExp = /(?<version><\?[\s\w\=\"\d\.\-]*\?>)/;
-const openContentListRegex: RegExp = /(?<openContentList><contentList[\w\s\:\=\"\.\/\-]*>)/;
-const closeContentListRegex: RegExp = /(?<closeContentList><\/contentList+>)/;
-
-const virtualTextureRegex: RegExp = /Textures_[\d]+/;
-const hotfixPatchRegex: RegExp = /Patch[\d]+_Hotfix[\d]+/;
-
-/**
- * TODO: xmlfile class that can hold opening tags and other data maybe
- * also: regex for opening tag variants would be better
- *
- * version regex /(?<version><\?[\sa-zA-Z\=\"\d\.\-]*\?>)/
- * openContentList regex /(?<openContentList><\w[\w\s\:\=\"\.\/\-]+>)/
- * closeContentList regex /(?<closeContentList><\/[\w]+>)/
-*/
-
-type XmlFileTags = {
-  version: string;
-  openContentList: string;
-  closeContentList: string;
-};
-
-class XmlFile {
-  name: string;
-  path: string;
-  tags: XmlFileTags;
-  content: string[];
-  strippedContent: string[] = [];
-
-  constructor(filePath: string, addNameTag?: boolean) {
-    this.path = filePath;
-    this.name = path.basename(this.path);
-    this.content = this.setUpContent(getLinesFromFileSync(this.path), addNameTag ?? false);
-    this.tags = this.getTags();
-    this.strippedContent = stripOpeningClosingTags(this);
-  }
-
-  private setUpContent(content: string[], addNameTag: boolean): string[] {
-    const conf: Config = new Config();
-    let tmpContent: string[] = [];
-    let fileString: string = "<!-- " + this.name + " --> ";
-    if (!content.includes(fileString)
-      && !this.name.includes(conf.mergedLocalizationName)
-      && addNameTag) {
-      tmpContent.push(fileString);
-      tmpContent.push("");
-    }
-
-    tmpContent = tmpContent.concat(content);
-    return tmpContent;
-  }
-
-  private getTags(): XmlFileTags {
-    let tags: XmlFileTags = {
-      version: "",
-      openContentList: "",
-      closeContentList: "",
-    };
-    for (const line of this.content) {
-      if (tags.version.length < 1) {
-        let match = line.match(versionRegex);
-        if (match?.groups !== undefined) {
-          tags.version = match.groups?.version;
-        }
-      }
-
-      if (tags.openContentList.length < 1) {
-        let match = line.match(openContentListRegex);
-        if (match?.groups !== undefined) {
-          tags.openContentList = match.groups.openContentList;
-        }
-      }
-
-      if (tags.closeContentList.length < 1) {
-        let match = line.match(closeContentListRegex);
-        if (match?.groups !== undefined) {
-          tags.closeContentList = match.groups.closeContentList;
-        }
-      }
-    }
-    return tags;
-  }
-}
 
 export function fixPath(wsPath: string): string {
   const illegal_strings = ["file:", "//"];
@@ -180,36 +85,11 @@ export function hasMetaFile(path: string): boolean {
   return path.toLowerCase().includes("meta.lsx");
 }
 
-export function getTagVariants(lines: string[]): string[] {
-  let testTags: XmlTag[] = [XmlTag.VersionEncoding, XmlTag.Version, XmlTag.OpenContentList, XmlTag.OpenContentListv2];
-  let openingTags: string[] = [];
-  for (const line of lines) {
-    if (openingTags.length < 3) {
-      let delLines: number[] = [];
-      for (let i = 0; i < testTags.length; i++) {
-        let tag = testTags[i];
-        if (line.toLowerCase() == xmlFileTags[tag].toLowerCase()) {
-          openingTags.push(xmlFileTags[tag]);
-          delLines.push(i);
-        }
-      }
-
-      for (let rmLine of delLines.toReversed()) {
-        testTags.splice(rmLine, 1);
-      }
-    } else {
-      break;
-    }
-  }
-
-  return openingTags;
-}
-
-export function getMetaFile(): File | undefined {
+export function getMetaFile(): LsFile | undefined {
   for (const entry of fs.readdirSync(getModPath(getWorkspacePath()), { recursive: true, withFileTypes: true })) {
     let fpath: string = path.join(entry.parentPath, entry.name);
     if (hasMetaFile(fpath)) {
-      return new File(fpath);
+      return new LsFile(fpath);
     }
   }
   return undefined;
@@ -221,159 +101,6 @@ export function getModName(modPath: string): string {
   return modPath.split(path.sep).at(-1) ?? "";
 }
 
-export async function addHandleToXml(handle?: string, fileIndex?: number) {
-  handle = handle ?? getSelectionOrCursorWord();
-
-  let tabSize: number = 4;
-  try {
-    tabSize = Number(vscode.window.activeTextEditor?.options.tabSize);
-  } catch (err) {
-    console.log(err);
-  }
-  let tab = "";
-  while (tab.length < tabSize) {
-    tab += " ";
-  }
-
-  fileIndex = fileIndex ?? 0;
-
-  const xmlFiles: XmlFile[] = [];
-  getFiles(getWorkspacePath(), {
-    type: FileFormats.xml,
-  }).forEach((file) => {
-    xmlFiles.push(new XmlFile(file.path));
-  });
-
-  let xmlFile: XmlFile | undefined = undefined;
-
-  switch (xmlFiles.length) {
-    case 0: {
-      await vscode.window.showErrorMessage("You have no localization files.");
-      return;
-    }
-    case 1: {
-      xmlFile = xmlFiles[fileIndex];
-      break;
-    }
-    default: {
-      const names: string[] = [];
-      xmlFiles.forEach((file) => {
-        names.push(file.name);
-      });
-      let picked =
-        (await vscode.window.showQuickPick(names)) ?? names[fileIndex];
-
-      xmlFiles.forEach((file) => {
-        if (path.basename(file.name) === picked) {
-          xmlFile = file;
-        }
-      });
-      break;
-    }
-  }
-
-  if (xmlFile !== undefined) {
-    handle =
-      tab +
-      xmlLineTags[XmlTag.OpenContent].replace("${handle}", handle) +
-      xmlLineTags[XmlTag.CloseContent];
-    xmlFile.strippedContent.push(handle);
-
-    xmlFile.content = addOpeningClosingTags(xmlFile.strippedContent, xmlFile.tags);
-
-    fs.writeFile(xmlFile.path, xmlFile.content.join(EOL), { flag: "w" }, (err) => {
-      if (err) {
-        consoleWebviewLog(err);
-        return;
-      }
-      consoleWebviewLog(xmlFile?.path, "saved");
-    });
-  }
-}
-
-export function stripOpeningClosingTags(file: XmlFile): string[] {
-  let linesToDelete: number[] = [];
-  let lines = file.content;
-
-  for (let i = 0; i < lines.length; i++) {
-    const line = lines[i].trim().toLowerCase();
-
-    for (const tag of Object.values(file.tags)) {
-      const tagLower = tag.toLowerCase();
-      if (line.includes(tagLower)) {
-        if (line.toLowerCase() !== tagLower) {
-          let tmpLine = lines[i].replace(tagLower, "");
-          if (tmpLine === lines[i]) {
-            tmpLine = lines[i].replace(tag, "");
-          }
-          lines[i] = tmpLine;
-        } else {
-          linesToDelete.push(i);
-        }
-      }
-    }
-  }
-
-  for (const line of linesToDelete.toReversed()) {
-    lines.splice(line, 1);
-  }
-  return lines;
-}
-
-export function addOpeningClosingTags(lines: string[], tags?: XmlFileTags): string[] {
-  if (tags === undefined) {
-    tags = {
-      version: xmlFileTags[XmlTag.VersionEncoding],
-      openContentList: xmlFileTags[XmlTag.OpenContentList],
-      closeContentList: xmlFileTags[XmlTag.CloseContentList],
-    };
-  }
-
-  lines = [tags.version, tags.openContentList].concat(lines);
-  lines.push(tags.closeContentList);
-  return lines;
-}
-
-
-// TODO: convert to use XmlFile class
-export function mergeXmlFiles(wsPath: string): boolean {
-  const conf = new Config();
-  wsPath = getModPath(wsPath);
-  if (conf.mergedLocalizationName.length < 1) {
-    return false;
-  }
-  // cant merge a single file
-  else if (fs.statSync(wsPath).isFile()) {
-    return false;
-  }
-
-  let lines: string[] = [];
-  let files: XmlFile[] = [];
-  getFiles(wsPath, {
-    type: FileFormats.xml,
-    forXmlMerging: true,
-  }).forEach((file) => {
-    files.push(new XmlFile(file.path, true));
-  });
-
-  // still cant merge a single file
-  if (files.length < 2) {
-    return false;
-  }
-
-  files.forEach((file) => {
-    lines = lines.concat(file.content);
-  });
-  lines = mergeXmlLines(files);
-
-  let text = lines.join(EOL);
-  let locaPath = path.join(
-    path.dirname(files[0].path),
-    conf.mergedLocalizationName + "." + FileFormats[FileFormats.xml],
-  );
-  fs.writeFileSync(locaPath, text, { flag: "w+" });
-  return true;
-}
 
 export function mergedLocaExists(
   dirents: fs.Dirent[],
@@ -392,30 +119,6 @@ export function mergedLocaExists(
   return mergedExists;
 }
 
-export function mergeXmlLines(files: XmlFile[]): string[] {
-  const conf: Config = new Config();
-  let mergedLines: string[] = [];
-
-  const openingTags: XmlFileTags = files[0].tags;
-  let lines: string[] = [];
-  for (const file of files) {
-    lines = lines.concat(file.strippedContent);
-  }
-
-  for (let i = 0; i < lines.length; i++) {
-    const line = lines[i].trim();
-    if (
-      !mergedLines.includes(lines[i]) ||
-      conf.mergedLocalizationAllowDuplicates ||
-      (line === "" && mergedLines.at(-1) !== line) ||
-      line.includes("<!--")
-    ) {
-      mergedLines.push(lines[i]);
-    }
-  }
-
-  return addOpeningClosingTags(mergedLines, openingTags);
-}
 
 function filterLocalizations(dirents: fs.Dirent[]): fs.Dirent[] {
   const conf = new Config();
@@ -456,8 +159,8 @@ export type getFilesOpts = {
   forUnpackingGameFiles?: boolean;
 };
 
-export function getFiles(wsPath: string, opts?: getFilesOpts): File[] {
-  let files: File[] = [];
+export function getFiles(wsPath: string, opts?: getFilesOpts): LsFile[] {
+  let files: LsFile[] = [];
   let type: string = "";
   let conf = opts?.conf ?? new Config();
   if (opts?.type !== undefined) {
@@ -477,7 +180,7 @@ export function getFiles(wsPath: string, opts?: getFilesOpts): File[] {
   }
 
   function pushToFiles(entry: fs.Dirent) {
-    files.push(new File(path.join(entry.parentPath, entry.name)));
+    files.push(new LsFile(path.join(entry.parentPath, entry.name)));
     consoleWebviewLog("added", entry.name);
   }
 
@@ -539,7 +242,7 @@ export function getFiles(wsPath: string, opts?: getFilesOpts): File[] {
 
         // lets you omit editable files from the .pak that the game wont look for
         if (opts?.forRemovingEditables) {
-          const f = new File(fp);
+          const f = new LsFile(fp);
           unneeded = isEditable(f.ext) && fileOk;
 
           if (unneeded) {

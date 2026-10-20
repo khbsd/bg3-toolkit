@@ -8,9 +8,10 @@ import { consoleWebviewLog } from "../../webview/console";
 import { Config } from "../config";
 import { ConvertCommon, FileFormats } from "./formats";
 import { convertAll } from "./junction";
+import { mergeXmlFiles } from "../xml";
 
 function convertFilesForPacking(wsPath: string): void {
-  futils.mergeXmlFiles(wsPath);
+  mergeXmlFiles(wsPath);
   convertAll(wsPath, FileFormats.lsx);
   convertAll(wsPath, FileFormats.xml);
 }

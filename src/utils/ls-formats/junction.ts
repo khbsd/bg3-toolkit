@@ -4,14 +4,14 @@ import * as vscode from "vscode";
 import { Config } from "../config";
 import { fixPath, getFiles } from "../file";
 import { getWorkspacePath } from "../ws";
-import { File, FileFormats } from "./formats";
+import { LsFile, FileFormats } from "./formats";
 import { Loca, Xml } from "./loca_xml";
 import { Lsf, Lsx } from "./lsx";
 import { Pak, Unpak } from "./pak";
 
 export function convertAll(dirPath: string, type: FileFormats) {
   if (fs.statSync(dirPath).isFile()) {
-    convert(new File(dirPath));
+    convert(new LsFile(dirPath));
     return;
   }
 
@@ -37,7 +37,7 @@ export function convertAll(dirPath: string, type: FileFormats) {
   }
 }
 
-export function convert(file: File) {
+export function convert(file: LsFile) {
   let c = undefined;
   switch (FileFormats[file.ext as keyof typeof FileFormats]) {
     case FileFormats.lsx:

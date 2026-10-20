@@ -1,9 +1,8 @@
 import * as vscode from "vscode";
 
-import { File } from "../../utils/ls-formats/formats";
+import { LsFile } from "../../utils/ls-formats/formats";
 import { convert } from "../../utils/ls-formats/junction";
 import { consoleWebviewLog } from "../../webview/console";
-
 
 export class Command {
   get(): vscode.Disposable {
@@ -11,7 +10,7 @@ export class Command {
       "bg3-toolkit.lsxConvert",
       (uri) => {
         consoleWebviewLog(uri.path);
-        convert(new File(uri.path));
+        convert(new LsFile(uri.path));
       },
     );
     return disposable;
