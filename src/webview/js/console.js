@@ -16,8 +16,12 @@
       msg: "clearing log text",
     },
   ];
-  
-  for (let i = 0, listenersAdded = false; i < buttonInfo.length && !listenersAdded; i++) {
+
+  for (
+    let i = 0, listenersAdded = false;
+    i < buttonInfo.length && !listenersAdded;
+    i++
+  ) {
     let b = buttonInfo[i];
     document.querySelector(b.class).addEventListener(b.listener, () => {
       vscode.postMessage(b);
@@ -29,7 +33,7 @@
   window.addEventListener("message", (event) => {
     if (event.data === "scroll-update") {
       document.getElementById("console").scrollTo(0, 1000000000000);
-      vscode.postMessage({ msg: "scroll updated" })
+      vscode.postMessage({ msg: "scroll updated" });
     }
   });
 })();

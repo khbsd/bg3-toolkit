@@ -24,7 +24,14 @@ export class Pak extends ConvertCommon {
     // needs to be called before super() so that converted files exist before the ConvertCommon class collects them.
     convertFilesForPacking(wsPath);
 
-    super(wsPath, { modPath: modPath }, { forPacking: true, forRemovingEditables: new Config().doNotPackEditables });
+    super(
+      wsPath,
+      { modPath: modPath },
+      {
+        forPacking: true,
+        forRemovingEditables: new Config().doNotPackEditables,
+      },
+    );
   }
 
   public build(): void {
@@ -66,16 +73,13 @@ export class Pak extends ConvertCommon {
         let consoleText = name + " " + verb + " to " + installPath;
 
         consoleWebviewLog(consoleText);
-        vscode.window.showInformationMessage(
-          consoleText,
-        );
+        vscode.window.showInformationMessage(consoleText);
       }
     } catch (err) {
       consoleWebviewLog(err);
     }
   }
 }
-
 
 /**
  *
@@ -98,11 +102,7 @@ export async function unpackChoose(): Promise<void> {
     if (pakPath === undefined) {
       let warning;
       await vscode.window
-        .showWarningMessage(
-          "You must select a pak!",
-          "oops",
-          "never mind",
-        )
+        .showWarningMessage("You must select a pak!", "oops", "never mind")
         .then((value) => {
           warning = value;
         });
@@ -147,9 +147,7 @@ export function Unpak(wsPath: string, unpakPath?: string) {
   wsPath = futils.fixPath(wsPath);
   unpakPath = futils.fixPath(unpakPath ?? path.resolve(wsPath, ".."));
 
-  if (
-    !path.basename(wsPath).includes("." + FileFormats[FileFormats.pak])
-  ) {
+  if (!path.basename(wsPath).includes("." + FileFormats[FileFormats.pak])) {
     return;
   }
 
@@ -170,7 +168,7 @@ export function Unpak(wsPath: string, unpakPath?: string) {
       fs.mkdirSync(dirPath, { recursive: true });
       if (fs.statSync(dirPath).isDirectory()) {
         fs.writeFileSync(fullPath, Buffer.from(file.extract_contents()));
-      };
+      }
       consoleWebviewLog("wrote file: " + fullPath);
     } catch (err) {
       consoleWebviewLog(err);

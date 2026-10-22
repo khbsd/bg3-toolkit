@@ -170,7 +170,6 @@ type ConvertCommonOpts = {
 type CombinedOpts = {
   cOpts?: ConvertCommonOpts;
   gOpts?: futils.getFilesOpts;
-
 };
 
 /**
@@ -199,7 +198,11 @@ export class ConvertCommon {
    * this class will assume you are converting a single file and skip populating
    * the 'files' array.
    */
-  constructor(wsPath: string, convertOpts?: ConvertCommonOpts, getFileOpts?: futils.getFilesOpts) {
+  constructor(
+    wsPath: string,
+    convertOpts?: ConvertCommonOpts,
+    getFileOpts?: futils.getFilesOpts,
+  ) {
     const opts: CombinedOpts = {
       cOpts: convertOpts,
       gOpts: getFileOpts,

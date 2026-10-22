@@ -81,29 +81,35 @@
   let msg = {
     type: "version-load",
     version: [],
-    msg: "mod version found, doing"
+    msg: "mod version found, doing",
   };
   for (let i = 0; i < versionInfo.length; i++) {
-    msg.version.push((document.querySelector(versionInfo[i].class).innerText));
+    msg.version.push(document.querySelector(versionInfo[i].class).innerText);
   }
   vscode.postMessage(msg);
 
   window.addEventListener("message", (event) => {
-    if (event.data.type === "major"
-      || event.data.type === "minor"
-      || event.data.type === "revision"
-      || event.data.type === "build") {
-      let val = document.querySelector("." + event.data.type).value = event.data.content;
+    if (
+      event.data.type === "major" ||
+      event.data.type === "minor" ||
+      event.data.type === "revision" ||
+      event.data.type === "build"
+    ) {
+      let val = (document.querySelector("." + event.data.type).value =
+        event.data.content);
 
       while (val.charAt(0) === "0" && val.length >= 2) {
-        document.querySelector("." + event.data.type).value = val = val.slice(1);
+        document.querySelector("." + event.data.type).value = val =
+          val.slice(1);
       }
-
     }
-
   });
 
-  for (let i = 0, buttonListenersAdded = false; i < buttonInfo.length && !buttonListenersAdded; i++) {
+  for (
+    let i = 0, buttonListenersAdded = false;
+    i < buttonInfo.length && !buttonListenersAdded;
+    i++
+  ) {
     let b = buttonInfo[i];
     document.querySelector(b.class).addEventListener(b.listener, () => {
       vscode.postMessage(b);
@@ -112,7 +118,11 @@
     buttonListenersAdded = buttonInfo.length - 1 === i;
   }
 
-  for (let i = 0, versionListenersAdded = false; i < versionInfo.length && !versionListenersAdded; i++) {
+  for (
+    let i = 0, versionListenersAdded = false;
+    i < versionInfo.length && !versionListenersAdded;
+    i++
+  ) {
     let v = versionInfo[i];
     document.querySelector(v.class).addEventListener(v.listener, () => {
       try {

@@ -94,11 +94,7 @@ export async function unpackGameData(): Promise<void> {
     if (pakPath === undefined) {
       let warning;
       await vscode.window
-        .showWarningMessage(
-          "You must select something!",
-          "oops",
-          "never mind",
-        )
+        .showWarningMessage("You must select something!", "oops", "never mind")
         .then((value) => {
           warning = value;
         });
@@ -149,7 +145,10 @@ export async function unpackGameData(): Promise<void> {
   } else if (fs.statSync(pakPath).isFile()) {
     Unpak(fixPath(pakPath.toString()), unPakPath);
   } else if (fs.statSync(pakPath).isDirectory()) {
-    for (const pak of getFiles(fixPath(pakPath.toString()), { type: FileFormats.pak, forUnpackingGameFiles: true })) {
+    for (const pak of getFiles(fixPath(pakPath.toString()), {
+      type: FileFormats.pak,
+      forUnpackingGameFiles: true,
+    })) {
       Unpak(pak.path, unPakPath);
     }
   }

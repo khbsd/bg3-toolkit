@@ -12,27 +12,27 @@ export enum Version64Parts {
 }
 
 export type Version64Part = {
-  shift: bigint,
-  mask: bigint,
+  shift: bigint;
+  mask: bigint;
 };
 
 export var Version64Def: Version64Part[] = [];
 {
   Version64Def[Version64Parts.major] = {
     shift: BigInt(55),
-    mask: BigInt(0xFF),
+    mask: BigInt(0xff),
   };
   Version64Def[Version64Parts.minor] = {
     shift: BigInt(47),
-    mask: BigInt(0xFF),
+    mask: BigInt(0xff),
   };
   Version64Def[Version64Parts.revision] = {
     shift: BigInt(31),
-    mask: BigInt(0xFFFF),
+    mask: BigInt(0xffff),
   };
   Version64Def[Version64Parts.build] = {
     shift: BigInt(0),
-    mask: BigInt(0x7FFFFFFF),
+    mask: BigInt(0x7fffffff),
   };
 }
 
@@ -65,7 +65,7 @@ export class Version64 {
     }
 
     return version;
-  };
+  }
 
   /**
    *
@@ -127,7 +127,10 @@ export class Version64 {
         consoleWebviewLog("replacing", resultVersion, "with", version);
         logged = true;
       }
-      metaFileContents = metaFileContents.replace(line + resultVersion, line + version);
+      metaFileContents = metaFileContents.replace(
+        line + resultVersion,
+        line + version,
+      );
     }
     fs.writeFileSync(metaPath, metaFileContents, { flag: "w" });
   }

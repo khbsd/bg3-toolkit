@@ -63,7 +63,7 @@ class XmlFileTags {
       name: "closeContentList",
     };
   }
-};
+}
 
 class XmlFile {
   name: string;
@@ -75,7 +75,10 @@ class XmlFile {
   constructor(filePath: string, addNameTag?: boolean) {
     this.path = filePath;
     this.name = path.basename(this.path);
-    this.content = this.setUpContent(getLinesFromFileSync(this.path), addNameTag ?? false);
+    this.content = this.setUpContent(
+      getLinesFromFileSync(this.path),
+      addNameTag ?? false,
+    );
     this.tags = this.getTags();
     this.strippedContent = stripOpeningClosingTags(this);
   }
@@ -84,9 +87,11 @@ class XmlFile {
     const conf: Config = new Config();
     let tmpContent: string[] = [];
     let fileString: string = "<!-- " + this.name + " --> ";
-    if (!content.includes(fileString)
-      && !this.name.includes(conf.mergedLocalizationName)
-      && addNameTag) {
+    if (
+      !content.includes(fileString) &&
+      !this.name.includes(conf.mergedLocalizationName) &&
+      addNameTag
+    ) {
       tmpContent.push(fileString);
       tmpContent.push("");
     }
@@ -170,15 +175,23 @@ export async function addHandleToXml(handle?: string, fileIndex?: number) {
       xmlLineTags[XmlTag.CloseContent];
 
     xmlFile.strippedContent.push(handle);
-    xmlFile.content = addOpeningClosingTags(xmlFile.strippedContent, xmlFile.tags);
+    xmlFile.content = addOpeningClosingTags(
+      xmlFile.strippedContent,
+      xmlFile.tags,
+    );
 
-    fs.writeFile(xmlFile.path, xmlFile.content.join(EOL), { flag: "w" }, (err) => {
-      if (err) {
-        consoleWebviewLog(err);
-        return;
-      }
-      consoleWebviewLog(xmlFile?.path, "saved");
-    });
+    fs.writeFile(
+      xmlFile.path,
+      xmlFile.content.join(EOL),
+      { flag: "w" },
+      (err) => {
+        if (err) {
+          consoleWebviewLog(err);
+          return;
+        }
+        consoleWebviewLog(xmlFile?.path, "saved");
+      },
+    );
   }
 }
 
@@ -211,7 +224,10 @@ export function stripOpeningClosingTags(file: XmlFile): string[] {
   return lines;
 }
 
-export function addOpeningClosingTags(lines: string[], tags: XmlFileTags): string[] {
+export function addOpeningClosingTags(
+  lines: string[],
+  tags: XmlFileTags,
+): string[] {
   lines = [tags.version.text, tags.openContentList.text].concat(lines);
   lines.push(tags.closeContentList.text);
   return lines;
@@ -255,7 +271,6 @@ export function mergeXmlFiles(wsPath: string): boolean {
   fs.writeFileSync(locaPath, text, { flag: "w+" });
   return true;
 }
-
 
 export function mergeXmlLines(files: XmlFile[]): string[] {
   const conf: Config = new Config();

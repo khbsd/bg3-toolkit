@@ -9,15 +9,11 @@ import { HtmlData, HtmlDataUtils } from "../utils/html";
 
 let webview: ConsoleWebviewViewProvider | undefined = undefined;
 const openingText = "hi !! i love you!";
-const consoleTags: string[] = [
-  '<p class="line">',
-  "</p>",
-  "<br>"
-];
+const consoleTags: string[] = ['<p class="line">', "</p>", "<br>"];
 const enum ConsoleTags {
   OpenPTag,
   ClosePTag,
-  LineBreak
+  LineBreak,
 }
 
 export class ConsoleWebviewViewProvider implements vscode.WebviewViewProvider {
@@ -32,9 +28,7 @@ export class ConsoleWebviewViewProvider implements vscode.WebviewViewProvider {
   scriptUri: string = "";
   styleMainUri: string = "";
 
-  constructor(
-    private readonly _extensionUri: vscode.Uri
-  ) {
+  constructor(private readonly _extensionUri: vscode.Uri) {
     this.consoleText = openingText;
   }
 
@@ -60,26 +54,30 @@ export class ConsoleWebviewViewProvider implements vscode.WebviewViewProvider {
     );
 
     // path to js script
-    this.scriptUri = this._view?.webview.asWebviewUri(
-      vscode.Uri.joinPath(
-        this._extensionUri,
-        "src",
-        "webview",
-        "js",
-        "console.js",
-      ),
-    ).toString();
+    this.scriptUri = this._view?.webview
+      .asWebviewUri(
+        vscode.Uri.joinPath(
+          this._extensionUri,
+          "src",
+          "webview",
+          "js",
+          "console.js",
+        ),
+      )
+      .toString();
 
     // path to css file
-    this.styleMainUri = this._view?.webview.asWebviewUri(
-      vscode.Uri.joinPath(
-        this._extensionUri,
-        "src",
-        "webview",
-        "css",
-        "console.css",
-      ),
-    ).toString();
+    this.styleMainUri = this._view?.webview
+      .asWebviewUri(
+        vscode.Uri.joinPath(
+          this._extensionUri,
+          "src",
+          "webview",
+          "css",
+          "console.css",
+        ),
+      )
+      .toString();
 
     this._view.webview.html = this._getHtmlForWebview(this._view.webview);
 
@@ -130,15 +128,22 @@ export class ConsoleWebviewViewProvider implements vscode.WebviewViewProvider {
   public updateConsoleText(text?: string): void {
     const conf: Config = new Config();
     if (text !== undefined) {
-      text = consoleTags[ConsoleTags.OpenPTag] + text + consoleTags[ConsoleTags.ClosePTag];
+      text =
+        consoleTags[ConsoleTags.OpenPTag] +
+        text +
+        consoleTags[ConsoleTags.ClosePTag];
       if (this.consoleText === openingText) {
         this.consoleText = text;
       } else {
-        this.consoleText = this.consoleText.concat(consoleTags[ConsoleTags.LineBreak] + text);
+        this.consoleText = this.consoleText.concat(
+          consoleTags[ConsoleTags.LineBreak] + text,
+        );
       }
     }
 
-    let textArray: string[] = this.consoleText.split(consoleTags[ConsoleTags.LineBreak]);
+    let textArray: string[] = this.consoleText.split(
+      consoleTags[ConsoleTags.LineBreak],
+    );
     if (textArray.length > conf.consoleLineLimit) {
       textArray = textArray.slice(textArray.length - conf.consoleLineLimit);
       this.consoleText = textArray.join(consoleTags[ConsoleTags.LineBreak]);

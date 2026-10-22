@@ -5,7 +5,11 @@ import { ConvertCommon, LsFile, FileFormats } from "./formats";
 
 export class Lsx extends ConvertCommon {
   constructor(wsPath: string, modPath?: string | undefined) {
-    super(wsPath, { modPath: modPath }, { type: FileFormats.lsx, forConversion: true });
+    super(
+      wsPath,
+      { modPath: modPath },
+      { type: FileFormats.lsx, forConversion: true },
+    );
     this._cf = this.convertFile;
   }
 
@@ -32,7 +36,11 @@ export class Lsx extends ConvertCommon {
 
 export class Lsf extends ConvertCommon {
   constructor(wsPath: string, modPath?: string | undefined) {
-    super(wsPath, { modPath: modPath }, { type: FileFormats.lsf, forConversion: true });
+    super(
+      wsPath,
+      { modPath: modPath },
+      { type: FileFormats.lsf, forConversion: true },
+    );
     this._cf = this.convertFile;
   }
 

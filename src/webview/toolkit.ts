@@ -48,6 +48,9 @@ export class ToolkitWebviewViewProvider implements vscode.WebviewViewProvider {
     };
 
     this._view.webview.html = this._getHtmlForWebview(this._view.webview);
+    if (!this.isModWorkspace) {
+      return;
+    }
 
     this._view.webview.onDidReceiveMessage((data) => {
       if (data.type === "version-load") {
@@ -57,7 +60,10 @@ export class ToolkitWebviewViewProvider implements vscode.WebviewViewProvider {
         if (!versionStringNotEmpty(data.version)) {
           version = v64.getVersionInMeta();
           for (let i = 0; i < version.length; i++) {
-            this._view?.webview.postMessage({ content: version[i], type: getNames(Version64Parts)[i] });
+            this._view?.webview.postMessage({
+              content: version[i],
+              type: getNames(Version64Parts)[i],
+            });
           }
         }
 
@@ -76,11 +82,13 @@ export class ToolkitWebviewViewProvider implements vscode.WebviewViewProvider {
             consoleWebviewLog(err);
             part = "0";
           }
-          this._view?.webview.postMessage({ content: part, type: getNames(Version64Parts)[i] });
+          this._view?.webview.postMessage({
+            content: part,
+            type: getNames(Version64Parts)[i],
+          });
           version.push(part);
         }
         v64.updateVersionInMeta(v64.version64Build(version.join(".")));
-
       } else if (data.type === "debug") {
         consoleWebviewLog("message received: " + data.msg);
       }
@@ -100,13 +108,15 @@ export class ToolkitWebviewViewProvider implements vscode.WebviewViewProvider {
           consoleWebviewLog("unrecognized type");
         }
       }
-
     });
   }
 
   private _getHtmlForWebview(webview: vscode.Webview) {
     const wv: vscode.Webview = webview;
     const hd: HtmlDataUtils = new HtmlDataUtils();
+    const wsPath: string = this.isModWorkspace
+      ? getModPath(getWorkspacePath())
+      : "";
     const conf: Config = new Config();
     const nonce = hd.getNonce();
     let htmlUri: string;
@@ -169,7 +179,7 @@ export class ToolkitWebviewViewProvider implements vscode.WebviewViewProvider {
       data[HtmlData.ScriptSrc] = scriptUri.toString();
       data[HtmlData.StyleSrc] = styleMainUri.toString();
       data[HtmlData.CspSrc] = csp;
-      data[HtmlData.WorkspacePath] = getModPath(getWorkspacePath());
+      data[HtmlData.WorkspacePath] = wsPath;
       data[HtmlData.babes] = babes;
     }
 
@@ -177,7 +187,7 @@ export class ToolkitWebviewViewProvider implements vscode.WebviewViewProvider {
     try {
       html = fs.readFileSync(htmlUri).toString();
     } catch (err) {
-      consoleWebviewLog(err);
+      console.log(err);
       return "";
     }
     return hd.formatHtml(html, data);

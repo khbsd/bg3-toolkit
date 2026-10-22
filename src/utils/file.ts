@@ -26,7 +26,6 @@ const enum XmlTag {
   CloseContent = 1,
 }
 
-
 export function fixPath(wsPath: string): string {
   const illegal_strings = ["file:", "//"];
   for (let str of illegal_strings) {
@@ -55,6 +54,10 @@ export function getRelativeModPath(modPath: string, fullPath: string): string {
  * @returns string
  */
 export function getModPath(wsPath: string): string {
+  if (wsPath.length === 0) {
+    console.log(wsPath);
+    throw Error("no workspace or work folder detected");
+  }
   wsPath = fixPath(wsPath);
 
   let tempPath: string = wsPath;
@@ -86,7 +89,10 @@ export function hasMetaFile(path: string): boolean {
 }
 
 export function getMetaFile(): LsFile | undefined {
-  for (const entry of fs.readdirSync(getModPath(getWorkspacePath()), { recursive: true, withFileTypes: true })) {
+  for (const entry of fs.readdirSync(getModPath(getWorkspacePath()), {
+    recursive: true,
+    withFileTypes: true,
+  })) {
     let fpath: string = path.join(entry.parentPath, entry.name);
     if (hasMetaFile(fpath)) {
       return new LsFile(fpath);
@@ -100,7 +106,6 @@ export function getModName(modPath: string): string {
   consoleWebviewLog(modPath.split(path.sep).at(-1));
   return modPath.split(path.sep).at(-1) ?? "";
 }
-
 
 export function mergedLocaExists(
   dirents: fs.Dirent[],
@@ -118,7 +123,6 @@ export function mergedLocaExists(
   }
   return mergedExists;
 }
-
 
 function filterLocalizations(dirents: fs.Dirent[]): fs.Dirent[] {
   const conf = new Config();
@@ -202,7 +206,10 @@ export function getFiles(wsPath: string, opts?: getFilesOpts): LsFile[] {
 
         // unpacking game data
         if (opts?.forUnpackingGameFiles && filter) {
-          if (!hotfixPatchRegex.test(entry.name) && !virtualTextureRegex.test(entry.name)) {
+          if (
+            !hotfixPatchRegex.test(entry.name) &&
+            !virtualTextureRegex.test(entry.name)
+          ) {
             pushToFiles(entry);
             continue;
           }
@@ -217,7 +224,8 @@ export function getFiles(wsPath: string, opts?: getFilesOpts): LsFile[] {
       let unneeded: boolean = false;
 
       for (const dir of conf.conversionNeededDirectories) {
-        const fileOk: boolean = entry.parentPath.includes(dir) &&
+        const fileOk: boolean =
+          entry.parentPath.includes(dir) &&
           !conf.conversionExcludeFiles.includes(
             path.basename(entry.name, path.extname(entry.name)),
           );

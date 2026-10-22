@@ -6,7 +6,11 @@ import { ConvertCommon, LsFile, FileFormats } from "./formats";
 
 export class Xml extends ConvertCommon {
   constructor(wsPath: string, modPath?: string | undefined) {
-    super(wsPath, { modPath: modPath }, { type: FileFormats.xml, forConversion: true });
+    super(
+      wsPath,
+      { modPath: modPath },
+      { type: FileFormats.xml, forConversion: true },
+    );
     this._cf = this.convertFile;
   }
 
@@ -33,7 +37,11 @@ export class Xml extends ConvertCommon {
 
 export class Loca extends ConvertCommon {
   constructor(wsPath: string, modPath?: string | undefined) {
-    super(wsPath, { modPath: modPath }, { type: FileFormats.loca, forConversion: true });
+    super(
+      wsPath,
+      { modPath: modPath },
+      { type: FileFormats.loca, forConversion: true },
+    );
     this._cf = this.convertFile;
   }
 

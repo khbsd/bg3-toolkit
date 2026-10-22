@@ -14,30 +14,38 @@ import { ToolkitWebviewViewProvider } from "./webview/toolkit";
 export async function activate(context: vscode.ExtensionContext) {
   let isModWorkspace: boolean = false;
   try {
-    const dirs = fs.readdirSync(getWorkspacePath(), { withFileTypes: true, recursive: true, });
+    let wsPath: string = "";
+
+    console.log("what");
+    const dirs = fs.readdirSync(getWorkspacePath(), {
+      withFileTypes: true,
+      recursive: true,
+    });
+    console.log(isModWorkspace);
     for (const dir of dirs) {
       isModWorkspace = hasMetaFile(dir.name);
       if (isModWorkspace) {
         // mostly here to double check that it wont error out
-        console.log(getModPath(dir.parentPath));
+        console.log((wsPath = getModPath(dir.parentPath)));
         break;
       }
     }
 
+    if (wsPath.length === 0) {
+      throw Error("no workspace or work folder detected");
+    }
   } catch (err) {
     console.log(err);
     isModWorkspace = false;
   }
+
   vscode.commands.executeCommand(
     "setContext",
     "bg3-toolkit.isModWorkspace",
     isModWorkspace,
   );
 
-  // register commands
-  for (let disposable of new Registrar().getCommandList()) {
-    context.subscriptions.push(disposable);
-  }
+  console.log("set bg3-toolkit.isModWorkspace to:", isModWorkspace);
 
   // toolkit webview
   const wvToolkit = new ToolkitWebviewViewProvider(
@@ -52,16 +60,21 @@ export async function activate(context: vscode.ExtensionContext) {
   );
 
   if (isModWorkspace) {
+    console.log("dont load this");
     // console webview
-    const csToolkit = new ConsoleWebviewViewProvider(
-      context.extensionUri);
+    const csToolkit = new ConsoleWebviewViewProvider(context.extensionUri);
     context.subscriptions.push(
       vscode.window.registerWebviewViewProvider(
         ConsoleWebviewViewProvider.viewType,
         csToolkit,
       ),
     );
+
+    // register commands
+    for (let disposable of new Registrar().getCommandList()) {
+      context.subscriptions.push(disposable);
+    }
   }
 }
 
-export function deactivate() { }
+export function deactivate() {}
