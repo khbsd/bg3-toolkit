@@ -16,17 +16,17 @@ export async function activate(context: vscode.ExtensionContext) {
   try {
     let wsPath: string = "";
 
-    console.log("what");
     const dirs = fs.readdirSync(getWorkspacePath(), {
       withFileTypes: true,
       recursive: true,
     });
-    console.log(isModWorkspace);
+
     for (const dir of dirs) {
       isModWorkspace = hasMetaFile(dir.name);
       if (isModWorkspace) {
         // mostly here to double check that it wont error out
-        console.log((wsPath = getModPath(dir.parentPath)));
+        wsPath = getModPath(dir.parentPath);
+        console.log((wsPath));
         break;
       }
     }
@@ -45,8 +45,6 @@ export async function activate(context: vscode.ExtensionContext) {
     isModWorkspace,
   );
 
-  console.log("set bg3-toolkit.isModWorkspace to:", isModWorkspace);
-
   // toolkit webview
   const wvToolkit = new ToolkitWebviewViewProvider(
     context.extensionUri,
@@ -60,7 +58,6 @@ export async function activate(context: vscode.ExtensionContext) {
   );
 
   if (isModWorkspace) {
-    console.log("dont load this");
     // console webview
     const csToolkit = new ConsoleWebviewViewProvider(context.extensionUri);
     context.subscriptions.push(
