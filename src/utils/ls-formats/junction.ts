@@ -1,7 +1,7 @@
 import * as fs from "fs";
 import * as vscode from "vscode";
 
-import { Config } from "../config";
+import { getConf } from "../config";
 import { fixPath, getFiles } from "../file";
 import { getWorkspacePath } from "../ws";
 import { LsFile, FileFormats } from "./formats";
@@ -69,10 +69,9 @@ export function pack(wsPath?: string) {
 }
 
 export async function unpackGameData(): Promise<void> {
-  const conf: Config = new Config();
   let pakPath: any | undefined;
   let unPakPath: any | undefined;
-  let gameData: string = conf.gameDataPath;
+  let gameData: string = getConf().gameDataPath;
 
   if (gameData.length === 0) {
     gameData = getWorkspacePath();

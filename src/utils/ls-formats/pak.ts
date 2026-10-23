@@ -5,7 +5,7 @@ import * as vscode from "vscode";
 import * as futils from "../file";
 
 import { consoleWebviewLog } from "../../webview/console";
-import { Config } from "../config";
+import { getConf } from "../config";
 import { ConvertCommon, FileFormats } from "./formats";
 import { convertAll } from "./junction";
 import { mergeXmlFiles } from "../xml";
@@ -24,14 +24,13 @@ export class Pak extends ConvertCommon {
     // needs to be called before super() so that converted files exist before the ConvertCommon class collects them.
     convertFilesForPacking(wsPath);
 
-    super(
-      wsPath,
-      { modPath: modPath },
-      {
+    super(wsPath, {
+      convertOpts: { modPath: modPath },
+      getFileOpts: {
         forPacking: true,
-        forRemovingEditables: new Config().doNotPackEditables,
+        forRemovingEditables: getConf().doNotPackEditables,
       },
-    );
+    });
   }
 
   public build(): void {
@@ -82,7 +81,6 @@ export class Pak extends ConvertCommon {
 }
 
 /**
- *
  * wrapper func for Unpak() that grabs the pak path and the destination path from the user
  */
 export async function unpackChoose(): Promise<void> {

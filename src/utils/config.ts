@@ -1,6 +1,6 @@
 import * as vscode from "vscode";
 
-export class Config extends Object {
+class Config extends Object {
   protected _config = vscode.workspace.getConfiguration("bg3-toolkit");
 
   // these are just garbo values that let me programmatically assign them in the constructor
@@ -30,4 +30,10 @@ export class Config extends Object {
       }
     }
   }
+}
+
+export type config = Config;
+
+export function getConf(): Config {
+  return new Config();
 }

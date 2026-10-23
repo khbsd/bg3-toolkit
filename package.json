@@ -2,7 +2,7 @@
   "name": "bg3-toolkit",
   "displayName": "bg3-toolkit",
   "description": "bg3 modmaking extension!! cross-platform and minimal. i love you!!",
-  "version": "1.0.12",
+  "version": "1.0.13",
   "publisher": "kayabeans",
   "icon": "resources/icon/icon_sm.png",
   "galleryBanner": {
@@ -121,7 +121,7 @@
         },
         "bg3-toolkit.conversionExcludePaths": {
           "type": "string",
-          "default": ".git, .pak, .vscode, .bak, .zip",
+          "default": ".pak, .bak, .zip",
           "description": "if the path includes any of these strings, it will not be included in conversion or packing processes."
         },
         "bg3-toolkit.conversionNeededDirectories": {

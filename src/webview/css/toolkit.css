@@ -95,7 +95,7 @@ body:has(.info .toggle-version input:checked) .toggled-version {
 .minor-label,
 .revision-label,
 .build-label {
-  width: 5rem;
+  width: 7rem;
   padding-top: 0.25rem;
   display: inline;
   margin-right: 0rem;

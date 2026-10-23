@@ -3,7 +3,7 @@ import * as path from "path";
 
 import { FileHandle } from "fs/promises";
 import { consoleWebviewLog } from "../webview/console";
-import { Config } from "./config";
+import { getConf, config } from "./config";
 import {
   FileFormats,
   LsFile,
@@ -15,16 +15,6 @@ import { getWorkspacePath } from "./ws";
 
 const virtualTextureRegex: RegExp = /Textures_[\d]+/;
 const hotfixPatchRegex: RegExp = /Patch[\d]+_Hotfix[\d]+/;
-
-const enum XmlTag {
-  VersionEncoding,
-  Version,
-  OpenContentList,
-  OpenContentListv2,
-  CloseContentList,
-  OpenContent = 0,
-  CloseContent = 1,
-}
 
 export function fixPath(wsPath: string): string {
   const illegal_strings = ["file:", "//"];
@@ -125,18 +115,15 @@ export function mergedLocaExists(
 }
 
 function filterLocalizations(dirents: fs.Dirent[]): fs.Dirent[] {
-  const conf = new Config();
+  const mergedLocalizationName: string = getConf().mergedLocalizationName;
 
-  let mergedExists: boolean = mergedLocaExists(
-    dirents,
-    conf.mergedLocalizationName,
-  );
+  let mergedExists: boolean = mergedLocaExists(dirents, mergedLocalizationName);
   let filteredDirs: fs.Dirent[] = [];
 
   for (const entry of dirents) {
     if (isLoca(entry.name)) {
       if (mergedExists) {
-        if (entry.name.split(".")[0] === conf.mergedLocalizationName) {
+        if (entry.name.split(".")[0] === mergedLocalizationName) {
           filteredDirs.push(entry);
         }
       } else {
@@ -150,13 +137,10 @@ function filterLocalizations(dirents: fs.Dirent[]): fs.Dirent[] {
   return filteredDirs;
 }
 
-/**
- * @param type: string | undefined
- */
 export type getFilesOpts = {
   type?: FileFormats;
   forConversion?: boolean;
-  conf?: Config;
+  conf?: config;
   forRemovingEditables?: boolean;
   forXmlMerging?: boolean;
   forPacking?: boolean;
@@ -166,7 +150,7 @@ export type getFilesOpts = {
 export function getFiles(wsPath: string, opts?: getFilesOpts): LsFile[] {
   let files: LsFile[] = [];
   let type: string = "";
-  let conf = opts?.conf ?? new Config();
+  let conf = opts?.conf ?? getConf();
   if (opts?.type !== undefined) {
     type = FileFormats[opts.type];
   }
@@ -190,22 +174,34 @@ export function getFiles(wsPath: string, opts?: getFilesOpts): LsFile[] {
 
   for (let entry of dirents) {
     let pathOk: boolean = true;
-    let filter: boolean = true;
+    let correctType: boolean = true;
+    let hidden: boolean = false;
+    let fp: string = path.join(entry.parentPath, entry.name);
+
+    for (const part of fp.split(path.sep)) {
+      hidden = part.charAt(0) === ".";
+      if (hidden) {
+        break;
+      }
+    }
+    if (hidden) {
+      continue;
+    }
 
     // filter out specified file formats by provided extension
     if (type.length > 0 && type !== FileFormats[FileFormats.none]) {
       if (type === FileFormats[FileFormats.lsf]) {
         for (const t of LsfCompressionFormats) {
-          filter = entry.name.includes("." + FileFormats[t]);
-          if (filter) {
+          correctType = entry.name.includes("." + FileFormats[t]);
+          if (correctType) {
             break;
           }
         }
       } else {
-        filter = entry.name.includes("." + type);
+        correctType = entry.name.includes("." + type);
 
         // unpacking game data
-        if (opts?.forUnpackingGameFiles && filter) {
+        if (opts?.forUnpackingGameFiles && correctType) {
           if (
             !hotfixPatchRegex.test(entry.name) &&
             !virtualTextureRegex.test(entry.name)
@@ -219,7 +215,6 @@ export function getFiles(wsPath: string, opts?: getFilesOpts): LsFile[] {
 
     // ignore paths or files that dont need converting
     for (const ignored of conf.conversionExcludePaths) {
-      let fp: string = path.join(entry.parentPath, entry.name);
       let conversion: boolean = true;
       let unneeded: boolean = false;
 
@@ -240,14 +235,6 @@ export function getFiles(wsPath: string, opts?: getFilesOpts): LsFile[] {
           }
         }
 
-        if (opts?.forConversion) {
-          conversion = fileOk;
-
-          if (conversion) {
-            break;
-          }
-        }
-
         // lets you omit editable files from the .pak that the game wont look for
         if (opts?.forRemovingEditables) {
           const f = new LsFile(fp);
@@ -257,15 +244,22 @@ export function getFiles(wsPath: string, opts?: getFilesOpts): LsFile[] {
             break;
           }
         }
+
+        if (opts?.forConversion) {
+          conversion = fileOk;
+
+          if (conversion) {
+            break;
+          }
+        }
       }
 
       pathOk =
         conversion &&
         !unneeded &&
-        filter &&
+        correctType &&
         !fp.includes(ignored) &&
-        entry.isFile() &&
-        !entry.name.startsWith(".");
+        entry.isFile();
       if (!pathOk) {
         break;
       }

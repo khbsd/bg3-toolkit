@@ -1,16 +1,14 @@
 import * as fs from "fs";
 
 import { consoleWebviewLog } from "../../webview/console";
-import { mergeXmlFiles } from "../xml";
 import { ConvertCommon, LsFile, FileFormats } from "./formats";
 
 export class Xml extends ConvertCommon {
   constructor(wsPath: string, modPath?: string | undefined) {
-    super(
-      wsPath,
-      { modPath: modPath },
-      { type: FileFormats.xml, forConversion: true },
-    );
+    super(wsPath, {
+      convertOpts: { modPath: modPath },
+      getFileOpts: { type: FileFormats.xml, forConversion: true },
+    });
     this._cf = this.convertFile;
   }
 
@@ -37,11 +35,10 @@ export class Xml extends ConvertCommon {
 
 export class Loca extends ConvertCommon {
   constructor(wsPath: string, modPath?: string | undefined) {
-    super(
-      wsPath,
-      { modPath: modPath },
-      { type: FileFormats.loca, forConversion: true },
-    );
+    super(wsPath, {
+      convertOpts: { modPath: modPath },
+      getFileOpts: { type: FileFormats.loca, forConversion: true },
+    });
     this._cf = this.convertFile;
   }
 

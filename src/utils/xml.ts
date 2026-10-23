@@ -2,7 +2,7 @@ import * as fs from "fs";
 import * as path from "path";
 import * as vscode from "vscode";
 
-import { Config } from "./config";
+import { getConf } from "./config";
 import { getFiles, getLinesFromFileSync, getModPath } from "./file";
 import { FileFormats } from "./ls-formats/formats";
 import { getSelectionOrCursorWord, getWorkspacePath } from "./ws";
@@ -38,7 +38,6 @@ const xmlLineTags: string[] = [
 type Tag = {
   re: RegExp;
   text: string;
-  name: string;
 };
 
 class XmlFileTags {
@@ -46,21 +45,18 @@ class XmlFileTags {
   openContentList: Tag;
   closeContentList: Tag;
 
-  constructor() {
+  constructor(opts?: { empty?: boolean }) {
     this.version = {
       re: /(?<version><\?[\s\w\=\"\d\.\-]*\?>)/,
-      text: xmlFileTags[XmlTag.VersionEncoding],
-      name: "version",
+      text: opts?.empty === true ? "" : xmlFileTags[XmlTag.VersionEncoding],
     };
     this.openContentList = {
       re: /(?<openContentList><contentList[\w\s\:\=\"\.\/\-]*>)/,
-      text: xmlFileTags[XmlTag.OpenContentList],
-      name: "openContentList",
+      text: opts?.empty === true ? "" : xmlFileTags[XmlTag.OpenContentList],
     };
     this.closeContentList = {
       re: /(?<closeContentList><\/contentList+>)/,
-      text: xmlFileTags[XmlTag.CloseContentList],
-      name: "closeContentList",
+      text: opts?.empty === true ? "" : xmlFileTags[XmlTag.CloseContentList],
     };
   }
 }
@@ -84,12 +80,12 @@ class XmlFile {
   }
 
   private setUpContent(content: string[], addNameTag: boolean): string[] {
-    const conf: Config = new Config();
+    const mergedLocalizationName: string = getConf().mergedLocalizationName;
     let tmpContent: string[] = [];
     let fileString: string = "<!-- " + this.name + " --> ";
     if (
       !content.includes(fileString) &&
-      !this.name.includes(conf.mergedLocalizationName) &&
+      !this.name.includes(mergedLocalizationName) &&
       addNameTag
     ) {
       tmpContent.push(fileString);
@@ -101,7 +97,7 @@ class XmlFile {
   }
 
   private getTags(): XmlFileTags {
-    let tags: XmlFileTags = new XmlFileTags();
+    let tags: XmlFileTags = new XmlFileTags({ empty: true });
     for (const line of this.content) {
       for (let tag of Object.keys(tags)) {
         let key = tag as keyof typeof tags;
@@ -117,8 +113,12 @@ class XmlFile {
   }
 }
 
-export async function addHandleToXml(handle?: string, fileIndex?: number) {
-  handle = handle ?? getSelectionOrCursorWord();
+export async function addHandleToXml(opts?: {
+  handle?: string;
+  fileIndex?: number;
+}) {
+  let handle = opts?.handle ?? getSelectionOrCursorWord();
+  let fileIndex = opts?.fileIndex ?? 0;
 
   let tabSize: number = 4;
   try {
@@ -130,8 +130,6 @@ export async function addHandleToXml(handle?: string, fileIndex?: number) {
   while (tab.length < tabSize) {
     tab += " ";
   }
-
-  fileIndex = fileIndex ?? 0;
 
   const xmlFiles: XmlFile[] = [];
   getFiles(getWorkspacePath(), {
@@ -234,9 +232,9 @@ export function addOpeningClosingTags(
 }
 
 export function mergeXmlFiles(wsPath: string): boolean {
-  const conf = new Config();
+  const mergedLocalizationName: string = getConf().mergedLocalizationName;
   wsPath = getModPath(wsPath);
-  if (conf.mergedLocalizationName.length < 1) {
+  if (mergedLocalizationName.length < 1) {
     return false;
   }
   // cant merge a single file
@@ -266,14 +264,15 @@ export function mergeXmlFiles(wsPath: string): boolean {
   let text = lines.join(EOL);
   let locaPath = path.join(
     path.dirname(files[0].path),
-    conf.mergedLocalizationName + "." + FileFormats[FileFormats.xml],
+    mergedLocalizationName + "." + FileFormats[FileFormats.xml],
   );
   fs.writeFileSync(locaPath, text, { flag: "w+" });
   return true;
 }
 
 export function mergeXmlLines(files: XmlFile[]): string[] {
-  const conf: Config = new Config();
+  const allowDuplicates: boolean = getConf()
+    .mergedLocalizationAllowDuplicates;
   let mergedLines: string[] = [];
 
   const openingTags: XmlFileTags = files[0].tags;
@@ -286,7 +285,7 @@ export function mergeXmlLines(files: XmlFile[]): string[] {
     const line = lines[i].trim();
     if (
       !mergedLines.includes(lines[i]) ||
-      conf.mergedLocalizationAllowDuplicates ||
+      allowDuplicates ||
       (line === "" && mergedLines.at(-1) !== line) ||
       line.includes("<!--")
     ) {

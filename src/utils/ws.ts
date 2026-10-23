@@ -3,7 +3,7 @@ import * as vscode from "vscode";
 import * as futils from "./file";
 
 import { consoleWebviewLog } from "../webview/console";
-import { Config } from "./config";
+import { getConf } from "./config";
 
 /**
  * returns your workspace path. if you have set a value for the "custom mod path" setting, will return that instead
@@ -12,9 +12,9 @@ import { Config } from "./config";
  */
 export function getWorkspacePath(short: boolean = false): string {
   let wsPath = "";
-  const conf: Config = new Config();
-  if (conf.customModPath.length > 0) {
-    wsPath = conf.customModPath;
+  const customModPath: string = getConf().customModPath;
+  if (customModPath.length > 0) {
+    wsPath = customModPath;
   } else {
     if (
       vscode.workspace.workspaceFolders?.length !== undefined &&

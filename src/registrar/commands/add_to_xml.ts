@@ -8,7 +8,7 @@ export class Command {
     const disposable = vscode.commands.registerCommand(
       "bg3-toolkit.addToXml",
       async () => {
-        addHandleToXml(getSelectionOrCursorWord());
+        addHandleToXml({ handle: getSelectionOrCursorWord() });
       },
     );
     return disposable;

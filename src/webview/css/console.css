@@ -37,7 +37,7 @@ li {
 
 .console {
   background-color: var(--vscode-titleBar-activeBackground);
-  overflow-y: scroll;
+  overflow-y: auto;
   overflow-x: hidden;
   overflow-wrap: anywhere;
   font-family: monospace;

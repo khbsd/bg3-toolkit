@@ -4,7 +4,7 @@ import * as util from "util";
 import * as vscode from "vscode";
 
 import { EOL } from "os";
-import { Config } from "../utils/config";
+import { getConf } from "../utils/config";
 import { HtmlData, HtmlDataUtils } from "../utils/html";
 
 let webview: ConsoleWebviewViewProvider | undefined = undefined;
@@ -126,7 +126,7 @@ export class ConsoleWebviewViewProvider implements vscode.WebviewViewProvider {
   }
 
   public updateConsoleText(text?: string): void {
-    const conf: Config = new Config();
+    const consoleLineLimit: number = getConf().consoleLineLimit;
     if (text !== undefined) {
       text =
         consoleTags[ConsoleTags.OpenPTag] +
@@ -144,8 +144,8 @@ export class ConsoleWebviewViewProvider implements vscode.WebviewViewProvider {
     let textArray: string[] = this.consoleText.split(
       consoleTags[ConsoleTags.LineBreak],
     );
-    if (textArray.length > conf.consoleLineLimit) {
-      textArray = textArray.slice(textArray.length - conf.consoleLineLimit);
+    if (textArray.length > consoleLineLimit) {
+      textArray = textArray.slice(textArray.length - consoleLineLimit);
       this.consoleText = textArray.join(consoleTags[ConsoleTags.LineBreak]);
     }
 

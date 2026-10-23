@@ -5,7 +5,7 @@ import * as eutils from "../enum";
 import * as futils from "../file";
 
 import { GlobPattern } from "vscode";
-import { Config } from "../config";
+import { getConf, config } from "../config";
 
 export enum FileFormats {
   none,
@@ -107,9 +107,7 @@ export class LsFile {
     let sourceExt: string = ext ?? this.ext;
     let tempPath: string = path.resolve(this.path, "..");
     let targetFile: string = "";
-    /*if (futils.hasMetaFile(this.path)) {
-      return this.name + "." + FileFormats[FileFormats.none];
-    }*/
+
     fs.readdirSync(tempPath, { withFileTypes: true }).forEach((entry) => {
       if (
         !entry.name.includes("." + sourceExt) &&
@@ -162,16 +160,6 @@ export class LsFile {
   }
 }
 
-type ConvertCommonOpts = {
-  modPath?: string;
-  conf?: Config;
-};
-
-type CombinedOpts = {
-  cOpts?: ConvertCommonOpts;
-  gOpts?: futils.getFilesOpts;
-};
-
 /**
  * THIS CLASS SHOULD ONLY BE EXTENDED, NOT INSTANTIATED.
  */
@@ -181,7 +169,7 @@ export class ConvertCommon {
   modPath: string;
   files: LsFile[] = [];
   type: FileFormats;
-  conf: Config;
+  conf: config;
 
   /**
    * placeholder for format specific file conversion funcs.
@@ -190,30 +178,24 @@ export class ConvertCommon {
     return;
   };
   /**
-   * @param wsPath string
-   * @param type FileFormats
-   * @param modPath string | undefined
-   *
    * if you pass a single file instead of a folder for the 'wsPath' parameter,
    * this class will assume you are converting a single file and skip populating
    * the 'files' array.
    */
   constructor(
     wsPath: string,
-    convertOpts?: ConvertCommonOpts,
-    getFileOpts?: futils.getFilesOpts,
+    opts?: {
+      convertOpts?: { modPath?: string; conf?: config };
+      getFileOpts?: futils.getFilesOpts;
+    },
   ) {
-    const opts: CombinedOpts = {
-      cOpts: convertOpts,
-      gOpts: getFileOpts,
-    };
     this.builder = lsPak;
-    this.type = opts.gOpts?.type ?? FileFormats.none;
+    this.type = opts?.getFileOpts?.type ?? FileFormats.none;
     this.wsPath = futils.fixPath(wsPath);
-    this.modPath = opts.cOpts?.modPath ?? futils.getModPath(this.wsPath);
-    this.conf = opts.cOpts?.conf ?? new Config();
+    this.modPath = opts?.convertOpts?.modPath ?? futils.getModPath(this.wsPath);
+    this.conf = opts?.convertOpts?.conf ?? getConf();
     if (fs.statSync(this.wsPath).isDirectory()) {
-      this.files = futils.getFiles(this.modPath, opts.gOpts);
+      this.files = futils.getFiles(this.modPath, opts?.getFileOpts);
     }
   }
 

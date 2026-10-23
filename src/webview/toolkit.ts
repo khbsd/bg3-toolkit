@@ -11,7 +11,7 @@ import { unpackChoose } from "../utils/ls-formats/pak";
 import { Version64, Version64Parts } from "../utils/version";
 import { getWorkspacePath } from "../utils/ws";
 import { consoleWebviewLog } from "./console";
-import { Config } from "../utils/config";
+import { getConf } from "../utils/config";
 
 function versionStringNotEmpty(version: string[]): boolean {
   for (const v of version) {
@@ -117,7 +117,6 @@ export class ToolkitWebviewViewProvider implements vscode.WebviewViewProvider {
     const wsPath: string = this.isModWorkspace
       ? getModPath(getWorkspacePath())
       : "";
-    const conf: Config = new Config();
     const nonce = hd.getNonce();
     let htmlUri: string;
 
@@ -170,7 +169,7 @@ export class ToolkitWebviewViewProvider implements vscode.WebviewViewProvider {
     const csp = wv.cspSource;
 
     // babes ???????
-    const babes = conf.babes ? "babes " : " ";
+    const babes: string = getConf().babes ? "babes " : " ";
 
     // make this data into an array for hd.getObjs()
     const data: string[] = [];

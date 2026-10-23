@@ -5,11 +5,10 @@ import { ConvertCommon, LsFile, FileFormats } from "./formats";
 
 export class Lsx extends ConvertCommon {
   constructor(wsPath: string, modPath?: string | undefined) {
-    super(
-      wsPath,
-      { modPath: modPath },
-      { type: FileFormats.lsx, forConversion: true },
-    );
+    super(wsPath, {
+      convertOpts: { modPath: modPath },
+      getFileOpts: { type: FileFormats.lsx, forConversion: true },
+    });
     this._cf = this.convertFile;
   }
 
@@ -36,20 +35,14 @@ export class Lsx extends ConvertCommon {
 
 export class Lsf extends ConvertCommon {
   constructor(wsPath: string, modPath?: string | undefined) {
-    super(
-      wsPath,
-      { modPath: modPath },
-      { type: FileFormats.lsf, forConversion: true },
-    );
+    super(wsPath, {
+      convertOpts: { modPath: modPath },
+      getFileOpts: { type: FileFormats.lsf, forConversion: true },
+    });
     this._cf = this.convertFile;
   }
 
   public convertFile(f: LsFile) {
-    /*if (f.out_ext === FileFormats[FileFormats.none]) {
-      consoleWebviewLog("not converting FileFormats.none file. returning...");
-      return;
-    }*/
-
     let outContents: string;
     try {
       outContents = this.builder
