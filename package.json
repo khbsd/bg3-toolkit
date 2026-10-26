@@ -255,13 +255,7 @@
           "visibility": "hidden"
         }
       ]
-    },
-    "viewsWelcome": [
-      {
-        "view": "toolkitTree",
-        "contents": "hi!! i love you.\n[click me plz i need it](command:bg3-toolkit.hrtRemind)"
-      }
-    ]
+    }
   },
   "scripts": {
     "vscode:prepublish": "npm run compile",

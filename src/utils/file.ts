@@ -163,8 +163,23 @@ export function getFiles(wsPath: string, opts?: getFilesOpts): LsFile[] {
   });
 
   if (conf.mergedLocalizationName.length > 0 && opts?.forPacking) {
-    consoleWebviewLog("removing non-merged loca files");
-    dirents = filterLocalizations(dirents);
+    consoleWebviewLog("checking if xml files need merging...");
+    let xmlCount: number = 0;
+    for (const entry of dirents) {
+      if (path.extname(entry.name) !== "." + FileFormats[FileFormats.xml]) {
+        continue;
+      } else {
+        xmlCount++;
+      }
+
+      if (xmlCount > 1) {
+        break;
+      }
+    }
+    if (xmlCount > 1) {
+      consoleWebviewLog("removing non-merged loca files from file list");
+      dirents = filterLocalizations(dirents);
+    }
   }
 
   function pushToFiles(entry: fs.Dirent) {
@@ -290,7 +305,6 @@ export function getLinesFromFileSync(filePath: string): string[] {
 
   // length of 1 means nothing was split
   if (lines.length === 1) {
-    consoleWebviewLog("trying unix newlines");
     lines = text.split("\n");
   }
 
