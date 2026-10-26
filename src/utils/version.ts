@@ -3,6 +3,8 @@ import * as fs from "fs";
 import { consoleWebviewLog } from "../webview/console";
 import { getMetaFile } from "./file";
 
+const ModuleInfoTag = '<node id="ModuleInfo">';
+
 export enum Version64Parts {
   major,
   minor,
@@ -97,6 +99,15 @@ export class Version64 {
     let firstResult = "";
 
     for (const result of metaFileContents.matchAll(this.re)) {
+      // make sure the versions of dependencies are not being read
+      if (
+        !metaFileContents
+          .slice(0, result.index)
+          .includes(ModuleInfoTag)
+      ) {
+        continue;
+      }
+
       if (firstResult.length === 0) {
         firstResult = result.groups?.version ?? "";
       }
@@ -121,6 +132,16 @@ export class Version64 {
       if (result.groups === undefined) {
         return;
       }
+
+      // make sure the versions of dependencies are not being changed
+      if (
+        !metaFileContents
+          .slice(0, result.index)
+          .includes(ModuleInfoTag)
+      ) {
+        continue;
+      }
+
       const resultVersion = result.groups.version;
       const line = result[0].slice(0, result[0].length - resultVersion.length);
       if (!logged) {

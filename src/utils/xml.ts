@@ -236,9 +236,8 @@ export function mergeXmlFiles(wsPath: string): boolean {
   wsPath = getModPath(wsPath);
   if (mergedLocalizationName.length < 1) {
     return false;
-  }
-  // cant merge a single file
-  else if (fs.statSync(wsPath).isFile()) {
+  } else if (fs.statSync(wsPath).isFile()) {
+    // cant merge a single file
     return false;
   }
 
