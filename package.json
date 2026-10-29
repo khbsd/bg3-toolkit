@@ -2,7 +2,7 @@
   "name": "bg3-toolkit",
   "displayName": "bg3-toolkit",
   "description": "bg3 modmaking extension!! cross-platform and minimal. i love you!!",
-  "version": "1.0.15",
+  "version": "1.0.16",
   "publisher": "kayabeans",
   "icon": "resources/icon/icon_sm.png",
   "galleryBanner": {
@@ -252,8 +252,8 @@
           "icon": "",
           "id": "consoleWebviewView",
           "name": "CONSOLE",
-          "visibility": "hidden",
-          "when": "bg3-toolkit.IsModWorkspace"
+          "visibility": "collapsed",
+          "when": "bg3-toolkit.isModWorkspace"
         }
       ]
     }
