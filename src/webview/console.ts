@@ -19,6 +19,7 @@ const enum ConsoleTags {
 export class ConsoleWebviewViewProvider implements vscode.WebviewViewProvider {
   public static readonly viewType = "consoleWebviewView";
   private _view?: vscode.WebviewView;
+  isModWorkspace: boolean;
   consoleText: string;
 
   hd: HtmlDataUtils = new HtmlDataUtils();
@@ -28,8 +29,12 @@ export class ConsoleWebviewViewProvider implements vscode.WebviewViewProvider {
   scriptUri: string = "";
   styleMainUri: string = "";
 
-  constructor(private readonly _extensionUri: vscode.Uri) {
+  constructor(
+    private readonly _extensionUri: vscode.Uri,
+    isModWorkspace?: boolean,
+  ) {
     this.consoleText = openingText;
+    this.isModWorkspace = isModWorkspace ?? true;
   }
 
   public resolveWebviewView(
@@ -37,6 +42,10 @@ export class ConsoleWebviewViewProvider implements vscode.WebviewViewProvider {
     _context: vscode.WebviewViewResolveContext,
     _token: vscode.CancellationToken,
   ) {
+    if (!this.isModWorkspace) {
+      return;
+    }
+
     this._view = webviewView;
     this._view.webview.options = {
       enableScripts: true,
@@ -102,6 +111,9 @@ export class ConsoleWebviewViewProvider implements vscode.WebviewViewProvider {
   }
 
   private _getHtmlForWebview(webview: vscode.Webview) {
+    if (!this.isModWorkspace) {
+      return "";
+    }
     // content security policy or whatever. who cares.
     const csp = webview.cspSource;
 

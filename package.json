@@ -2,7 +2,7 @@
   "name": "bg3-toolkit",
   "displayName": "bg3-toolkit",
   "description": "bg3 modmaking extension!! cross-platform and minimal. i love you!!",
-  "version": "1.0.14",
+  "version": "1.0.15",
   "publisher": "kayabeans",
   "icon": "resources/icon/icon_sm.png",
   "galleryBanner": {
@@ -186,7 +186,7 @@
           "command": "bg3-toolkit.lsxConvert"
         },
         {
-          "when": "(resourceExtname == .lsf || resourceExtname == .LSF || resourceExtname == .lsb ||  resourceExtname == .LSB || resourceExtname == .lsfx || resourceExtname == .LSFX || resourceExtname == .lsfex || resourceExtname == .LSFEX || resourceExtname == .lsbc || resourceExtname == .LSBC || resourceExtname == .lsbs || resourceExtname == .LSBS) && bg3-toolkit.isModWorkspace",
+          "when": "(resourceExtname == .lsf || resourceExtname == .LSF || resourceExtname == .lsb ||  resourceExtname == .LSB || resourceExtname == .lsfx || resourceExtname == .LSFX || resourceExtname == .lsefx || resourceExtname == .LSEFX || resourceExtname == .lsbc || resourceExtname == .LSBC || resourceExtname == .lsbs || resourceExtname == .LSBS) && bg3-toolkit.isModWorkspace",
           "command": "bg3-toolkit.lsfConvert"
         },
         {
@@ -252,7 +252,8 @@
           "icon": "",
           "id": "consoleWebviewView",
           "name": "CONSOLE",
-          "visibility": "hidden"
+          "visibility": "hidden",
+          "when": "bg3-toolkit.IsModWorkspace"
         }
       ]
     }

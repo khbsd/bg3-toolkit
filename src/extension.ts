@@ -26,7 +26,7 @@ export async function activate(context: vscode.ExtensionContext) {
       if (isModWorkspace) {
         // mostly here to double check that it wont error out
         wsPath = getModPath(dir.parentPath);
-        console.log((wsPath));
+        console.log(wsPath);
         break;
       }
     }
@@ -46,10 +46,7 @@ export async function activate(context: vscode.ExtensionContext) {
   );
 
   // toolkit webview
-  const wvToolkit = new ToolkitWebviewViewProvider(
-    context.extensionUri,
-    isModWorkspace,
-  );
+  const wvToolkit = new ToolkitWebviewViewProvider(context.extensionUri, isModWorkspace);
   context.subscriptions.push(
     vscode.window.registerWebviewViewProvider(
       ToolkitWebviewViewProvider.viewType,
@@ -57,16 +54,16 @@ export async function activate(context: vscode.ExtensionContext) {
     ),
   );
 
+  // console webview
+  const csToolkit = new ConsoleWebviewViewProvider(context.extensionUri, isModWorkspace);
+  context.subscriptions.push(
+    vscode.window.registerWebviewViewProvider(
+      ConsoleWebviewViewProvider.viewType,
+      csToolkit,
+    ),
+  );
+  
   if (isModWorkspace) {
-    // console webview
-    const csToolkit = new ConsoleWebviewViewProvider(context.extensionUri);
-    context.subscriptions.push(
-      vscode.window.registerWebviewViewProvider(
-        ConsoleWebviewViewProvider.viewType,
-        csToolkit,
-      ),
-    );
-
     // register commands
     for (let disposable of new Registrar().getCommandList()) {
       context.subscriptions.push(disposable);

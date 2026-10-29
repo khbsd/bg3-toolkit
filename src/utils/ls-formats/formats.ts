@@ -14,7 +14,7 @@ export enum FileFormats {
   // non-editable below this line
   lsf,
   lsfx,
-  lsfex,
+  lsefx,
   lsb,
   lsbc,
   lsbs,
@@ -36,7 +36,7 @@ export enum CompressionType {
 export const LsfCompressionFormats: FileFormats[] = [
   FileFormats.lsf,
   FileFormats.lsfx,
-  FileFormats.lsfex,
+  FileFormats.lsefx,
   FileFormats.lsb,
   FileFormats.lsbc,
   FileFormats.lsbs,
@@ -138,7 +138,7 @@ export class LsFile {
         default:
         case FileFormats.lsf:
         case FileFormats.lsfx:
-        case FileFormats.lsfex:
+        case FileFormats.lsefx:
         case FileFormats.lsb:
         case FileFormats.lsbc:
         case FileFormats.lsbs: {

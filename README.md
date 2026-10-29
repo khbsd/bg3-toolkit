@@ -31,7 +31,7 @@ here !! and both ([open-vsx.org](https://open-vsx.org/) and [marketplace.visuals
 - "add as handle" to xml file
 - xml merge support
 - multi-mod workspace support
-- conversion for \*.ls{b, bc, bs, f, fex, fx, x} files to and from editable and binary formats
+- conversion for \*.ls{b, bc, bs, efx, f, fx, x} files to and from editable and binary formats
 - pack and unpack mods
 - game data unpacking
 - version editing
