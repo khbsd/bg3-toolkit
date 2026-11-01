@@ -232,5 +232,5 @@ body:has(.version-text .build-input input:focus) .version-text .build-label {
 }
 
 .debug {
-  display: none;
+  display: inline-block;
 }

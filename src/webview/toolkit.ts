@@ -2,16 +2,17 @@ import * as fs from "fs";
 import * as path from "path";
 import * as vscode from "vscode";
 
+import { getConf } from "../utils/config";
 import { getNames } from "../utils/enum";
 import { getModPath } from "../utils/file";
 import { HtmlData, HtmlDataUtils } from "../utils/html";
 import { FileFormats } from "../utils/ls-formats/formats";
 import { convertAll, pack } from "../utils/ls-formats/junction";
 import { unpackChoose } from "../utils/ls-formats/pak";
+import { makeModTemplate } from "../utils/templates/template";
 import { Version64, Version64Parts } from "../utils/version";
 import { getWorkspacePath } from "../utils/ws";
 import { consoleWebviewLog } from "./console";
-import { getConf } from "../utils/config";
 
 function versionStringNotEmpty(version: string[]): boolean {
   for (const v of version) {
@@ -91,6 +92,7 @@ export class ToolkitWebviewViewProvider implements vscode.WebviewViewProvider {
         v64.updateVersionInMeta(v64.version64Build(version.join(".")));
       } else if (data.type === "debug") {
         consoleWebviewLog("message received: " + data.msg);
+        makeModTemplate(getWorkspacePath());
       }
 
       if (getNames(FileFormats).includes(data.type)) {

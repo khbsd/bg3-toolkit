@@ -46,7 +46,10 @@ export async function activate(context: vscode.ExtensionContext) {
   );
 
   // toolkit webview
-  const wvToolkit = new ToolkitWebviewViewProvider(context.extensionUri, isModWorkspace);
+  const wvToolkit = new ToolkitWebviewViewProvider(
+    context.extensionUri,
+    isModWorkspace,
+  );
   context.subscriptions.push(
     vscode.window.registerWebviewViewProvider(
       ToolkitWebviewViewProvider.viewType,
@@ -55,19 +58,25 @@ export async function activate(context: vscode.ExtensionContext) {
   );
 
   // console webview
-  const csToolkit = new ConsoleWebviewViewProvider(context.extensionUri, isModWorkspace);
+  const csToolkit = new ConsoleWebviewViewProvider(
+    context.extensionUri,
+    isModWorkspace,
+  );
   context.subscriptions.push(
     vscode.window.registerWebviewViewProvider(
       ConsoleWebviewViewProvider.viewType,
       csToolkit,
     ),
   );
-  
+
   if (isModWorkspace) {
     // register commands
     for (let disposable of new Registrar().getCommandList()) {
       context.subscriptions.push(disposable);
     }
+  } else {
+    let makeModCmd = require("./registrar/commands/make_mod_template");
+    context.subscriptions.push(new makeModCmd.Command().get());
   }
 }
 

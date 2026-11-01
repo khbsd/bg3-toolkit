@@ -104,6 +104,10 @@
       {
         "command": "bg3-toolkit.addToXml",
         "title": "Add as a handle to localization file"
+      },
+      {
+        "command": "bg3-toolkit.makeModTemplate",
+        "title": "Make mod template in the current directory"
       }
     ],
     "configuration": {

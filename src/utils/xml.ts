@@ -40,7 +40,7 @@ type Tag = {
   text: string;
 };
 
-class XmlFileTags {
+export class XmlFileTags {
   version: Tag;
   openContentList: Tag;
   closeContentList: Tag;
