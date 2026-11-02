@@ -204,7 +204,8 @@ body:has(.version-text .build-input input:focus) .version-text .build-label {
 }
 
 .pack-button,
-.unpack-button {
+.unpack-button,
+.make-mod-button {
   display: block;
   height: 3rem;
   width: 100%;

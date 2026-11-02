@@ -49,9 +49,6 @@ export class ToolkitWebviewViewProvider implements vscode.WebviewViewProvider {
     };
 
     this._view.webview.html = this._getHtmlForWebview(this._view.webview);
-    if (!this.isModWorkspace) {
-      return;
-    }
 
     this._view.webview.onDidReceiveMessage((data) => {
       if (data.type === "version-load") {
@@ -90,9 +87,11 @@ export class ToolkitWebviewViewProvider implements vscode.WebviewViewProvider {
           version.push(part);
         }
         v64.updateVersionInMeta(v64.version64Build(version.join(".")));
+      } else if (data.type === "make-mod") {
+        console.log(data);
+        makeModTemplate(getWorkspacePath());
       } else if (data.type === "debug") {
         consoleWebviewLog("message received: " + data.msg);
-        makeModTemplate(getWorkspacePath());
       }
 
       if (getNames(FileFormats).includes(data.type)) {
@@ -118,7 +117,7 @@ export class ToolkitWebviewViewProvider implements vscode.WebviewViewProvider {
     const hd: HtmlDataUtils = new HtmlDataUtils();
     const wsPath: string = this.isModWorkspace
       ? getModPath(getWorkspacePath())
-      : "";
+      : getWorkspacePath();
     const nonce = hd.getNonce();
     let htmlUri: string;
 

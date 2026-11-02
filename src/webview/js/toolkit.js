@@ -40,6 +40,12 @@
       msg: "converting loca files",
     },
     {
+      class: ".make-mod-button",
+      listener: "click",
+      type: "make-mod",
+      msg: "making folder into mod workspace",
+    },
+    {
       class: ".debug",
       listener: "click",
       type: "debug",
@@ -78,31 +84,35 @@
     },
   ];
 
-  let msg = {
-    type: "version-load",
-    version: [],
-    msg: "mod version found, doing",
-  };
-  for (let i = 0; i < versionInfo.length; i++) {
-    msg.version.push(document.querySelector(versionInfo[i].class).innerText);
-  }
-  vscode.postMessage(msg);
+  try {
+    let msg = {
+      type: "version-load",
+      version: [],
+      msg: "mod version found, doing",
+    };
+    for (let i = 0; i < versionInfo.length; i++) {
+      msg.version.push(document.querySelector(versionInfo[i].class).innerText);
+    }
+    vscode.postMessage(msg);
+  } catch (err) {}
 
   window.addEventListener("message", (event) => {
-    if (
-      event.data.type === "major" ||
-      event.data.type === "minor" ||
-      event.data.type === "revision" ||
-      event.data.type === "build"
-    ) {
-      let val = (document.querySelector("." + event.data.type).value =
-        event.data.content);
+    try {
+      if (
+        event.data.type === "major" ||
+        event.data.type === "minor" ||
+        event.data.type === "revision" ||
+        event.data.type === "build"
+      ) {
+        let val = (document.querySelector("." + event.data.type).value =
+          event.data.content);
 
-      while (val.charAt(0) === "0" && val.length >= 2) {
-        document.querySelector("." + event.data.type).value = val =
-          val.slice(1);
+        while (val.charAt(0) === "0" && val.length >= 2) {
+          document.querySelector("." + event.data.type).value = val =
+            val.slice(1);
+        }
       }
-    }
+    } catch (err) {}
   });
 
   for (
@@ -111,37 +121,45 @@
     i++
   ) {
     let b = buttonInfo[i];
-    document.querySelector(b.class).addEventListener(b.listener, () => {
-      vscode.postMessage(b);
-    });
+    try {
+      document.querySelector(b.class).addEventListener(b.listener, () => {
+        vscode.postMessage(b);
+      });
+    } catch (err) {}
+
+    /*vscode.postMessage(
+      "object " + (i + 1) + " of " + buttonInfo.length + " registered",
+    );*/
 
     buttonListenersAdded = buttonInfo.length - 1 === i;
   }
 
-  for (
-    let i = 0, versionListenersAdded = false;
-    i < versionInfo.length && !versionListenersAdded;
-    i++
-  ) {
-    let v = versionInfo[i];
-    document.querySelector(v.class).addEventListener(v.listener, () => {
-      try {
-        Number(document.querySelector(v.class).value);
-      } catch (err) {
-        document.querySelector(v.class).value = 0;
-        return;
-      }
-      let msg = {
-        type: "version-update",
-        version: [],
-      };
-      for (let i = 0; i < versionInfo.length; i++) {
-        let val = document.querySelector(versionInfo[i].class).value;
-        msg.version.push(val);
-        //vscode.postMessage(val);
-      }
-      vscode.postMessage(msg);
-    });
-    versionListenersAdded = versionInfo.length - 1 === i;
-  }
+  try {
+    for (
+      let i = 0, versionListenersAdded = false;
+      i < versionInfo.length && !versionListenersAdded;
+      i++
+    ) {
+      let v = versionInfo[i];
+      document.querySelector(v.class).addEventListener(v.listener, () => {
+        try {
+          Number(document.querySelector(v.class).value);
+        } catch (err) {
+          document.querySelector(v.class).value = 0;
+          return;
+        }
+        let msg = {
+          type: "version-update",
+          version: [],
+        };
+        for (let i = 0; i < versionInfo.length; i++) {
+          let val = document.querySelector(versionInfo[i].class).value;
+          msg.version.push(val);
+          //vscode.postMessage(val);
+        }
+        vscode.postMessage(msg);
+      });
+      versionListenersAdded = versionInfo.length - 1 === i;
+    }
+  } catch (err) {}
 })();

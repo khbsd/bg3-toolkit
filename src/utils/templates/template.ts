@@ -1,9 +1,26 @@
 import * as fs from "fs";
 import * as path from "path";
-import * as vscode from "vscode";
+//import * as vscode from "vscode";
 import { FileFormats } from "../ls-formats/formats";
+import { Uuid } from "../uuid_handle";
 import { getWorkspacePath } from "../ws";
 import { addOpeningClosingTags, XmlFileTags } from "../xml";
+
+export class ModTemplate {
+  author: string;
+  name: string;
+  modUuid: string;
+  iconUuid: string;
+
+  constructor(author: string, name: string) {
+    this.author = author;
+    this.name = name;
+
+    let uuid = new Uuid();
+    this.modUuid = uuid.get();
+    this.iconUuid = uuid.get();
+  }
+}
 
 export enum TemplateFolders {
   Localization,
@@ -46,14 +63,24 @@ export class TemplateFile extends TemplateFolder {
 }
 
 export async function makeModTemplate(wsPath: string): Promise<void> {
-  const name: string | undefined = await vscode.window.showInputBox({
+  /*const name: string | undefined = await vscode.window.showInputBox({
     title: "mod name?",
-  });
+  });*/
+  const name = "test";
   if (name === undefined) {
     return;
   }
 
   wsPath = path.join(wsPath, name);
+
+  try {
+    if (fs.statSync(wsPath).isDirectory()) {
+      fs.rmdirSync(wsPath);
+      console.log("removed");
+    }
+  } catch (err) {
+    console.log(wsPath, "doesnt exist, making");
+  }
 
   const folders = mainFolders(wsPath);
   for (const folder of folders) {
@@ -73,9 +100,7 @@ export function mainFolders(wsPath: string): TemplateFolder[] {
     folder = folder as keyof typeof TemplateFolders;
 
     if (folder.length > 1) {
-      let temp = new TemplateFolder(folder, wsPath);
-      folders.push(temp);
-      console.log(temp);
+      folders.push(new TemplateFolder(folder, wsPath));
     }
   }
   return folders;
@@ -92,7 +117,7 @@ export function mainFiles(wsPath: string) {
     "templates",
     "files",
   );
-  
+
   for (const file of fs.readdirSync(templatesPath, { withFileTypes: true })) {
     console.log(file);
   }

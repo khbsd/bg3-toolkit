@@ -58,14 +58,14 @@ export async function activate(context: vscode.ExtensionContext) {
   );
 
   // console webview
-  const csToolkit = new ConsoleWebviewViewProvider(
+  const wvConsole = new ConsoleWebviewViewProvider(
     context.extensionUri,
     isModWorkspace,
   );
   context.subscriptions.push(
     vscode.window.registerWebviewViewProvider(
       ConsoleWebviewViewProvider.viewType,
-      csToolkit,
+      wvConsole,
     ),
   );
 
