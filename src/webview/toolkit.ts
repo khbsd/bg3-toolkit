@@ -9,6 +9,7 @@ import { HtmlData, HtmlDataUtils } from "../utils/html";
 import { FileFormats } from "../utils/ls-formats/formats";
 import { convertAll, pack } from "../utils/ls-formats/junction";
 import { unpackChoose } from "../utils/ls-formats/pak";
+import { generateDds } from "../utils/templates/dds";
 import { makeModTemplate } from "../utils/templates/template";
 import { Version64, Version64Parts } from "../utils/version";
 import { getWorkspacePath } from "../utils/ws";
@@ -92,6 +93,8 @@ export class ToolkitWebviewViewProvider implements vscode.WebviewViewProvider {
         makeModTemplate(getWorkspacePath());
       } else if (data.type === "debug") {
         consoleWebviewLog("message received: " + data.msg);
+        console.log(Object.values(FileFormats))
+        generateDds(432);
       }
 
       if (getNames(FileFormats).includes(data.type)) {
