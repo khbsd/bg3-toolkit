@@ -8,13 +8,25 @@ const DDS_HEIGHT_OFFSET: number = 12;
 const DDS_WIDTH_OFFSET: number = 16;
 const DDS_PITCH_OFFSET: number = 20;
 
+const filesDir: string = path.resolve(
+  __dirname,
+  "..",
+  "..",
+  "..",
+  "src",
+  "utils",
+  "templates",
+  "dds",
+);
+
 export function getPitch(height: number, width: number) {
   return Math.floor(Math.max(1, width / 4) * Math.max(1, height / 4));
 }
 
-/*
+// TODO: name integration
+/**
  * @param val number, but capped at 4294967295 (uint32 max)
- * @returns number[], array of 4 numbers that can be mapped to 4 bytes. least to most significant.
+ * @returns number[], array of 4 numbers that can be mapped to 4 bytes, little endian.
  */
 export function toFourByte(val: number): number[] {
   if (val > UINT_MAX) {
@@ -22,29 +34,21 @@ export function toFourByte(val: number): number[] {
   }
 
   let hexVal: string = val.toString(16);
-  let hexVals: string[] = [];
-  let intVals: number[] = [];
-
   while (hexVal.length < 8) {
     hexVal = "0" + hexVal;
   }
 
-  let rmVals: number[] = [];
-  hexVals = hexVal.split("");
-  for (let valCounter = 0; valCounter < hexVal.length; valCounter++) {
-    hexVals[valCounter] += hexVals[valCounter + 1];
-    rmVals.push(valCounter + 1);
-    valCounter++;
+  const hexVals: string[] = hexVal.split("");
+  let intVals: number[] = [];
+  for (let valCounter = hexVal.length; valCounter > 1; valCounter--) {
+    intVals.push(
+      Number("0x" + hexVals[valCounter - 2] + hexVals[valCounter - 1]),
+    );
+
+    valCounter--;
   }
 
-  rmVals.toReversed().forEach((v) => {
-    hexVals.splice(v, 1);
-  });
-
-  hexVals.forEach((byte) => {
-    intVals.push(Number("0x" + byte));
-  });
-  return intVals.toReversed();
+  return intVals;
 }
 
 export function generateDds(
@@ -65,32 +69,8 @@ export function generateDds(
   const heightBytes: number[] = toFourByte(height);
 
   try {
-    header = fs.readFileSync(
-      path.resolve(
-        __dirname,
-        "..",
-        "..",
-        "..",
-        "src",
-        "utils",
-        "templates",
-        "dds",
-        "header",
-      ),
-    );
-    data = fs.readFileSync(
-      path.resolve(
-        __dirname,
-        "..",
-        "..",
-        "..",
-        "src",
-        "utils",
-        "templates",
-        "dds",
-        "data",
-      ),
-    );
+    header = fs.readFileSync(path.resolve(filesDir, "header"));
+    data = fs.readFileSync(path.resolve(filesDir, "data"));
   } catch (err) {
     console.log(err);
   }
@@ -117,7 +97,7 @@ export function generateDds(
 
   try {
     fs.writeFileSync(
-      path.join(getWorkspacePath(), "test.dds"),
+      path.join(getWorkspacePath(), name ?? "test" + ".dds"),
       Buffer.from(ddsBuf),
       {
         flag: "w+",
