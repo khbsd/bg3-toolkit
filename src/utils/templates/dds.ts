@@ -29,9 +29,7 @@ export function getPitch(height: number, width: number) {
  * @returns number[], array of 4 numbers that can be mapped to 4 bytes, little endian.
  */
 export function toFourByte(val: number): number[] {
-  if (val > UINT_MAX) {
-    val = UINT_MAX;
-  }
+  val = Math.min(UINT_MAX, val);
 
   let hexVal: string = val.toString(16);
   while (hexVal.length < 8) {
@@ -40,12 +38,10 @@ export function toFourByte(val: number): number[] {
 
   const hexVals: string[] = hexVal.split("");
   let intVals: number[] = [];
-  for (let valCounter = hexVal.length; valCounter > 1; valCounter--) {
+  for (let valCounter = hexVal.length; valCounter > 1; valCounter -= 2) {
     intVals.push(
       Number("0x" + hexVals[valCounter - 2] + hexVals[valCounter - 1]),
     );
-
-    valCounter--;
   }
 
   return intVals;
