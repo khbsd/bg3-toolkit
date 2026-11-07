@@ -3,7 +3,7 @@ import * as path from "path";
 import { getWorkspacePath } from "../ws";
 
 const UINT_MAX: number = 4294967295;
-
+const BYTE_SECTIONS: number = 4; // also good for certificate generation
 const DDS_HEIGHT_OFFSET: number = 12;
 const DDS_WIDTH_OFFSET: number = 16;
 const DDS_PITCH_OFFSET: number = 20;
@@ -48,38 +48,44 @@ export function toFourByte(val: number): number[] {
 }
 
 export function generateDds(
-  height: number,
-  width?: number,
-  name?: string,
+  width: number,
+  opts?: {
+    height?: number;
+    name?: string;
+  },
 ): void {
-  if (width === undefined) {
-    width = height;
+  if (opts === undefined) {
+    opts = {
+      height: width,
+      name: "test",
+    };
   }
-  let header: Buffer | undefined;
-  let data: Buffer | undefined;
+  if (opts.height === undefined) {
+    opts.height = width;
+  }
+  let header: number[] | undefined;
+  let data: number[] | undefined;
   let ddsBuf: number[] = [];
 
-  const pitch: number = getPitch(height, width);
+  const pitch: number = getPitch(opts.height, width);
   const pitchBytes: number[] = toFourByte(pitch);
   const widthBytes: number[] = toFourByte(width);
-  const heightBytes: number[] = toFourByte(height);
+  const heightBytes: number[] = toFourByte(opts.height);
 
   try {
-    header = fs.readFileSync(path.resolve(filesDir, "header"));
-    data = fs.readFileSync(path.resolve(filesDir, "data"));
+    header = Array.from(fs.readFileSync(path.resolve(filesDir, "header")));
+    data = Array.from(fs.readFileSync(path.resolve(filesDir, "data")));
   } catch (err) {
     console.log(err);
+
+    if (header === undefined || data === undefined) {
+      return;
+    }
   }
 
-  if (header === undefined || data === undefined) {
-    return;
-  }
+  ddsBuf = ddsBuf.concat(header);
 
-  header.forEach((byte) => {
-    ddsBuf.push(byte);
-  });
-
-  for (let i = 0; i < 4; i++) {
+  for (let i = 0; i < BYTE_SECTIONS; i++) {
     ddsBuf[DDS_WIDTH_OFFSET + i] = widthBytes[i];
     ddsBuf[DDS_HEIGHT_OFFSET + i] = heightBytes[i];
     ddsBuf[DDS_PITCH_OFFSET + i] = pitchBytes[i];
@@ -93,7 +99,7 @@ export function generateDds(
 
   try {
     fs.writeFileSync(
-      path.join(getWorkspacePath(), name ?? "test" + ".dds"),
+      path.join(getWorkspacePath(), opts?.name ?? "test" + ".dds"),
       Buffer.from(ddsBuf),
       {
         flag: "w+",
