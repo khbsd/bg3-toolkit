@@ -6,6 +6,66 @@ import { consoleWebviewLog } from "../webview/console";
 import { getConf } from "./config";
 
 /**
+ * English (US) 	      en
+ * Simplified Chinese 	zh-cn
+ * Traditional Chinese 	zh-tw
+ * French 	            fr
+ * German 	            de
+ * Italian 	            it
+ * Spanish 	            es
+ * Japanese 	          ja
+ * Korean 	            ko
+ * Russian 	            ru
+ * Portuguese (Brazil) 	pt-br
+ * Turkish 	            tr
+ * Polish 	            pl
+ * Czech 	              cs  // not supported by game
+ * Hungarian 	          hu
+ * Ukranian             ukr // not supported by vscode
+ */
+
+export type DisplayLanguage = {
+  iso: string;
+  name: string;
+};
+
+export function getDisplayLanguageName(): DisplayLanguage {
+  let dl: DisplayLanguage = { iso: vscode.env.language, name: "" };
+  switch (dl.iso) {
+    case "de":
+      dl.name = "German";
+    default:
+    case "en":
+      dl.name = "English";
+    case "es":
+      dl.name = "Spanish";
+    case "fr":
+      dl.name = "French";
+    case "hu":
+      dl.name = "Hungarian";
+    case "it":
+      dl.name = "Italian";
+    case "ja":
+      dl.name = "Japanese";
+    case "ko":
+      dl.name = "Korean";
+    case "pl":
+      dl.name = "Polish";
+    case "pt-br":
+      dl.name = "BrazilianPortuguese";
+    case "ru":
+      dl.name = "Russian";
+    case "tr":
+      dl.name = "Turkish";
+    case "zh-cn":
+      dl.name = "Chinese";
+    case "zh-tw":
+      dl.name = "ChineseTraditional";
+  }
+  return dl;
+}
+
+/**
  * returns your workspace path. if you have set a value for the "custom mod path" setting, will return that instead
  * @param short boolean
  * @returns string

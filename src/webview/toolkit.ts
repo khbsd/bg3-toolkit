@@ -93,7 +93,6 @@ export class ToolkitWebviewViewProvider implements vscode.WebviewViewProvider {
         makeModTemplate(getWorkspacePath());
       } else if (data.type === "debug") {
         consoleWebviewLog("message received: " + data.msg);
-        console.log(Object.values(FileFormats));
         generateDds(380);
       }
 

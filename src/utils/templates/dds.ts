@@ -23,7 +23,6 @@ export function getPitch(height: number, width: number) {
   return Math.floor(Math.max(1, width / 4) * Math.max(1, height / 4));
 }
 
-// TODO: name integration
 /**
  * @param val number, but capped at 4294967295 (uint32 max)
  * @returns number[], array of 4 numbers that can be mapped to 4 bytes, little endian.
@@ -47,6 +46,14 @@ export function toFourByte(val: number): number[] {
   return intVals;
 }
 
+/**
+ *
+ * @param width number of pixels wide
+ * @param opts object with properties ```height: number``` and ```name: string```.
+ * if ```height``` is not specified, will use ```width``` as ```height```.
+ * if ```name``` is not specified, will use ```"image"``` as ```name```.
+ * @returns void
+ */
 export function generateDds(
   width: number,
   opts?: {
@@ -57,11 +64,14 @@ export function generateDds(
   if (opts === undefined) {
     opts = {
       height: width,
-      name: "test",
+      name: "image",
     };
   }
   if (opts.height === undefined) {
     opts.height = width;
+  }
+  if (opts.name === undefined) {
+    opts.name = "test";
   }
   let header: number[] | undefined;
   let data: number[] | undefined;
@@ -99,7 +109,7 @@ export function generateDds(
 
   try {
     fs.writeFileSync(
-      path.join(getWorkspacePath(), opts?.name ?? "test" + ".dds"),
+      path.join(getWorkspacePath(), opts?.name + ".dds"),
       Buffer.from(ddsBuf),
       {
         flag: "w+",

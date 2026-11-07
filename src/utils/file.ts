@@ -27,8 +27,11 @@ export function fixPath(wsPath: string): string {
   return wsPath;
 }
 
+/**
+ * aw yeah the good ole split slice split :^ )
+ * */
 export function getRelativeModPath(modPath: string, fullPath: string): string {
-  // aw yeah the good ole split slice split :^ )
+
   let relPath = fullPath.split(path.sep).slice(modPath.split(path.sep).length);
 
   let relativePath = "";
