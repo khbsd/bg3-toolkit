@@ -4,11 +4,11 @@
         <node id="TextureBank">
             <children>
                 <node id="Resource">
-                    <attribute id="ID" type="FixedString" value="${IconUuid}" />
+                    <attribute id="ID" type="FixedString" value="${iconUuid}" />
                     <attribute id="Localized" type="bool" value="False" />
-                    <attribute id="Name" type="LSString" value="${Name}_Icons" />
+                    <attribute id="Name" type="LSString" value="${name}_Icons" />
                     <attribute id="SRGB" type="bool" value="True" />
-                    <attribute id="SourceFile" type="LSString" value="Public/${Name}/Assets/Textures/Icons/${Name}_Icons.dds" />
+                    <attribute id="SourceFile" type="LSString" value="Public/${name}/Assets/Textures/Icons/${name}_Icons.dds" />
                     <attribute id="Streaming" type="bool" value="True" />
                     <attribute id="Template" type="FixedString" value="Icons_Items" />
                     <attribute id="Type" type="int64" value="0" />

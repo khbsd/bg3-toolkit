@@ -1,18 +1,27 @@
 import * as fs from "fs";
 import * as path from "path";
 import { Uuid } from "../uuid_handle";
-import {
-  DisplayLanguage,
-  getDisplayLanguageName,
-  getWorkspacePath,
-} from "../ws";
+import { getDisplayLanguageName, getWorkspacePath } from "../ws";
+import { getTemplateText } from "../xml";
 
+const templatesPath: string = path.resolve(
+  __dirname,
+  "..",
+  "..",
+  "..",
+  "src",
+  "utils",
+  "templates",
+  "files",
+);
+
+// maybe unneeded
 enum ModVars {
-  Author,
-  IconUuid,
-  Language,
-  ModUuid,
-  Name,
+  author,
+  iconUuid,
+  language,
+  modUuid,
+  name,
 }
 
 export enum TemplateFolders {
@@ -29,47 +38,56 @@ export type TemplateDds = {
   path: string;
 };
 
-export class TemplateFolder {
+export interface TemplateFolder {
   path: string;
-  name: string;
-  stats: fs.Stats | undefined = undefined;
+}
 
-  constructor(folderPath: string) {
-    this.name = path.basename(folderPath);
-    this.path = folderPath;
+export class TemplateFolder {
+  name?: string;
+  path: string;
+  stats?: fs.Stats | undefined = undefined;
+
+  constructor(tf: TemplateFolder) {
+    this.name = path.basename(tf.path);
+    this.path = tf.path;
     try {
       this.stats = fs.statSync(this.path);
     } catch (err) {}
   }
 }
 
+export interface TemplateFile {
+  path: string;
+  content: string;
+}
+
 export class TemplateFile extends TemplateFolder {
   content: string;
-  path: string;
 
-  constructor(filePath: string, content?: string) {
-    super(path.dirname(filePath));
-    this.path = filePath;
-    this.content = content ?? "";
-  }
-
-  public setContent(content: string) {
-    this.content = content;
+  constructor(tf: TemplateFile) {
+    super({ path: tf.path });
+    this.content = tf.content ?? "";
   }
 }
 
 export class ModTemplate {
+  // named this way so they align with the names of the placeholders
   author: string;
   name: string;
   modUuid: string;
   iconUuid: string;
+  language: string;
   workspacePath: string;
 
-  language: DisplayLanguage;
-
-  modPaths: string[] = [
-    "Localization/${Language}/${Name}_Loca.xml",
-    "Mods/${Name}/meta.lsx",
+  modPaths: TemplateFile[] = [
+    {
+      path: "Localization/${language}/${name}_Loca.xml",
+      content: getTemplateText(),
+    },
+    {
+      path: "Mods/${name}/meta.lsx",
+      content: path.join(templatesPath, "meta_lsx.txt"),
+    },
   ];
 
   itemPaths_Dds: TemplateDds[] = [
@@ -86,29 +104,45 @@ export class ModTemplate {
     {
       width: 256,
       height: 64,
-      path: "Public/${Name}/Assets/Textures/Icons/${Name}_Icons.dds",
+      path: "Public/${name}/Assets/Textures/Icons/${name}_Icons.dds",
     },
   ];
-  itemPaths_files: string[] = [
-    "Public/${Name}/Content/UI/[PAK]_UI/_merged.lsx",
-    "Public/${Name}/GUI/Icons_Items.lsx",
-    "Public/${Name}/Stats/Generated/Data/${Name}_Stats.txt",
-    "Public/${Name}/Stats/Generated/TreasureTable.txt",
+  itemPaths_files: TemplateFile[] = [
+    {
+      path: "Public/${name}/Content/UI/[PAK]_UI/_merged.lsx",
+      content: path.join(templatesPath, "_merged_lsf.txt"),
+    },
+    {
+      path: "Public/${name}/GUI/Icons_Items.lsx",
+      content: path.join(templatesPath, "icons_items.txt"),
+    },
+    {
+      path: "Public/${name}/RootTemplates/${name}.lsx",
+      content: path.join(templatesPath, "root_template_lsf.txt"),
+    },
+    {
+      path: "Public/${name}/Stats/Generated/Data/${name}_Stats.txt",
+      content: "",
+    },
+    { path: "Public/${name}/Stats/Generated/TreasureTable.txt", content: "" },
   ];
 
+  // TODO: change from string[] to TemplateFile[]
+  // need to set up .txt placeholder files for a couple of them
   scriptPaths: string[] = [
-    "Mods/${Name}/ScriptExtender/Config.json",
-    "Mods/${Name}/ScriptExtender/Lua/BootstrapClient.lua",
-    "Mods/${Name}/ScriptExtender/Lua/BootstrapServer.lua",
-    "Mods/${Name}/ScriptExtender/Lua/Server/${Name}.lua",
+    "Mods/${name}/ScriptExtender/Config.json",
+    "Mods/${name}/ScriptExtender/Lua/BootstrapClient.lua",
+    "Mods/${name}/ScriptExtender/Lua/BootstrapServer.lua",
+    "Mods/${name}/ScriptExtender/Lua/Server/${name}.lua",
   ];
 
+  // TODO: change from string[] to TemplateFolder[]
   assetPaths: string[] = [
-    "Generated/Public/${Name}/Assets/DDS",
-    "Generated/Public/${Name}/Assets/GR2",
-    "Public/${Name}/Content/Assets/Characters/[PAK]_Armor/Materials",
-    "Public/${Name}/Content/Assets/Characters/[PAK]_Armor/Meshes",
-    "Public/${Name}/Content/Assets/Characters/[PAK]_Armor/Textures",
+    "Generated/Public/${name}/Assets/DDS",
+    "Generated/Public/${name}/Assets/GR2",
+    "Public/${name}/Content/Assets/Characters/[PAK]_Armor/Materials",
+    "Public/${name}/Content/Assets/Characters/[PAK]_Armor/Meshes",
+    "Public/${name}/Content/Assets/Characters/[PAK]_Armor/Textures",
   ];
 
   constructor(author: string, name: string, wsPath?: string) {
@@ -118,13 +152,15 @@ export class ModTemplate {
     let uuid = new Uuid();
     this.modUuid = uuid.uuid;
     this.iconUuid = uuid.get();
-    this.language = getDisplayLanguageName();
+    this.language = getDisplayLanguageName().name;
     this.workspacePath = wsPath ?? path.join(getWorkspacePath(), this.name);
   }
 }
 
+// if it has the content property: TemplateFile
+// if it has the width property: TemplateDds
+// if it has neither: TemplateFolder
 export function format(text: string): string {
-  
   return text;
 }
 
@@ -169,26 +205,4 @@ export async function makeModTemplate(): Promise<void> {
   }
 
   let mt = new ModTemplate(authorName, modName);
-
-  for (let file of mt.modPaths) {
-    let f = new TemplateFile(mt.workspacePath);
-  }
-}
-
-
-export function mainFiles(wsPath: string) {
-  let templatesPath: string = path.resolve(
-    __dirname,
-    "..",
-    "..",
-    "..",
-    "src",
-    "utils",
-    "templates",
-    "files",
-  );
-
-  for (const file of fs.readdirSync(templatesPath, { withFileTypes: true })) {
-    console.log(file);
-  }
 }
