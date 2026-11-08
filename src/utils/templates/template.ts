@@ -15,6 +15,11 @@ const templatesPath: string = path.resolve(
   "files",
 );
 
+const headers = {
+  accept: "application/vnd.github.v3+json",
+  "user-agent": "octokit-request.js/10.0.16 Node.js/24.21.0 (darwin; arm64)",
+};
+
 // maybe unneeded
 enum ModVars {
   author,
@@ -78,6 +83,7 @@ export class ModTemplate {
   iconUuid: string;
   language: string;
   workspacePath: string;
+  seVersion: number = 32;
 
   modPaths: TemplateFile[] = [
     {
@@ -129,20 +135,26 @@ export class ModTemplate {
 
   // TODO: change from string[] to TemplateFile[]
   // need to set up .txt placeholder files for a couple of them
-  scriptPaths: string[] = [
-    "Mods/${name}/ScriptExtender/Config.json",
-    "Mods/${name}/ScriptExtender/Lua/BootstrapClient.lua",
-    "Mods/${name}/ScriptExtender/Lua/BootstrapServer.lua",
-    "Mods/${name}/ScriptExtender/Lua/Server/${name}.lua",
+  scriptPaths: TemplateFile[] = [
+    { path: "Mods/${name}/ScriptExtender/Config.json", content: "" },
+    {
+      path: "Mods/${name}/ScriptExtender/Lua/BootstrapClient.lua",
+      content: "",
+    },
+    {
+      path: "Mods/${name}/ScriptExtender/Lua/BootstrapServer.lua",
+      content: "",
+    },
+    { path: "Mods/${name}/ScriptExtender/Lua/Server/${name}.lua", content: "" },
   ];
 
   // TODO: change from string[] to TemplateFolder[]
-  assetPaths: string[] = [
-    "Generated/Public/${name}/Assets/DDS",
-    "Generated/Public/${name}/Assets/GR2",
-    "Public/${name}/Content/Assets/Characters/[PAK]_Armor/Materials",
-    "Public/${name}/Content/Assets/Characters/[PAK]_Armor/Meshes",
-    "Public/${name}/Content/Assets/Characters/[PAK]_Armor/Textures",
+  assetPaths: TemplateFolder[] = [
+    { path: "Generated/Public/${name}/Assets/DDS" },
+    { path: "Generated/Public/${name}/Assets/GR2" },
+    { path: "Public/${name}/Content/Assets/Characters/[PAK]_Armor/Materials" },
+    { path: "Public/${name}/Content/Assets/Characters/[PAK]_Armor/Meshes" },
+    { path: "Public/${name}/Content/Assets/Characters/[PAK]_Armor/Textures" },
   ];
 
   constructor(author: string, name: string, wsPath?: string) {
@@ -154,6 +166,9 @@ export class ModTemplate {
     this.iconUuid = uuid.get();
     this.language = getDisplayLanguageName().name;
     this.workspacePath = wsPath ?? path.join(getWorkspacePath(), this.name);
+    this.getSeVersion().then((ver) => {
+      this.seVersion = ver;
+    });
     this.format();
   }
 
@@ -163,6 +178,23 @@ export class ModTemplate {
   // do path placeholders first and then any content
   private format(): string {
     return "";
+  }
+
+  private async getSeVersion(): Promise<number> {
+    let ver: number = 0;
+    let res: Response = await fetch(
+      "https://api.github.com/repos/Norbyte/bg3se/releases/latest",
+      { method: "GET", headers: headers },
+    );
+
+    if (res !== undefined) {
+      let gitData: string | any = await res.json();
+      ver = gitData.tag_name.slice(1);
+      console.log(ver);
+    }
+
+    //console.log("http req", req);
+    return ver;
   }
 }
 
@@ -207,4 +239,5 @@ export async function makeModTemplate(): Promise<void> {
   }
 
   let mt = new ModTemplate(authorName, modName);
+  //console.log(mt);
 }

@@ -1,0 +1,5 @@
+{
+  "FeatureFlags": ["Lua"],
+  "ModTable": "${name}",
+  "RequiredVersion": ${seVersion}
+}
