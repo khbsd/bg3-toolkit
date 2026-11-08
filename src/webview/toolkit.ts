@@ -10,7 +10,7 @@ import { FileFormats } from "../utils/ls-formats/formats";
 import { convertAll, pack } from "../utils/ls-formats/junction";
 import { unpackChoose } from "../utils/ls-formats/pak";
 import { generateDds } from "../utils/templates/dds";
-import { makeModTemplate } from "../utils/templates/template";
+import { ModTemplate, makeModTemplate } from "../utils/templates/template";
 import { Version64, Version64Parts } from "../utils/version";
 import { getWorkspacePath } from "../utils/ws";
 import { consoleWebviewLog } from "./console";
@@ -89,11 +89,9 @@ export class ToolkitWebviewViewProvider implements vscode.WebviewViewProvider {
         }
         v64.updateVersionInMeta(v64.version64Build(version.join(".")));
       } else if (data.type === "make-mod") {
-        console.log(data);
-        makeModTemplate(getWorkspacePath());
+        makeModTemplate();
       } else if (data.type === "debug") {
         consoleWebviewLog("message received: " + data.msg);
-        generateDds(380);
       }
 
       if (getNames(FileFormats).includes(data.type)) {

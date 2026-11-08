@@ -13,6 +13,7 @@ import { getConf } from "./config";
  * German 	            de
  * Italian 	            it
  * Spanish 	            es
+ * LatinSpanish         es // unaware of an iso code for this, i presume its latin american spanish as opposed to spain spanish
  * Japanese 	          ja
  * Korean 	            ko
  * Russian 	            ru
@@ -34,33 +35,47 @@ export function getDisplayLanguageName(): DisplayLanguage {
   switch (dl.iso) {
     case "de":
       dl.name = "German";
+      break;
     default:
     case "en":
       dl.name = "English";
+      break;
     case "es":
       dl.name = "Spanish";
+      break;
     case "fr":
       dl.name = "French";
+      break;
     case "hu":
       dl.name = "Hungarian";
+      break;
     case "it":
       dl.name = "Italian";
+      break;
     case "ja":
       dl.name = "Japanese";
+      break;
     case "ko":
       dl.name = "Korean";
+      break;
     case "pl":
       dl.name = "Polish";
+      break;
     case "pt-br":
       dl.name = "BrazilianPortuguese";
+      break;
     case "ru":
       dl.name = "Russian";
+      break;
     case "tr":
       dl.name = "Turkish";
+      break;
     case "zh-cn":
       dl.name = "Chinese";
+      break;
     case "zh-tw":
       dl.name = "ChineseTraditional";
+      break;
   }
   return dl;
 }
@@ -161,4 +176,19 @@ export function getSelectionOrCursorWord(): string {
   }
 
   return selected;
+}
+
+export function getTab(): string {
+  let tabSize: number = 4;
+  try {
+    tabSize = Number(vscode.window.activeTextEditor?.options.tabSize);
+  } catch (err) {
+    console.log(err);
+  }
+  let tab = "";
+  while (tab.length < tabSize) {
+    tab += " ";
+  }
+
+  return tab;
 }

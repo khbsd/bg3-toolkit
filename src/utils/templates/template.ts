@@ -1,59 +1,18 @@
 import * as fs from "fs";
 import * as path from "path";
-import * as vscode from "vscode";
-import { FileFormats } from "../ls-formats/formats";
 import { Uuid } from "../uuid_handle";
-import { getWorkspacePath } from "../ws";
-import { addOpeningClosingTags, XmlFileTags } from "../xml";
+import {
+  DisplayLanguage,
+  getDisplayLanguageName,
+  getWorkspacePath,
+} from "../ws";
 
-const modPaths: string[] = [
-  "Localization/${Language}/${Name}_Loca.xml",
-  "Mods/${Name}/meta.lsx"
-]
-
-const itemPaths: string[] = [
-  "Public/Game/GUI/Assets/Tooltips/Icons/abilities.dds", // 380
-  "Public/Game/GUI/Assets/Tooltips/ItemIcons/icons.dds", // 380
-  "Public/Game/GUI/Assets/ControllerUIicons/skills_png/abilities.dds", // 144
-  "Public/Game/GUI/Assets/ControllerUIicons/items_png/items.dds", // 144
-  "Public/${Name}/Assets/Textures/Icons/${Name}_Icons.dds", // 256 x 64
-  "Public/${Name}/Content/UI/[PAK]_UI/_merged.lsx",
-  "Public/${Name}/GUI/Icons_Items.lsx",
-  "Public/${Name}/Stats/Generated/Data/${Name}_Stats.txt",
-  "Public/${Name}/Stats/Generated/TreasureTable.txt",
-];
-
-const scriptPaths: string[] = [
-  "Mods/${Name}/ScriptExtender/Config.json",
-  "Mods/${Name}/ScriptExtender/Lua/BootstrapClient.lua",
-  "Mods/${Name}/ScriptExtender/Lua/BootstrapServer.lua",
-  "Mods/${Name}/ScriptExtender/Lua/Server/${Name}.lua",
-]
-
-const assetPaths: string[] = [
-  "Generated/Public/${Name}/Assets/DDS",
-  "Generated/Public/${Name}/Assets/GR2",
-  "Public/${Name}/Content/Assets/Characters/[PAK]_Armor/Materials",
-  "Public/${Name}/Content/Assets/Characters/[PAK]_Armor/Meshes",
-  "Public/${Name}/Content/Assets/Characters/[PAK]_Armor/Textures",
-];
-
-export class ModTemplate {
-  author: string;
-  name: string;
-  modUuid: string;
-  iconUuid: string;
-  language;
-
-  constructor(author: string, name: string) {
-    this.author = author;
-    this.name = name;
-
-    let uuid = new Uuid();
-    this.modUuid = uuid.get();
-    this.iconUuid = uuid.get();
-    this.language = vscode.l10n.bundle;
-  }
+enum ModVars {
+  Author,
+  IconUuid,
+  Language,
+  ModUuid,
+  Name,
 }
 
 export enum TemplateFolders {
@@ -63,14 +22,21 @@ export enum TemplateFolders {
   Scripts,
 }
 
+export type TemplateDds = {
+  width: number;
+  height?: number;
+  name?: string;
+  path: string;
+};
+
 export class TemplateFolder {
   path: string;
   name: string;
   stats: fs.Stats | undefined = undefined;
 
-  constructor(name: string, wsPath?: string) {
-    this.name = name;
-    this.path = path.join(wsPath ?? getWorkspacePath(), this.name);
+  constructor(folderPath: string) {
+    this.name = path.basename(folderPath);
+    this.path = folderPath;
     try {
       this.stats = fs.statSync(this.path);
     } catch (err) {}
@@ -78,17 +44,13 @@ export class TemplateFolder {
 }
 
 export class TemplateFile extends TemplateFolder {
-  ext: FileFormats;
   content: string;
+  path: string;
 
-  constructor(
-    name: string,
-    ext: FileFormats,
-    opts?: { wsPath?: string; content?: string },
-  ) {
-    super(name + "." + FileFormats[ext], opts?.wsPath);
-    this.ext = ext;
-    this.content = opts?.content ?? "";
+  constructor(filePath: string, content?: string) {
+    super(path.dirname(filePath));
+    this.path = filePath;
+    this.content = content ?? "";
   }
 
   public setContent(content: string) {
@@ -96,49 +58,123 @@ export class TemplateFile extends TemplateFolder {
   }
 }
 
-export async function makeModTemplate(wsPath: string): Promise<void> {
-  /*const name: string | undefined = await vscode.window.showInputBox({
-    title: "mod name?",
-  });*/
-  const name = "test";
-  if (name === undefined) {
+export class ModTemplate {
+  author: string;
+  name: string;
+  modUuid: string;
+  iconUuid: string;
+  workspacePath: string;
+
+  language: DisplayLanguage;
+
+  modPaths: string[] = [
+    "Localization/${Language}/${Name}_Loca.xml",
+    "Mods/${Name}/meta.lsx",
+  ];
+
+  itemPaths_Dds: TemplateDds[] = [
+    { width: 380, path: "Public/Game/GUI/Assets/Tooltips/Icons/abilities.dds" },
+    { width: 380, path: "Public/Game/GUI/Assets/Tooltips/ItemIcons/icons.dds" },
+    {
+      width: 144,
+      path: "Public/Game/GUI/Assets/ControllerUIicons/skills_png/abilities.dds",
+    },
+    {
+      width: 144,
+      path: "Public/Game/GUI/Assets/ControllerUIicons/items_png/items.dds",
+    },
+    {
+      width: 256,
+      height: 64,
+      path: "Public/${Name}/Assets/Textures/Icons/${Name}_Icons.dds",
+    },
+  ];
+  itemPaths_files: string[] = [
+    "Public/${Name}/Content/UI/[PAK]_UI/_merged.lsx",
+    "Public/${Name}/GUI/Icons_Items.lsx",
+    "Public/${Name}/Stats/Generated/Data/${Name}_Stats.txt",
+    "Public/${Name}/Stats/Generated/TreasureTable.txt",
+  ];
+
+  scriptPaths: string[] = [
+    "Mods/${Name}/ScriptExtender/Config.json",
+    "Mods/${Name}/ScriptExtender/Lua/BootstrapClient.lua",
+    "Mods/${Name}/ScriptExtender/Lua/BootstrapServer.lua",
+    "Mods/${Name}/ScriptExtender/Lua/Server/${Name}.lua",
+  ];
+
+  assetPaths: string[] = [
+    "Generated/Public/${Name}/Assets/DDS",
+    "Generated/Public/${Name}/Assets/GR2",
+    "Public/${Name}/Content/Assets/Characters/[PAK]_Armor/Materials",
+    "Public/${Name}/Content/Assets/Characters/[PAK]_Armor/Meshes",
+    "Public/${Name}/Content/Assets/Characters/[PAK]_Armor/Textures",
+  ];
+
+  constructor(author: string, name: string, wsPath?: string) {
+    this.author = author;
+    this.name = name;
+
+    let uuid = new Uuid();
+    this.modUuid = uuid.uuid;
+    this.iconUuid = uuid.get();
+    this.language = getDisplayLanguageName();
+    this.workspacePath = wsPath ?? path.join(getWorkspacePath(), this.name);
+  }
+}
+
+export function format(text: string): string {
+  
+  return text;
+}
+
+/**
+ *
+ * @param folder: ```TemplateFolder``` attempt to make a folder. does not if it exists.
+ */
+export async function makeModFolder(folder: TemplateFolder) {
+  if (folder.stats?.isDirectory()) {
+    return;
+  }
+  fs.mkdir(folder.path, { recursive: true }, (err) => {
+    console.log(err);
+  });
+}
+
+/**
+ *
+ * @param file: ```TemplateFile``` attempt to make a file. does not if it exists.
+ */
+export async function makeModFile(file: TemplateFile) {
+  if (file.stats?.isFile()) {
     return;
   }
 
-  wsPath = path.join(wsPath, name);
-
-  try {
-    if (fs.statSync(wsPath).isDirectory()) {
-      fs.rmdirSync(wsPath);
-      console.log("removed");
-    }
-  } catch (err) {
-    console.log(wsPath, "doesnt exist, making");
-  }
-
-  const folders = mainFolders(wsPath);
-  for (const folder of folders) {
-    if (folder.stats === undefined) {
-      fs.mkdirSync(folder.path, { recursive: true });
-    }
-  }
-
-  mainFiles(wsPath);
-
-  const locaText = addOpeningClosingTags([" "], new XmlFileTags());
+  fs.writeFile(file.path, file.content, (err) => {
+    console.log(err);
+  });
 }
 
-export function mainFolders(wsPath: string): TemplateFolder[] {
-  let folders: TemplateFolder[] = [];
-  for (let folder of Object.values(TemplateFolders)) {
-    folder = folder as keyof typeof TemplateFolders;
-
-    if (folder.length > 1) {
-      folders.push(new TemplateFolder(folder, wsPath));
-    }
+export async function makeModTemplate(): Promise<void> {
+  /*const modName: string | undefined = await vscode.window.showInputBox({
+    title: "mod name?",
+  });*/
+  /*const authorName: string | undefined = await vscode.window.showInputBox({
+    title: "author name?",
+  });*/
+  const modName = "test";
+  const authorName = "kayaaaaaaa";
+  if (authorName === undefined || modName === undefined) {
+    return;
   }
-  return folders;
+
+  let mt = new ModTemplate(authorName, modName);
+
+  for (let file of mt.modPaths) {
+    let f = new TemplateFile(mt.workspacePath);
+  }
 }
+
 
 export function mainFiles(wsPath: string) {
   let templatesPath: string = path.resolve(

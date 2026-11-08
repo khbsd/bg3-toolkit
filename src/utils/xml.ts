@@ -2,12 +2,13 @@ import * as fs from "fs";
 import * as path from "path";
 import * as vscode from "vscode";
 
+import { EOL } from "os";
+import { consoleWebviewLog } from "../webview/console";
 import { getConf } from "./config";
 import { getFiles, getLinesFromFileSync, getModPath } from "./file";
 import { FileFormats } from "./ls-formats/formats";
-import { getSelectionOrCursorWord, getWorkspacePath } from "./ws";
-import { EOL } from "os";
-import { consoleWebviewLog } from "../webview/console";
+import { Handle } from "./uuid_handle";
+import { getSelectionOrCursorWord, getTab, getWorkspacePath } from "./ws";
 
 const enum XmlTag {
   VersionEncoding,
@@ -52,7 +53,7 @@ export class XmlFileTags {
     };
     this.openContentList = {
       re: /(?<openContentList><contentList[\w\s\:\=\"\.\/\-]*>)/,
-      text: opts?.empty === true ? "" : xmlFileTags[XmlTag.OpenContentList],
+      text: opts?.empty === true ? "" : xmlFileTags[XmlTag.OpenContentListv2],
     };
     this.closeContentList = {
       re: /(?<closeContentList><\/contentList+>)/,
@@ -120,17 +121,6 @@ export async function addHandleToXml(opts?: {
   let handle = opts?.handle ?? getSelectionOrCursorWord();
   let fileIndex = opts?.fileIndex ?? 0;
 
-  let tabSize: number = 4;
-  try {
-    tabSize = Number(vscode.window.activeTextEditor?.options.tabSize);
-  } catch (err) {
-    console.log(err);
-  }
-  let tab = "";
-  while (tab.length < tabSize) {
-    tab += " ";
-  }
-
   const xmlFiles: XmlFile[] = [];
   getFiles(getWorkspacePath(), {
     type: FileFormats.xml,
@@ -167,10 +157,7 @@ export async function addHandleToXml(opts?: {
   }
 
   if (xmlFile !== undefined) {
-    handle =
-      tab +
-      xmlLineTags[XmlTag.OpenContent].replace("${handle}", handle) +
-      xmlLineTags[XmlTag.CloseContent];
+    handle = getFormattedLineTags(handle);
 
     xmlFile.strippedContent.push(handle);
     xmlFile.content = addOpeningClosingTags(
@@ -270,8 +257,7 @@ export function mergeXmlFiles(wsPath: string): boolean {
 }
 
 export function mergeXmlLines(files: XmlFile[]): string[] {
-  const allowDuplicates: boolean = getConf()
-    .mergedLocalizationAllowDuplicates;
+  const allowDuplicates: boolean = getConf().mergedLocalizationAllowDuplicates;
   let mergedLines: string[] = [];
 
   const openingTags: XmlFileTags = files[0].tags;
@@ -293,4 +279,22 @@ export function mergeXmlLines(files: XmlFile[]): string[] {
   }
 
   return addOpeningClosingTags(mergedLines, openingTags);
+}
+
+export function getFormattedLineTags(handle?: string): string {
+  handle = handle ?? new Handle().handle;
+  return (
+    getTab() +
+    xmlLineTags[XmlTag.OpenContent].replace("${handle}", handle) +
+    xmlLineTags[XmlTag.CloseContent]
+  );
+}
+
+export function getTemplateText(): string {
+  let templateText = "";
+  templateText = addOpeningClosingTags(
+    [getFormattedLineTags()],
+    new XmlFileTags(),
+  ).join(EOL);
+  return templateText;
 }

@@ -8,7 +8,7 @@ export class Command {
     const disposable = vscode.commands.registerCommand(
       "bg3-toolkit.makeModTemplate",
       () => {
-        makeModTemplate(getWorkspacePath());
+        makeModTemplate();
       },
     );
     return disposable;
