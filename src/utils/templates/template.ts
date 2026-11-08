@@ -154,14 +154,16 @@ export class ModTemplate {
     this.iconUuid = uuid.get();
     this.language = getDisplayLanguageName().name;
     this.workspacePath = wsPath ?? path.join(getWorkspacePath(), this.name);
+    this.format();
   }
-}
 
-// if it has the content property: TemplateFile
-// if it has the width property: TemplateDds
-// if it has neither: TemplateFolder
-export function format(text: string): string {
-  return text;
+  // if it has the content property: TemplateFile
+  // if it has the width property: TemplateDds
+  // if it has neither: TemplateFolder
+  // do path placeholders first and then any content
+  private format(): string {
+    return "";
+  }
 }
 
 /**
