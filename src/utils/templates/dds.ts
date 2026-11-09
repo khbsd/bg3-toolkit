@@ -59,6 +59,7 @@ export function generateDds(
   opts?: {
     height?: number;
     name?: string;
+    path?: string;
   },
 ): void {
   if (opts === undefined) {
@@ -73,6 +74,8 @@ export function generateDds(
   if (opts.name === undefined) {
     opts.name = "test";
   }
+  const imagePath: string =
+    opts?.path ?? path.join(getWorkspacePath(), opts?.name + ".dds");
   let header: number[] | undefined;
   let data: number[] | undefined;
   let ddsBuf: number[] = [];
@@ -108,13 +111,11 @@ export function generateDds(
   }
 
   try {
-    fs.writeFileSync(
-      path.join(getWorkspacePath(), opts?.name + ".dds"),
-      Buffer.from(ddsBuf),
-      {
-        flag: "w+",
-      },
-    );
+    console.log("writing:", imagePath);
+    fs.mkdirSync(path.dirname(imagePath), { recursive: true });
+    fs.writeFileSync(imagePath, Buffer.from(ddsBuf), {
+      flag: "w+",
+    });
   } catch (err) {
     console.log(err);
   }

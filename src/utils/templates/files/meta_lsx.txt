@@ -17,7 +17,7 @@
           </children>
         </node>
         <node id="ModuleInfo">
-          <attribute id="Author" type="LSWString" value="${Author}" />
+          <attribute id="Author" type="LSWString" value="${author}" />
           <attribute id="CharacterCreationLevelName" type="FixedString" value="" />
           <attribute id="Description" type="LSWString" value="${name}" />
           <attribute id="Folder" type="LSWString" value="${name}" />

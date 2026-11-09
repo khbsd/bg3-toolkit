@@ -2,9 +2,9 @@ import * as fs from "fs";
 import * as path from "path";
 
 import { consoleWebviewLog } from "../../webview/console";
-import { Uuid } from "../uuid_handle";
+import { Handle, Uuid } from "../uuid_handle";
 import { getDisplayLanguageName, getWorkspacePath } from "../ws";
-import { getTemplateText } from "../xml";
+import { generateDds } from "./dds";
 
 const templatesPath: string = path.resolve(
   __dirname,
@@ -20,7 +20,7 @@ const templatesPath: string = path.resolve(
 const modFiles: TemplateFile[] = [
   {
     path: "Localization/${language}/${name}_Loca.xml",
-    content: getTemplateText(),
+    content: path.join(templatesPath, "loca_xml.txt"),
   },
   {
     path: "Mods/${name}/meta.lsx",
@@ -52,7 +52,7 @@ const itemFiles: TemplateFile[] = [
   },
   {
     path: "Public/${name}/GUI/Icons_Items.lsx",
-    content: path.join(templatesPath, "icons_items.txt"),
+    content: path.join(templatesPath, "icons_items_lsx.txt"),
   },
   {
     path: "Public/${name}/RootTemplates/${name}.lsx",
@@ -90,32 +90,6 @@ const assetPaths: TemplateFolder[] = [
   { path: "Public/${name}/Content/Assets/Characters/[PAK]_Armor/Textures" },
 ];
 
-enum ModInfoType {
-  dds,
-  file,
-  folder,
-}
-
-// maybe unneeded
-enum ModVars {
-  author,
-  iconUuid,
-  language,
-  modUuid,
-  name,
-}
-
-export interface TemplateDds {
-  width: number;
-  height?: number;
-  name?: string;
-  path: string;
-}
-
-export class TemplateDds {
-  constructor(td: TemplateDds) {}
-}
-
 export interface TemplateFolder {
   path: string;
 }
@@ -148,6 +122,23 @@ export class TemplateFile extends TemplateFolder {
   }
 }
 
+export interface TemplateDds {
+  width: number;
+  height?: number;
+}
+
+export class TemplateDds extends TemplateFolder {
+  width: number;
+  height?: number;
+  constructor(td: TemplateDds) {
+    super({ path: td.path });
+    this.width = td.width;
+    if (td.height === undefined) {
+      this.height = this.width;
+    }
+  }
+}
+
 export type ModOptions = {
   wsPath?: string;
   assets?: boolean;
@@ -161,8 +152,9 @@ export class ModTemplate {
   name: string;
   modUuid: string;
   iconUuid: string;
+  initHandle: string;
   language: string;
-  workspacePath: string;
+  wsPath: string;
   seVersion: number = 33; // latest version as of typing this. dynamically updated
   opts?: {
     assets?: boolean;
@@ -182,65 +174,57 @@ export class ModTemplate {
       this.opts.items = true;
     }
 
-    let uuid = new Uuid();
+    const uuid = new Uuid();
+    const handle = new Handle();
     this.modUuid = uuid.uuid;
     this.iconUuid = uuid.get();
+    this.initHandle = handle.handle;
     this.language = getDisplayLanguageName().name;
-    this.workspacePath =
-      opts?.wsPath ?? path.join(getWorkspacePath(), this.name);
-
-    this.getSeVersion().then((ver) => {
-      this.seVersion = ver;
-    });
-
-    this.format();
+    this.wsPath = opts?.wsPath ?? path.join(getWorkspacePath(), this.name);
   }
 
   // do path placeholders first and then any content
-  private format(): void {
+  public format(): void {
     function _f(mt: ModTemplate, text: string): string {
       for (const attr of Object.keys(mt)) {
         const key = attr as keyof typeof mt;
-        let attrVal = mt[key];
-        if (typeof attrVal === "string") {
-          const ph = "${" + key + "}";
-          while (text.includes(ph)) {
-            text = text.replace("${" + key + "}", attrVal);
-          }
+        let val = mt[key];
+        if (typeof val === "string" || typeof val === "number") {
+          text = text.replaceAll("${" + key + "}", val.toString());
         }
       }
       console.log(text);
+      return text;
+    }
+    function _resolveModPath(text: string, wsPath: string): string {
+      if (!text.includes(wsPath)) {
+        text = path.join(wsPath, text);
+      }
       return text;
     }
 
     // TODO: add workspace path to file.path
     function _addFiles(mt: ModTemplate, files: TemplateFile[]) {
       for (let file of files) {
-        // check for path here, then get content
-        for (let attr of Object.keys(file)) {
-          const key = attr as keyof typeof file;
-          if (file[key] === "string") {
-            //@ts-ignore
-            file[key] = _f(mt, file[key]);
-          }
+        file.path = _f(mt, _resolveModPath(file.path, mt.wsPath));
+        if (file.content.length > 0) {
+          file.content = _f(
+            mt,
+            fs.readFileSync(path.normalize(file.content)).toString(),
+          );
         }
         mt.modFiles.push(new TemplateFile(file));
       }
     }
     function _addDds(mt: ModTemplate, files: TemplateDds[]) {
       for (const image of files) {
+        image.path = _f(mt, _resolveModPath(image.path, mt.wsPath));
         mt.modImages.push(new TemplateDds(image));
       }
     }
     function _addPaths(mt: ModTemplate, folders: TemplateFolder[]) {
       for (const folder of folders) {
-        for (let attr of Object.keys(folder)) {
-          const key = attr as keyof typeof folder;
-          if (typeof folder[key] === "string") {
-            // @ts-ignore
-            folder[key] = _f(mt, folder[key]);
-          }
-        }
+        folder.path = _f(mt, _resolveModPath(folder.path, mt.wsPath));
         mt.modPaths.push(new TemplateFolder(folder));
       }
     }
@@ -260,8 +244,7 @@ export class ModTemplate {
     console.log(this);
   }
 
-  private async getSeVersion(): Promise<number> {
-    let ver: number = 33;
+  public async getSeVersion() {
     try {
       let res: Response = await fetch(
         "https://api.github.com/repos/Norbyte/bg3se/releases/latest",
@@ -269,14 +252,31 @@ export class ModTemplate {
       );
 
       let gitData: string | any = await res.json();
-      ver = Number(gitData.tag_name.slice(1));
-      consoleWebviewLog("found latest bg3se version:", ver);
+      this.seVersion = Number(gitData.tag_name.slice(1));
+      consoleWebviewLog("found latest bg3se version:", this.seVersion);
     } catch (err) {
       consoleWebviewLog(err);
     }
 
     //console.log("http req", req);
-    return ver;
+  }
+
+  public async build() {
+    for (const file of this.modFiles) {
+      makeModFile(file);
+    }
+
+    for (const folder of this.modPaths) {
+      makeModFolder(folder);
+    }
+
+    for (const image of this.modImages) {
+      generateDds(image.width, {
+        height: image.height,
+        name: image.name,
+        path: image.path,
+      });
+    }
   }
 }
 
@@ -297,14 +297,13 @@ export async function makeModFolder(folder: TemplateFolder) {
  *
  * @param file: ```TemplateFile``` attempt to make a file. does not if it exists.
  */
-export async function makeModFile(file: TemplateFile) {
+export function makeModFile(file: TemplateFile) {
   if (file.stats?.isFile()) {
     return;
   }
 
-  fs.writeFile(file.path, file.content, (err) => {
-    console.log(err);
-  });
+  fs.mkdirSync(path.dirname(file.path), { recursive: true });
+  fs.writeFileSync(file.path, file.content);
 }
 
 export async function makeModTemplate(): Promise<void> {
@@ -324,4 +323,7 @@ export async function makeModTemplate(): Promise<void> {
     assets: true,
     scripting: true,
   });
+  await mt.getSeVersion();
+  mt.format();
+  mt.build();
 }
