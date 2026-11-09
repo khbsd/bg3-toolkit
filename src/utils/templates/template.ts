@@ -1,5 +1,6 @@
 import * as fs from "fs";
 import * as path from "path";
+import * as vscode from "vscode";
 
 import { consoleWebviewLog } from "../../webview/console";
 import { Handle, Uuid } from "../uuid_handle";
@@ -306,23 +307,49 @@ export function makeModFile(file: TemplateFile) {
   fs.writeFileSync(file.path, file.content);
 }
 
+// TODO: symlinking
 export async function makeModTemplate(): Promise<void> {
-  /*const modName: string | undefined = await vscode.window.showInputBox({
+  const yesNo: string[] = ["yes", "no"];
+  let modName: string | undefined;
+  let authorName: string | undefined;
+
+  modName = await vscode.window.showInputBox({
     title: "mod name?",
-  });*/
-  /*const authorName: string | undefined = await vscode.window.showInputBox({
+  });
+  authorName = await vscode.window.showInputBox({
     title: "author name?",
-  });*/
-  const modName = "MOD_NAME";
-  const authorName = "kayaaaaaaa";
+  });
   if (authorName === undefined || modName === undefined) {
     return;
   }
 
-  let mt = new ModTemplate(authorName, modName, {
-    assets: true,
-    scripting: true,
+  let modOpts: ModOptions = {
+    wsPath: path.join(getWorkspacePath(), modName),
+  };
+
+  let q = await vscode.window.showQuickPick(yesNo, {
+    title: "assets?",
+    prompt: "will this mod add custom assets?",
   });
+  modOpts.assets = q === "yes";
+
+  if (!modOpts.assets) {
+    q = await vscode.window.showQuickPick(yesNo, {
+      title: "items?",
+      prompt: "will this mod add custom items?",
+    });
+    modOpts.items = q === "yes";
+  } else {
+    modOpts.items = modOpts.assets;
+  }
+
+  q = await vscode.window.showQuickPick(yesNo, {
+    title: "items?",
+    prompt: "will this mod use script extender scripting?",
+  });
+  modOpts.scripting = q === "yes";
+
+  let mt = new ModTemplate(authorName, modName, modOpts);
   await mt.getSeVersion();
   mt.format();
   mt.build();
