@@ -111,7 +111,6 @@ export function generateDds(
   }
 
   try {
-    console.log("writing:", imagePath);
     fs.mkdirSync(path.dirname(imagePath), { recursive: true });
     fs.writeFileSync(imagePath, Buffer.from(ddsBuf), {
       flag: "w+",

@@ -195,7 +195,6 @@ export class ModTemplate {
           text = text.replaceAll("${" + key + "}", val.toString());
         }
       }
-      console.log(text);
       return text;
     }
     function _resolveModPath(text: string, wsPath: string): string {
