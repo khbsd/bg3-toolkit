@@ -6,6 +6,7 @@ import { consoleWebviewLog } from "../../webview/console";
 import { Handle, Uuid } from "../uuid_handle";
 import { getDisplayLanguageName, getWorkspacePath } from "../ws";
 import { generateDds } from "./dds";
+import { getModName, getModPath } from "../file";
 
 const templatesPath: string = path.resolve(
   __dirname,
@@ -304,10 +305,10 @@ export function makeModFile(file: TemplateFile) {
   }
 
   fs.mkdirSync(path.dirname(file.path), { recursive: true });
-  fs.writeFileSync(file.path, file.content);
+  fs.writeFileSync(file.path, file.content, { flag: "wx" });
 }
 
-// TODO: symlinking
+// TODO: symlinking, partial mod recreation too
 export async function makeModTemplate(): Promise<void> {
   const yesNo: string[] = ["yes", "no"];
   let modName: string | undefined;
@@ -344,7 +345,7 @@ export async function makeModTemplate(): Promise<void> {
   }
 
   q = await vscode.window.showQuickPick(yesNo, {
-    title: "items?",
+    title: "scripting?",
     prompt: "will this mod use script extender scripting?",
   });
   modOpts.scripting = q === "yes";
