@@ -62,6 +62,12 @@ export function generateDds(
     path?: string;
   },
 ): void {
+  try {
+    if (opts?.path !== undefined && fs.statSync(opts.path).isFile()) {
+      return;
+    }
+  } catch (err) {}
+
   if (opts === undefined) {
     opts = {
       height: width,

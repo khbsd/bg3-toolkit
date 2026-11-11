@@ -6,7 +6,6 @@ import { consoleWebviewLog } from "../../webview/console";
 import { Handle, Uuid } from "../uuid_handle";
 import { getDisplayLanguageName, getWorkspacePath } from "../ws";
 import { generateDds } from "./dds";
-import { getModName, getModPath } from "../file";
 
 const templatesPath: string = path.resolve(
   __dirname,
@@ -146,6 +145,9 @@ export type ModOptions = {
   assets?: boolean;
   items?: boolean;
   scripting?: boolean;
+  modUuid?: string;
+  name?: string;
+  author?: string;
 };
 
 export class ModTemplate {
@@ -185,7 +187,6 @@ export class ModTemplate {
     this.wsPath = opts?.wsPath ?? path.join(getWorkspacePath(), this.name);
   }
 
-  // do path placeholders first and then any content
   public format(): void {
     function _f(mt: ModTemplate, text: string): string {
       for (const attr of Object.keys(mt)) {
@@ -197,6 +198,7 @@ export class ModTemplate {
       }
       return text;
     }
+
     function _resolveModPath(text: string, wsPath: string): string {
       if (!text.includes(wsPath)) {
         text = path.join(wsPath, text);
@@ -204,7 +206,6 @@ export class ModTemplate {
       return text;
     }
 
-    // TODO: add workspace path to file.path
     function _addFiles(mt: ModTemplate, files: TemplateFile[]) {
       for (let file of files) {
         file.path = _f(mt, _resolveModPath(file.path, mt.wsPath));
@@ -258,8 +259,6 @@ export class ModTemplate {
     } catch (err) {
       consoleWebviewLog(err);
     }
-
-    //console.log("http req", req);
   }
 
   public async build() {
@@ -308,6 +307,7 @@ export function makeModFile(file: TemplateFile) {
 }
 
 // TODO: symlinking, partial mod recreation too
+// ie, should be able to determine if mod exists, what parts exist, and use its name and uuid
 export async function makeModTemplate(): Promise<void> {
   const yesNo: string[] = ["yes", "no"];
   let modName: string | undefined;
