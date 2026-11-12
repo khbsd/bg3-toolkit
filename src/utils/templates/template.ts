@@ -212,15 +212,24 @@ export class ModTemplate {
     function _addFiles(mt: ModTemplate, files: TemplateFile[]) {
       for (let file of files) {
         file.path = _f(mt, _resolveModPath(file.path, mt.wsPath));
-        
-        // TODO: check if path is not an actual path
-        if (file.content.length > 0) {
+
+        if (file.content.length > 0 && !file.content.includes('"')) {
           file.content = _f(
             mt,
             fs.readFileSync(path.normalize(file.content)).toString(),
           );
         }
-        mt.modFiles.push(new TemplateFile(file));
+
+        let dup: boolean = false;
+        for (let existingFile of mt.modFiles) {
+          dup = existingFile.path === file.path;
+          if (dup) {
+            break;
+          }
+        }
+        if (!dup) {
+          mt.modFiles.push(new TemplateFile(file));
+        }
       }
     }
     function _addDds(mt: ModTemplate, files: TemplateDds[]) {
@@ -305,30 +314,28 @@ export class ModTemplate {
 export async function makeModTemplate(): Promise<void> {
   const v = vscode;
   const yesNo: string[] = ["yes", "no"];
-  let modOpts: ModOptions = { name: "beep", author: "boop" };
+  let modOpts: ModOptions = { name: "", author: "" };
 
   let mf = getMetaFile();
   if (mf !== undefined) {
     modOpts = getModInfoFromMeta(mf);
     modOpts.preexists = true;
-  } else {
   }
 
-  console.log(getModPath(getWorkspacePath()));
-
-  /*
-  modOpts.name =
-    (await vscode.window.showInputBox({
-      title: "mod name?",
-    })) ?? "";
-  modOpts.author =
-    (await vscode.window.showInputBox({
-      title: "author name?",
-    })) ?? "";
-  if (modOpts.name.length === 0 || modOpts.author === undefined) {
-    return;
+  if (!modOpts.preexists) {
+    modOpts.name =
+      (await vscode.window.showInputBox({
+        title: "mod name?",
+      })) ?? "";
+    modOpts.author =
+      (await vscode.window.showInputBox({
+        title: "author name?",
+      })) ?? "";
+    if (modOpts.name.length === 0 || modOpts.author === undefined) {
+      return;
+    }
   }
-  
+
   let q = await vscode.window.showQuickPick(yesNo, {
     title: "assets?",
     prompt: "will this mod add custom assets?",
@@ -350,7 +357,6 @@ export async function makeModTemplate(): Promise<void> {
     prompt: "will this mod use script extender scripting?",
   });
   modOpts.scripting = q === "yes";
-  */
 
   let mt = new ModTemplate(modOpts);
   await mt.getSeVersion();
