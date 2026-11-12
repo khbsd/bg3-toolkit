@@ -149,6 +149,7 @@ export type ModOptions = {
   scripting?: boolean;
   modUuid?: string;
   iconUuid?: string;
+  preexists?: boolean;
   name: string;
   author: string;
 };
@@ -165,11 +166,8 @@ export class ModTemplate {
   language: string;
   wsPath: string;
   seVersion: number = 33; // latest version as of typing this. dynamically updated
-  opts?: {
-    assets?: boolean;
-    items?: boolean;
-    scripting?: boolean;
-  };
+  preexists?: boolean = false;
+  opts?: ModOptions;
 
   modFiles: TemplateFile[] = [];
   modImages: TemplateDds[] = [];
@@ -236,7 +234,10 @@ export class ModTemplate {
       }
     }
 
-    _addFiles(this, modFiles);
+    if (!this.preexists) {
+      _addFiles(this, modFiles);
+    }
+
     if (this.opts?.assets) {
       _addFiles(this, itemFiles);
       _addDds(this, itemDds);
@@ -245,6 +246,7 @@ export class ModTemplate {
       _addFiles(this, itemFiles);
       _addDds(this, itemDds);
     }
+
     if (this.opts?.scripting) {
       _addFiles(this, scriptFiles);
     }
@@ -306,7 +308,7 @@ export async function makeModTemplate(): Promise<void> {
   let mf = getMetaFile();
   if (mf !== undefined) {
     modOpts = getModInfoFromMeta(mf);
-    return;
+    modOpts.preexists = true;
   } else {
   }
 
