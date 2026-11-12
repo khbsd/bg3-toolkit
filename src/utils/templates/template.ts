@@ -3,6 +3,8 @@ import * as path from "path";
 import * as vscode from "vscode";
 
 import { consoleWebviewLog } from "../../webview/console";
+import { getModPath } from "../file";
+import { getMetaFile, getModInfoFromMeta } from "../meta";
 import { Handle, Uuid } from "../uuid_handle";
 import { getDisplayLanguageName, getWorkspacePath } from "../ws";
 import { generateDds } from "./dds";
@@ -146,10 +148,13 @@ export type ModOptions = {
   items?: boolean;
   scripting?: boolean;
   modUuid?: string;
-  name?: string;
-  author?: string;
+  iconUuid?: string;
+  name: string;
+  author: string;
 };
 
+// TODO: if a metafile already exists, grab it and use it for these fields
+// same for iconUuid
 export class ModTemplate {
   // named this way so they align with the names of the placeholders
   author: string;
@@ -170,9 +175,9 @@ export class ModTemplate {
   modImages: TemplateDds[] = [];
   modPaths: TemplateFolder[] = [];
 
-  constructor(author: string, name: string, opts?: ModOptions) {
-    this.author = author;
-    this.name = name;
+  constructor(opts: ModOptions) {
+    this.author = opts.author;
+    this.name = opts.name;
     this.opts = opts;
     if (this.opts?.assets === true) {
       this.opts.items = true;
@@ -180,8 +185,8 @@ export class ModTemplate {
 
     const uuid = new Uuid();
     const handle = new Handle();
-    this.modUuid = uuid.uuid;
-    this.iconUuid = uuid.get();
+    this.modUuid = opts?.modUuid ?? uuid.uuid;
+    this.iconUuid = opts?.iconUuid ?? uuid.get();
     this.initHandle = handle.handle;
     this.language = getDisplayLanguageName().name;
     this.wsPath = opts?.wsPath ?? path.join(getWorkspacePath(), this.name);
@@ -263,11 +268,22 @@ export class ModTemplate {
 
   public async build() {
     for (const file of this.modFiles) {
-      makeModFile(file);
+      if (file.stats?.isFile()) {
+        continue;
+      }
+
+      fs.mkdirSync(path.dirname(file.path), { recursive: true });
+      fs.writeFileSync(file.path, file.content, { flag: "wx" });
     }
 
     for (const folder of this.modPaths) {
-      makeModFolder(folder);
+      if (folder.stats?.isDirectory()) {
+        continue;
+      }
+
+      fs.mkdir(folder.path, { recursive: true }, (err) => {
+        console.log(err);
+      });
     }
 
     for (const image of this.modImages) {
@@ -280,53 +296,35 @@ export class ModTemplate {
   }
 }
 
-/**
- *
- * @param folder: ```TemplateFolder``` attempt to make a folder. does not if it exists.
- */
-export async function makeModFolder(folder: TemplateFolder) {
-  if (folder.stats?.isDirectory()) {
-    return;
-  }
-  fs.mkdir(folder.path, { recursive: true }, (err) => {
-    console.log(err);
-  });
-}
-
-/**
- *
- * @param file: ```TemplateFile``` attempt to make a file. does not if it exists.
- */
-export function makeModFile(file: TemplateFile) {
-  if (file.stats?.isFile()) {
-    return;
-  }
-
-  fs.mkdirSync(path.dirname(file.path), { recursive: true });
-  fs.writeFileSync(file.path, file.content, { flag: "wx" });
-}
-
 // TODO: symlinking, partial mod recreation too
 // ie, should be able to determine if mod exists, what parts exist, and use its name and uuid
 export async function makeModTemplate(): Promise<void> {
+  const v = vscode;
   const yesNo: string[] = ["yes", "no"];
-  let modName: string | undefined;
-  let authorName: string | undefined;
+  let modOpts: ModOptions = { name: "beep", author: "boop" };
 
-  modName = await vscode.window.showInputBox({
-    title: "mod name?",
-  });
-  authorName = await vscode.window.showInputBox({
-    title: "author name?",
-  });
-  if (authorName === undefined || modName === undefined) {
+  let mf = getMetaFile();
+  if (mf !== undefined) {
+    modOpts = getModInfoFromMeta(mf);
     return;
+  } else {
   }
 
-  let modOpts: ModOptions = {
-    wsPath: path.join(getWorkspacePath(), modName),
-  };
+  console.log(getModPath(getWorkspacePath()));
 
+  /*
+  modOpts.name =
+    (await vscode.window.showInputBox({
+      title: "mod name?",
+    })) ?? "";
+  modOpts.author =
+    (await vscode.window.showInputBox({
+      title: "author name?",
+    })) ?? "";
+  if (modOpts.name.length === 0 || modOpts.author === undefined) {
+    return;
+  }
+  
   let q = await vscode.window.showQuickPick(yesNo, {
     title: "assets?",
     prompt: "will this mod add custom assets?",
@@ -348,8 +346,9 @@ export async function makeModTemplate(): Promise<void> {
     prompt: "will this mod use script extender scripting?",
   });
   modOpts.scripting = q === "yes";
+  */
 
-  let mt = new ModTemplate(authorName, modName, modOpts);
+  let mt = new ModTemplate(modOpts);
   await mt.getSeVersion();
   mt.format();
   mt.build();

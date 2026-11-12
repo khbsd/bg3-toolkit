@@ -2,7 +2,8 @@ import * as fs from "fs";
 import * as vscode from "vscode";
 
 import { Registrar } from "./registrar/registrar";
-import { getModPath, hasMetaFile } from "./utils/file";
+import { getModPath } from "./utils/file";
+import { hasMetaFile } from "./utils/meta";
 import { getWorkspacePath } from "./utils/ws";
 import { ConsoleWebviewViewProvider } from "./webview/console";
 import { ToolkitWebviewViewProvider } from "./webview/toolkit";

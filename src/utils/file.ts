@@ -3,7 +3,7 @@ import * as path from "path";
 
 import { FileHandle } from "fs/promises";
 import { consoleWebviewLog } from "../webview/console";
-import { getConf, config } from "./config";
+import { config, getConf } from "./config";
 import {
   FileFormats,
   LsFile,
@@ -11,8 +11,8 @@ import {
   isEditable,
   isLoca,
 } from "./ls-formats/formats";
+import { hasMetaFile } from "./meta";
 import { getWorkspacePath } from "./ws";
-
 const virtualTextureRegex: RegExp = /Textures_[\d]+/;
 const hotfixPatchRegex: RegExp = /Patch[\d]+_Hotfix[\d]+/;
 
@@ -31,7 +31,6 @@ export function fixPath(wsPath: string): string {
  * aw yeah the good ole split slice split :^ )
  * */
 export function getRelativeModPath(modPath: string, fullPath: string): string {
-
   let relPath = fullPath.split(path.sep).slice(modPath.split(path.sep).length);
 
   let relativePath = "";
@@ -71,27 +70,14 @@ export function getModPath(wsPath: string): string {
       retPath = path.resolve(p.parentPath, "..", "..");
     }
   }
+
   if (retPath.length === 0) {
-    return getModPath(path.resolve(tempPath, ".."));
+    if (retPath.includes(getWorkspacePath())) {
+      return getModPath(path.resolve(tempPath, ".."));
+    }
+    return getWorkspacePath();
   }
   return retPath;
-}
-
-export function hasMetaFile(path: string): boolean {
-  return path.toLowerCase().includes("meta.lsx");
-}
-
-export function getMetaFile(): LsFile | undefined {
-  for (const entry of fs.readdirSync(getModPath(getWorkspacePath()), {
-    recursive: true,
-    withFileTypes: true,
-  })) {
-    let fpath: string = path.join(entry.parentPath, entry.name);
-    if (hasMetaFile(fpath)) {
-      return new LsFile(fpath);
-    }
-  }
-  return undefined;
 }
 
 export function getModName(modPath: string): string {

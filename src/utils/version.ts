@@ -1,9 +1,7 @@
 import * as fs from "fs";
 
 import { consoleWebviewLog } from "../webview/console";
-import { getMetaFile } from "./file";
-
-const ModuleInfoTag = '<node id="ModuleInfo">';
+import { ModuleInfoTag, getMetaFile } from "./meta";
 
 export enum Version64Parts {
   major,
@@ -100,11 +98,7 @@ export class Version64 {
 
     for (const result of metaFileContents.matchAll(this.re)) {
       // make sure the versions of dependencies are not being read
-      if (
-        !metaFileContents
-          .slice(0, result.index)
-          .includes(ModuleInfoTag)
-      ) {
+      if (!metaFileContents.slice(0, result.index).includes(ModuleInfoTag)) {
         continue;
       }
 
@@ -134,11 +128,7 @@ export class Version64 {
       }
 
       // make sure the versions of dependencies are not being changed
-      if (
-        !metaFileContents
-          .slice(0, result.index)
-          .includes(ModuleInfoTag)
-      ) {
+      if (!metaFileContents.slice(0, result.index).includes(ModuleInfoTag)) {
         continue;
       }
 
