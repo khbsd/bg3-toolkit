@@ -12,11 +12,11 @@ export const MetaNameRegex: RegExp = new RegExp(
   "g",
 );
 export const MetaAuthorRegex: RegExp = new RegExp(
-  /id="Author"\s+type="LSWString"\s+value="(?<author>[^"]*)/,
+  /id="Author"\s+type="LSWString"\s+value="(?<author>[^"]*)"/,
   "g",
 );
 export const MetaUuidRegex: RegExp = new RegExp(
-  /id="UUID"\s+type="FixedString"\s+value="(?<modUuid>[^"]*)/,
+  /id="UUID"\s+type="FixedString"\s+value="(?<modUuid>[^"]*)"/,
   "g",
 );
 
