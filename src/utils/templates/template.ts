@@ -212,6 +212,8 @@ export class ModTemplate {
     function _addFiles(mt: ModTemplate, files: TemplateFile[]) {
       for (let file of files) {
         file.path = _f(mt, _resolveModPath(file.path, mt.wsPath));
+        
+        // TODO: check if path is not an actual path
         if (file.content.length > 0) {
           file.content = _f(
             mt,
