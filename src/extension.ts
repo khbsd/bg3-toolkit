@@ -71,10 +71,13 @@ export async function activate(context: vscode.ExtensionContext) {
   );
 
   if (isModWorkspace) {
+    let r: Registrar = new Registrar();
     // register commands
-    for (let disposable of new Registrar().getCommandList()) {
+    for (let disposable of r.getCommandList()) {
       context.subscriptions.push(disposable);
     }
+    // register listeners
+    r.registerListeners();
   } else {
     let makeModCmd = require("./registrar/commands/make_mod_template");
     context.subscriptions.push(new makeModCmd.Command().get());
