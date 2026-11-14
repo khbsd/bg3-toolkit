@@ -142,11 +142,13 @@ export async function getModInfo(): Promise<ModOptions> {
     }
     if (file === undefined) {
       consoleWebviewLog(indicator.name, "not found, skipping");
-      if (
-        Reflect.get(opts, indicator.ind.of) === undefined ||
-        Reflect.get(opts, indicator.ind.of) === true
-      ) {
-        consoleWebviewLog("setting", indicator.ind.of, "to", file !== undefined);
+      if (Reflect.get(opts, indicator.ind.of) !== false) {
+        consoleWebviewLog(
+          "setting",
+          indicator.ind.of,
+          "to",
+          file !== undefined,
+        );
         Reflect.set(opts, indicator.ind.of, file !== undefined);
       }
       continue;
@@ -168,7 +170,7 @@ export async function getModInfo(): Promise<ModOptions> {
         for (let opt of Object.keys(opts)) {
           let key = opt as keyof typeof opts;
           if (result.groups[key] === "") {
-            consoleWebviewLog("setting", key, "to", result.groups[key]);
+            consoleWebviewLog("setting", key, "to", undefined);
             Reflect.set(opts, key, undefined);
           } else if (result.groups[key] !== undefined) {
             consoleWebviewLog("setting", key, "to", result.groups[key]);
