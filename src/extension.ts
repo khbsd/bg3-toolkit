@@ -3,7 +3,7 @@ import * as vscode from "vscode";
 
 import { Registrar } from "./registrar/registrar";
 import { getModPath } from "./utils/file";
-import { hasMetaFile } from "./utils/meta";
+import { hasMetaFile } from "./utils/mod_info";
 import { getWorkspacePath } from "./utils/ws";
 import { ConsoleWebviewViewProvider } from "./webview/console";
 import { ToolkitWebviewViewProvider } from "./webview/toolkit";

@@ -11,7 +11,7 @@ import {
   isEditable,
   isLoca,
 } from "./ls-formats/formats";
-import { hasMetaFile } from "./meta";
+import { hasMetaFile } from "./mod_info";
 import { getWorkspacePath } from "./ws";
 const virtualTextureRegex: RegExp = /Textures_[\d]+/;
 const hotfixPatchRegex: RegExp = /Patch[\d]+_Hotfix[\d]+/;

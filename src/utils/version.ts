@@ -1,7 +1,7 @@
 import * as fs from "fs";
 
 import { consoleWebviewLog } from "../webview/console";
-import { ModuleInfoTag, getMetaFile } from "./meta";
+import { ModuleInfoTag, getMetaFile } from "./mod_info";
 
 export enum Version64Parts {
   major,

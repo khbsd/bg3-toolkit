@@ -3,8 +3,7 @@ import * as path from "path";
 import * as vscode from "vscode";
 
 import { consoleWebviewLog } from "../../webview/console";
-import { getModPath } from "../file";
-import { getMetaFile, getModInfoFromMeta } from "../meta";
+import { getModInfo } from "../mod_info";
 import { Handle, Uuid } from "../uuid_handle";
 import { getDisplayLanguageName, getWorkspacePath } from "../ws";
 import { generateDds } from "./dds";
@@ -158,16 +157,22 @@ export type ModOptions = {
 // same for iconUuid
 export class ModTemplate {
   // named this way so they align with the names of the placeholders
-  author: string;
+
+  // ModOptions:
+  wsPath: string;
+  assets?: boolean;
+  items?: boolean;
+  scripting?: boolean;
+  modUuid?: string;
+  iconUuid?: string;
+  preexists?: boolean;
   name: string;
-  modUuid: string;
-  iconUuid: string;
+  author: string;
+
   initHandle: string;
   language: string;
-  wsPath: string;
-  seVersion: number = 33; // latest version as of typing this. dynamically updated
-  preexists?: boolean = false;
-  opts?: ModOptions;
+  seVersion: number = 33; // latest version as of typing this. dynamically update
+  opts: ModOptions;
 
   modFiles: TemplateFile[] = [];
   modImages: TemplateDds[] = [];
@@ -176,6 +181,7 @@ export class ModTemplate {
   constructor(opts: ModOptions) {
     this.author = opts.author;
     this.name = opts.name;
+
     this.opts = opts;
     if (this.opts?.assets === true) {
       this.opts.items = true;
@@ -250,10 +256,9 @@ export class ModTemplate {
     }
 
     if (this.opts?.assets) {
-      _addFiles(this, itemFiles);
-      _addDds(this, itemDds);
       _addPaths(this, assetPaths);
-    } else if (this.opts?.items && !this.opts?.assets) {
+    }
+    if (this.opts?.items) {
       _addFiles(this, itemFiles);
       _addDds(this, itemDds);
     }
@@ -261,7 +266,7 @@ export class ModTemplate {
     if (this.opts?.scripting) {
       _addFiles(this, scriptFiles);
     }
-    console.log(this);
+    // console.log(this);
   }
 
   public async getSeVersion() {
@@ -316,17 +321,25 @@ export async function makeModTemplate(): Promise<void> {
   const yesNo: string[] = ["yes", "no"];
   let modOpts: ModOptions = { name: "", author: "" };
 
-  let mf = getMetaFile();
-  if (mf !== undefined) {
-    modOpts = getModInfoFromMeta(mf);
-    modOpts.preexists = true;
+  modOpts = await getModInfo();
+
+  if (
+    modOpts.assets &&
+    modOpts.scripting &&
+    modOpts.items &&
+    modOpts.preexists
+  ) {
+    return;
   }
 
-  if (!modOpts.preexists) {
+  if (modOpts.name.length === 0) {
     modOpts.name =
       (await vscode.window.showInputBox({
         title: "mod name?",
       })) ?? "";
+  }
+
+  if (modOpts.author.length === 0) {
     modOpts.author =
       (await vscode.window.showInputBox({
         title: "author name?",
@@ -336,27 +349,35 @@ export async function makeModTemplate(): Promise<void> {
     }
   }
 
-  let q = await vscode.window.showQuickPick(yesNo, {
-    title: "assets?",
-    prompt: "will this mod add custom assets?",
-  });
-  modOpts.assets = q === "yes";
+  let q: string | undefined;
+  if (modOpts.assets === false || modOpts.assets === undefined) {
+    q = await vscode.window.showQuickPick(yesNo, {
+      title: "assets?",
+      prompt: "will this mod add custom assets?",
+    });
+    modOpts.assets = q === "yes";
+    console.log(q);
+  }
 
-  if (!modOpts.assets) {
+  if (modOpts.items === false || modOpts.items === undefined) {
     q = await vscode.window.showQuickPick(yesNo, {
       title: "items?",
       prompt: "will this mod add custom items?",
     });
     modOpts.items = q === "yes";
-  } else {
-    modOpts.items = modOpts.assets;
+    console.log(q);
   }
 
-  q = await vscode.window.showQuickPick(yesNo, {
-    title: "scripting?",
-    prompt: "will this mod use script extender scripting?",
-  });
-  modOpts.scripting = q === "yes";
+  if (modOpts.scripting === false || modOpts.scripting === undefined) {
+    q = await vscode.window.showQuickPick(yesNo, {
+      title: "scripting?",
+      prompt: "will this mod use script extender scripting?",
+    });
+    modOpts.scripting = q === "yes";
+    console.log(q);
+  }
+
+  console.log(modOpts);
 
   let mt = new ModTemplate(modOpts);
   await mt.getSeVersion();
