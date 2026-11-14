@@ -314,14 +314,10 @@ export class ModTemplate {
   }
 }
 
-// TODO: symlinking, partial mod recreation too
-// ie, should be able to determine if mod exists, what parts exist, and use its name and uuid
+// TODO: symlinking
 export async function makeModTemplate(): Promise<void> {
-  const v = vscode;
   const yesNo: string[] = ["yes", "no"];
-  let modOpts: ModOptions = { name: "", author: "" };
-
-  modOpts = await getModInfo();
+  let modOpts: ModOptions = await getModInfo();
 
   if (
     modOpts.assets &&
@@ -329,55 +325,55 @@ export async function makeModTemplate(): Promise<void> {
     modOpts.items &&
     modOpts.preexists
   ) {
+    vscode.window.showInformationMessage("mod fully created!");
     return;
   }
 
-  if (modOpts.name.length === 0) {
+  if (!modOpts.name) {
     modOpts.name =
       (await vscode.window.showInputBox({
         title: "mod name?",
       })) ?? "";
   }
 
-  if (modOpts.author.length === 0) {
+  if (!modOpts.author) {
     modOpts.author =
       (await vscode.window.showInputBox({
         title: "author name?",
       })) ?? "";
-    if (modOpts.name.length === 0 || modOpts.author === undefined) {
-      return;
-    }
+  }
+
+  if (!modOpts.name || !modOpts.author) {
+    return;
   }
 
   let q: string | undefined;
-  if (modOpts.assets === false || modOpts.assets === undefined) {
+  if (!modOpts.assets) {
     q = await vscode.window.showQuickPick(yesNo, {
       title: "assets?",
       prompt: "will this mod add custom assets?",
     });
     modOpts.assets = q === "yes";
-    console.log(q);
+    consoleWebviewLog("assets?", q);
   }
 
-  if (modOpts.items === false || modOpts.items === undefined) {
+  if (!modOpts.items) {
     q = await vscode.window.showQuickPick(yesNo, {
       title: "items?",
       prompt: "will this mod add custom items?",
     });
     modOpts.items = q === "yes";
-    console.log(q);
+    consoleWebviewLog("items?", q);
   }
 
-  if (modOpts.scripting === false || modOpts.scripting === undefined) {
+  if (!modOpts.scripting) {
     q = await vscode.window.showQuickPick(yesNo, {
       title: "scripting?",
       prompt: "will this mod use script extender scripting?",
     });
     modOpts.scripting = q === "yes";
-    console.log(q);
+    consoleWebviewLog("scripting?", q);
   }
-
-  console.log(modOpts);
 
   let mt = new ModTemplate(modOpts);
   await mt.getSeVersion();

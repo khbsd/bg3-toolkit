@@ -25,42 +25,37 @@ export const IconUuidRegex: RegExp = new RegExp(
   "g",
 );
 
-export type Indicator = {
-  of: string;
-  extant: boolean;
-};
-
 export type ModIndicatorFile = {
   name: string;
   re: RegExp[];
-  ind: Indicator;
+  of: string;
 };
 
 export const indicatorFiles: ModIndicatorFile[] = [
   {
     name: "meta.lsx",
     re: [NameRegex, AuthorRegex, ModUuidRegex],
-    ind: { of: "preexists", extant: false },
+    of: "preexists",
   },
   {
     name: "Icons_Items.lsx",
     re: [IconUuidRegex],
-    ind: { of: "items", extant: false },
+    of: "items",
   },
   {
     name: path.join("[PAK]_UI", "_merged.lsx"),
     re: [IconUuidRegex],
-    ind: { of: "items", extant: false },
+    of: "items",
   },
   {
     name: "Config.json",
     re: [],
-    ind: { of: "scripting", extant: false },
+    of: "scripting",
   },
   {
     name: "[PAK]_Armor",
     re: [],
-    ind: { of: "assets", extant: false },
+    of: "assets",
   },
 ];
 
@@ -120,17 +115,16 @@ export async function getModInfo(): Promise<ModOptions> {
     scripting: undefined,
     preexists: undefined,
   };
+  consoleWebviewLog("checking for existing mod files...");
 
   for (const indicator of indicatorFiles) {
     if (path.extname(indicator.name) === "") {
+      const dirExists: boolean = getModIndicatorDir(indicator.name);
+
       consoleWebviewLog(indicator.name);
-      consoleWebviewLog(
-        "setting",
-        indicator.ind.of,
-        "to",
-        getModIndicatorDir(indicator.name),
-      );
-      Reflect.set(opts, indicator.ind.of, getModIndicatorDir(indicator.name));
+      consoleWebviewLog(indicator.name, "folder found, marking as", dirExists);
+
+      Reflect.set(opts, indicator.of, dirExists);
       continue;
     }
 
@@ -141,23 +135,23 @@ export async function getModInfo(): Promise<ModOptions> {
       consoleWebviewLog(err);
     }
     if (file === undefined) {
-      consoleWebviewLog(indicator.name, "not found, skipping");
-      if (Reflect.get(opts, indicator.ind.of) !== false) {
+      consoleWebviewLog(indicator.name, "not found");
+
+      // if file is undefined the opt must be set to false and not overwritten
+      if (Reflect.get(opts, indicator.of) !== false) {
         consoleWebviewLog(
-          "setting",
-          indicator.ind.of,
-          "to",
+          indicator.of,
+          "is missing or incomplete, marking as",
           file !== undefined,
         );
-        Reflect.set(opts, indicator.ind.of, file !== undefined);
+        Reflect.set(opts, indicator.of, file !== undefined);
       }
       continue;
     }
 
-    consoleWebviewLog(file.name);
+    consoleWebviewLog(file.name, "file found");
 
     const content: string = fs.readFileSync(file.path).toString();
-
     for (const re of indicator.re) {
       for (const result of content.matchAll(re)) {
         if (
@@ -170,18 +164,21 @@ export async function getModInfo(): Promise<ModOptions> {
         for (let opt of Object.keys(opts)) {
           let key = opt as keyof typeof opts;
           if (result.groups[key] === "") {
-            consoleWebviewLog("setting", key, "to", undefined);
+            consoleWebviewLog(key, "not found, marking as", undefined);
             Reflect.set(opts, key, undefined);
           } else if (result.groups[key] !== undefined) {
-            consoleWebviewLog("setting", key, "to", result.groups[key]);
+            consoleWebviewLog(key, "found, setting to", result.groups[key]);
             Reflect.set(opts, key, result.groups[key]);
           }
         }
       }
     }
-    if (Reflect.get(opts, indicator.ind.of) === undefined) {
-      consoleWebviewLog("setting", indicator.ind.of, "to", file !== undefined);
-      Reflect.set(opts, indicator.ind.of, file !== undefined);
+
+    // if the indicator opt has not been set previously by the undefined guards,
+    // set it to true
+    if (Reflect.get(opts, indicator.of) === undefined) {
+      consoleWebviewLog(indicator.of, "found, marking as", file !== undefined);
+      Reflect.set(opts, indicator.of, file !== undefined);
     }
   }
 
