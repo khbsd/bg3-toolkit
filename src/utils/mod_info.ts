@@ -53,6 +53,16 @@ export const indicatorFiles: ModIndicatorFile[] = [
     of: "scripting",
   },
   {
+    name: "BootstrapClient.lua",
+    re: [],
+    of: "scripting",
+  },
+  {
+    name: "BootstrapServer.lua",
+    re: [],
+    of: "scripting",
+  },
+  {
     name: "[PAK]_Armor",
     re: [],
     of: "assets",

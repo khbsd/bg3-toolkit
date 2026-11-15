@@ -172,7 +172,6 @@ export class ModTemplate {
   initHandle: string;
   language: string;
   seVersion: number = 33; // latest version as of typing this. dynamically update
-  opts: ModOptions;
 
   modFiles: TemplateFile[] = [];
   modImages: TemplateDds[] = [];
@@ -182,16 +181,15 @@ export class ModTemplate {
     this.author = opts.author;
     this.name = opts.name;
 
-    this.opts = opts;
-    if (this.opts?.assets === true) {
-      this.opts.items = true;
-    }
-
     const uuid = new Uuid();
     const handle = new Handle();
     this.modUuid = opts?.modUuid ?? uuid.uuid;
     this.iconUuid = opts?.iconUuid ?? uuid.get();
     this.initHandle = handle.handle;
+    this.assets = opts.assets;
+    this.preexists = opts.preexists;
+    this.items = opts.items;
+    this.scripting = opts.scripting;
     this.language = getDisplayLanguageName().name;
     this.wsPath = opts?.wsPath ?? path.join(getWorkspacePath(), this.name);
   }
@@ -255,15 +253,15 @@ export class ModTemplate {
       _addFiles(this, modFiles);
     }
 
-    if (this.opts?.assets) {
+    if (this.assets) {
       _addPaths(this, assetPaths);
     }
-    if (this.opts?.items) {
+    if (this.items) {
       _addFiles(this, itemFiles);
       _addDds(this, itemDds);
     }
 
-    if (this.opts?.scripting) {
+    if (this.scripting) {
       _addFiles(this, scriptFiles);
     }
     // console.log(this);
