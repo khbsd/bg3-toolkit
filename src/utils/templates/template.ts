@@ -159,6 +159,8 @@ export class ModTemplate {
   // named this way so they align with the names of the placeholders
 
   // ModOptions:
+  name: string;
+  author: string;
   wsPath: string;
   assets?: boolean;
   items?: boolean;
@@ -166,8 +168,6 @@ export class ModTemplate {
   modUuid?: string;
   iconUuid?: string;
   preexists?: boolean;
-  name: string;
-  author: string;
 
   initHandle: string;
   language: string;
@@ -183,13 +183,21 @@ export class ModTemplate {
 
     const uuid = new Uuid();
     const handle = new Handle();
-    this.modUuid = opts?.modUuid ?? uuid.uuid;
-    this.iconUuid = opts?.iconUuid ?? uuid.get();
+
+    for (const attr of Object.keys(opts)) {
+      const key = attr as keyof typeof opts;
+      if (
+        this.hasOwnProperty(key) &&
+        opts[key] !== undefined &&
+        this[key] === undefined
+      ) {
+        Reflect.set(this, key, opts[key]);
+        consoleWebviewLog("set", key, "to", opts[key]);
+      }
+    }
+    this.modUuid = this.modUuid ?? uuid.uuid;
+    this.iconUuid = this.iconUuid ?? uuid.get();
     this.initHandle = handle.handle;
-    this.assets = opts.assets;
-    this.preexists = opts.preexists;
-    this.items = opts.items;
-    this.scripting = opts.scripting;
     this.language = getDisplayLanguageName().name;
     this.wsPath = opts?.wsPath ?? path.join(getWorkspacePath(), this.name);
   }
