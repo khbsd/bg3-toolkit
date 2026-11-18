@@ -301,7 +301,6 @@ export class ModTemplate {
 
     if (!this.preexists) {
       _addFiles(this, modFiles);
-      console.log(this);
     }
 
     if (this.assets) {
