@@ -11,6 +11,7 @@ export class Command {
         makeModTemplate();
       },
     );
+    
     return disposable;
   }
 }

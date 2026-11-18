@@ -11,6 +11,7 @@ export class Command {
         convert(new LsFile(uri.path));
       },
     );
+    
     return disposable;
   }
 }

@@ -11,6 +11,7 @@ export class Command {
         consoleWebviewLog("hi");
       },
     );
+    
     return disposable;
   }
 }

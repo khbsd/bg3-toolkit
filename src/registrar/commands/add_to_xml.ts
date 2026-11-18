@@ -11,6 +11,7 @@ export class Command {
         addHandleToXml({ handle: getSelectionOrCursorWord() });
       },
     );
+    
     return disposable;
   }
 }

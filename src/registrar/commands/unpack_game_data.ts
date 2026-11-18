@@ -10,6 +10,7 @@ export class Command {
         unpackGameData();
       }
     );
+    
     return disposable;
   }
 }

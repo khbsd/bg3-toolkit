@@ -15,6 +15,7 @@ export class Command {
         insertAt(new Handle().handle, e.selection);
       },
     );
+    
     return disposable;
   }
 }

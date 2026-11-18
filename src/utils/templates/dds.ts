@@ -1,6 +1,8 @@
 import * as fs from "fs";
 import * as path from "path";
+
 import { getWorkspacePath } from "../ws";
+import { TemplateDds } from "./template";
 
 const UINT_MAX: number = 4294967295;
 const BYTE_SECTIONS: number = 4; // also good for certificate generation
@@ -54,42 +56,30 @@ export function toFourByte(val: number): number[] {
  * if ```name``` is not specified, will use ```"image"``` as ```name```.
  * @returns void
  */
-export function generateDds(
-  width: number,
-  opts?: {
-    height?: number;
-    name?: string;
-    path?: string;
-  },
-): void {
+export function generateDds(dds: TemplateDds): void {
   try {
-    if (opts?.path !== undefined && fs.statSync(opts.path).isFile()) {
+    if (dds?.path !== undefined && fs.statSync(dds.path).isFile()) {
       return;
     }
   } catch (err) {}
 
-  if (opts === undefined) {
-    opts = {
-      height: width,
-      name: "image",
-    };
+  if (dds.height === undefined) {
+    dds.height = dds.width;
   }
-  if (opts.height === undefined) {
-    opts.height = width;
+  if (dds.name === undefined) {
+    dds.name = "test";
   }
-  if (opts.name === undefined) {
-    opts.name = "test";
-  }
+  
   const imagePath: string =
-    opts?.path ?? path.join(getWorkspacePath(), opts?.name + ".dds");
+    dds.path ?? path.join(getWorkspacePath(), dds.name + ".dds");
   let header: number[] | undefined;
   let data: number[] | undefined;
   let ddsBuf: number[] = [];
 
-  const pitch: number = getPitch(opts.height, width);
+  const pitch: number = getPitch(dds.height, dds.width);
   const pitchBytes: number[] = toFourByte(pitch);
-  const widthBytes: number[] = toFourByte(width);
-  const heightBytes: number[] = toFourByte(opts.height);
+  const widthBytes: number[] = toFourByte(dds.width);
+  const heightBytes: number[] = toFourByte(dds.height);
 
   try {
     header = Array.from(fs.readFileSync(path.resolve(filesDir, "header")));

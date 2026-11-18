@@ -11,6 +11,7 @@ export class Command {
         mergeXmlFiles(getWorkspacePath());
       },
     );
+    
     return disposable;
   }
 }

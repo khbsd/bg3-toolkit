@@ -43,5 +43,6 @@ export function getObjFromEnum(e: Object, fillVals?: string[]): EnumObj[] {
     };
     obj.push(tempobj);
   }
+  
   return obj;
 }

@@ -206,6 +206,7 @@ export function stripOpeningClosingTags(file: XmlFile): string[] {
   for (const line of linesToDelete.toReversed()) {
     lines.splice(line, 1);
   }
+  
   return lines;
 }
 

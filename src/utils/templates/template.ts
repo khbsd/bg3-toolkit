@@ -247,11 +247,10 @@ export class ModTemplate {
         const key = attr as keyof typeof mt;
         let val = mt[key];
         if (typeof val === "string" || typeof val === "number") {
-          console.log(val);
           text = text.replaceAll("${" + key + "}", val.toString());
         }
       }
-      console.log(text);
+
       return text;
     }
 
@@ -259,6 +258,7 @@ export class ModTemplate {
       if (!text.includes(wsPath)) {
         text = path.join(wsPath, text);
       }
+
       return text;
     }
 
@@ -280,6 +280,7 @@ export class ModTemplate {
             break;
           }
         }
+
         if (!dup) {
           mt.modFiles.push(new TemplateFile(file));
         }
@@ -310,7 +311,6 @@ export class ModTemplate {
       _addFiles(this, itemFiles);
       _addDds(this, itemDds);
     }
-
     if (this.scripting) {
       _addFiles(this, scriptFiles);
     }
@@ -343,16 +343,24 @@ export class ModTemplate {
 
           fs.stat(dataPath, (err) => {
             if (err) {
-              fs.mkdirSync(dataPath, {
-                recursive: true,
-              });
+              fs.mkdir(
+                dataPath,
+                {
+                  recursive: true,
+                },
+                wvErrLog,
+              );
             }
           });
           fs.stat(linkPath, (err) => {
             if (err) {
-              fs.mkdirSync(linkPath, {
-                recursive: true,
-              });
+              fs.mkdir(
+                linkPath,
+                {
+                  recursive: true,
+                },
+                wvErrLog,
+              );
             }
           });
 
@@ -387,11 +395,7 @@ export class ModTemplate {
     }
 
     for (const image of this.modImages) {
-      generateDds(image.width, {
-        height: image.height,
-        name: image.name,
-        path: image.path,
-      });
+      generateDds(image);
     }
   }
 }
@@ -428,6 +432,7 @@ export async function modOptPrompts(
       Reflect.set(mo, key, q === "yes");
     }
   }
+
   return mo;
 }
 

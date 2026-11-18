@@ -89,9 +89,7 @@ export class ConsoleWebviewViewProvider implements vscode.WebviewViewProvider {
       .toString();
 
     this._view.webview.html = this._getHtmlForWebview(this._view.webview);
-
     webview = this;
-
     this._view.webview.onDidReceiveMessage(async (data) => {
       console.log("message recieved: ", data.msg);
       if (data.type === "copy" && this.consoleText !== openingText) {
@@ -134,6 +132,7 @@ export class ConsoleWebviewViewProvider implements vscode.WebviewViewProvider {
       console.log(err);
       return "";
     }
+
     return this.hd.formatHtml(html, data);
   }
 

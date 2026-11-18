@@ -21,6 +21,7 @@ export class HtmlDataUtils {
     for (let i = 0; i < 32; i++) {
       text += possible.charAt(Math.floor(Math.random() * possible.length));
     }
+    
     return text;
   }
 
@@ -31,6 +32,7 @@ export class HtmlDataUtils {
         html = html.replaceAll("${" + obj.name + "}", obj.data);
       }
     }
+
     return html;
   }
 }

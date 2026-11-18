@@ -14,6 +14,7 @@ export class Command {
         convertAll(getWorkspacePath(), FileFormats.loca);
       },
     );
+    
     return disposable;
   }
 }

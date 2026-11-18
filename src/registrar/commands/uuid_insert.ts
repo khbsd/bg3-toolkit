@@ -15,6 +15,7 @@ export class Command {
         insertAt(new Uuid().uuid, e.selection);
       },
     );
+    
     return disposable;
   }
 }

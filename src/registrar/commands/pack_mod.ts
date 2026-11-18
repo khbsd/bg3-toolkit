@@ -10,6 +10,7 @@ export class Command {
         pack();
       },
     );
+    
     return disposable;
   }
 }

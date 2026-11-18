@@ -110,6 +110,7 @@ export class Version64 {
         break;
       }
     }
+
     return this.version64Extract(BigInt(firstResult));
   }
 
@@ -143,6 +144,7 @@ export class Version64 {
         line + version,
       );
     }
+    
     fs.writeFileSync(metaPath, metaFileContents, { flag: "w" });
   }
 }

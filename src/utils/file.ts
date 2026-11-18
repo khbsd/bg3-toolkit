@@ -100,6 +100,7 @@ export function mergedLocaExists(
       }
     }
   }
+
   return mergedExists;
 }
 
@@ -165,6 +166,7 @@ export function getFiles(wsPath: string, opts?: getFilesOpts): LsFile[] {
         break;
       }
     }
+
     if (xmlCount > 1) {
       consoleWebviewLog("removing non-merged loca files from file list");
       dirents = filterLocalizations(dirents);
@@ -188,6 +190,7 @@ export function getFiles(wsPath: string, opts?: getFilesOpts): LsFile[] {
         break;
       }
     }
+    
     if (hidden) {
       continue;
     }

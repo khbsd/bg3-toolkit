@@ -110,6 +110,7 @@ export function getWorkspacePath(short: boolean = false): string {
     wsPathShortSlice.map((p) => wsPathShort.concat(p, path.sep, ""));
     return wsPathShort;
   }
+  
   return futils.fixPath(wsPath);
 }
 

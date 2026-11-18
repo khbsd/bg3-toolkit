@@ -46,6 +46,7 @@ export class Uuid {
     if (uuid.includes(illegal)) {
       return this.get();
     }
+
     return uuid;
   }
 }
@@ -67,6 +68,7 @@ export class Handle {
     if (handle.includes(illegal)) {
       handle = this.get();
     }
+    
     return handle;
   }
 }

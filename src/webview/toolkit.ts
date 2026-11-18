@@ -189,6 +189,7 @@ export class ToolkitWebviewViewProvider implements vscode.WebviewViewProvider {
       console.log(err);
       return "";
     }
+    
     return hd.formatHtml(html, data);
   }
 }

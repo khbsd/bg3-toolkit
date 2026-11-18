@@ -191,6 +191,7 @@ export async function getModInfo(): Promise<ModOptions> {
         } catch (err) {
           consoleWebviewLog(err);
         }
+
         if (file === undefined) {
           consoleWebviewLog(indicator.name, "not found");
 
@@ -203,6 +204,7 @@ export async function getModInfo(): Promise<ModOptions> {
             );
             Reflect.set(opts, indicator.of, file !== undefined);
           }
+
           continue;
         }
 
@@ -241,6 +243,7 @@ export async function getModInfo(): Promise<ModOptions> {
           );
           Reflect.set(opts, indicator.of, file !== undefined);
         }
+
         break;
       }
 
