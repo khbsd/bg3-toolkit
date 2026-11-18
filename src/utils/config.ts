@@ -17,6 +17,7 @@ class Config extends Object {
   mergedLocalizationAllowDuplicates: boolean = false;
   consoleLineLimit: number = 0;
   babes: boolean = true;
+  reloadRemind: boolean = true;
 
   constructor() {
     super();

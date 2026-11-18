@@ -180,6 +180,11 @@
           "type": "boolean",
           "default": true,
           "description": "babes? (needs reload, command palette -> developer: reload window)"
+        },
+        "bg3-toolkit.reloadRemind": {
+          "type": "boolean",
+          "default": true,
+          "description": "if the extension will remind you to reload before generating a mod template. can be safely ignored/dismissed."
         }
       }
     },

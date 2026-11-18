@@ -437,6 +437,20 @@ export async function modOptPrompts(
 }
 
 export async function makeModTemplate(): Promise<void> {
+  if (getConf().reloadRemind) {
+    vscode.window
+      .showInformationMessage(
+        "if youve already generated a mod template and are wanting to make a new mod template, id recommend reloading the window !!",
+        { title: "reload" },
+        { title: "nah" },
+      )
+      .then((val) => {
+        if (val?.title === "reload") {
+          vscode.commands.executeCommand("workbench.action.reloadWindow");
+        }
+      });
+  }
+
   let modOpts: ModOptions | undefined = await getModInfo();
 
   if (
