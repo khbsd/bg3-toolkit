@@ -3,9 +3,10 @@ import * as path from "path";
 import * as vscode from "vscode";
 
 import { consoleWebviewLog } from "../../webview/console";
-import { getModInfo } from "../mod_info";
+import { getConf } from "../config";
+import { getModInfo, ModOption } from "../mod_info";
 import { Handle, Uuid } from "../uuid_handle";
-import { getDisplayLanguageName, getWorkspacePath } from "../ws";
+import { getDisplayLanguageName, getWorkspacePath, wvErrLog } from "../ws";
 import { generateDds } from "./dds";
 
 const templatesPath: string = path.resolve(
@@ -18,6 +19,35 @@ const templatesPath: string = path.resolve(
   "templates",
   "files",
 );
+
+export const linkPaths: string[] = [
+  path.join("Generated", "Public"),
+  "Mods",
+  "Public",
+];
+
+export type OptionPrompt = {
+  category: string;
+  prompt: string;
+};
+const optionPrompts: OptionPrompt[] = [
+  {
+    category: ModOption[ModOption.assets],
+    prompt: "will this mod add custom assets?",
+  },
+  {
+    category: ModOption[ModOption.items],
+    prompt: "will this mod add custom items?",
+  },
+  {
+    category: ModOption[ModOption.scripting],
+    prompt: "will this mod use script extender scripting?",
+  },
+  {
+    category: ModOption[ModOption.symlinks],
+    prompt: "will this mod use symlinks to hotload files?",
+  },
+];
 
 const modFiles: TemplateFile[] = [
   {
@@ -142,6 +172,8 @@ export class TemplateDds extends TemplateFolder {
 }
 
 export type ModOptions = {
+  name: string;
+  author: string;
   wsPath?: string;
   assets?: boolean;
   items?: boolean;
@@ -149,8 +181,7 @@ export type ModOptions = {
   modUuid?: string;
   iconUuid?: string;
   preexists?: boolean;
-  name: string;
-  author: string;
+  symlinks?: boolean;
 };
 
 // TODO: if a metafile already exists, grab it and use it for these fields
@@ -168,14 +199,18 @@ export class ModTemplate {
   modUuid?: string;
   iconUuid?: string;
   preexists?: boolean;
+  symlinks?: boolean;
 
   initHandle: string;
   language: string;
-  seVersion: number = 33; // latest version as of typing this. dynamically update
 
-  modFiles: TemplateFile[] = [];
-  modImages: TemplateDds[] = [];
-  modPaths: TemplateFolder[] = [];
+  // latest version as of typing this, but is dynamically updated when calling
+  // this.getSeVersion()
+  seVersion: number = 33;
+
+  modFiles: TemplateFile[];
+  modImages: TemplateDds[];
+  modPaths: TemplateFolder[];
 
   constructor(opts: ModOptions) {
     this.author = opts.author;
@@ -199,18 +234,24 @@ export class ModTemplate {
     this.iconUuid = this.iconUuid ?? uuid.get();
     this.initHandle = handle.handle;
     this.language = getDisplayLanguageName().name;
-    this.wsPath = opts?.wsPath ?? path.join(getWorkspacePath(), this.name);
+    this.wsPath = opts?.wsPath ?? path.join(getWorkspacePath());
+
+    this.modFiles = [];
+    this.modImages = [];
+    this.modPaths = [];
   }
 
-  public format(): void {
+  public format() {
     function _f(mt: ModTemplate, text: string): string {
       for (const attr of Object.keys(mt)) {
         const key = attr as keyof typeof mt;
         let val = mt[key];
         if (typeof val === "string" || typeof val === "number") {
+          console.log(val);
           text = text.replaceAll("${" + key + "}", val.toString());
         }
       }
+      console.log(text);
       return text;
     }
 
@@ -259,6 +300,7 @@ export class ModTemplate {
 
     if (!this.preexists) {
       _addFiles(this, modFiles);
+      console.log(this);
     }
 
     if (this.assets) {
@@ -272,7 +314,6 @@ export class ModTemplate {
     if (this.scripting) {
       _addFiles(this, scriptFiles);
     }
-    // console.log(this);
   }
 
   public async getSeVersion() {
@@ -290,7 +331,44 @@ export class ModTemplate {
     }
   }
 
-  public async build() {
+  public build() {
+    if (this.symlinks) {
+      const gameDataPath = getConf().gameDataPath;
+      if (gameDataPath) {
+        for (const link of linkPaths) {
+          const fullLinkPath = path.join(this.wsPath, link, this.name);
+          const dataLinkPath = path.join(gameDataPath, link, this.name);
+          const linkPath = path.dirname(fullLinkPath);
+          const dataPath = path.dirname(dataLinkPath);
+
+          fs.stat(dataPath, (err) => {
+            if (err) {
+              fs.mkdirSync(dataPath, {
+                recursive: true,
+              });
+            }
+          });
+          fs.stat(linkPath, (err) => {
+            if (err) {
+              fs.mkdirSync(linkPath, {
+                recursive: true,
+              });
+            }
+          });
+
+          fs.readlink(dataLinkPath, (err) => {
+            if (err) {
+              fs.symlink(fullLinkPath, dataLinkPath, "dir", wvErrLog);
+            }
+          });
+        }
+      } else {
+        vscode.window.showErrorMessage(
+          "make sure you set the game data path option in the extension settings !!",
+        );
+      }
+    }
+
     for (const file of this.modFiles) {
       if (file.stats?.isFile()) {
         continue;
@@ -305,9 +383,7 @@ export class ModTemplate {
         continue;
       }
 
-      fs.mkdir(folder.path, { recursive: true }, (err) => {
-        console.log(err);
-      });
+      fs.mkdir(folder.path, { recursive: true }, wvErrLog);
     }
 
     for (const image of this.modImages) {
@@ -320,65 +396,59 @@ export class ModTemplate {
   }
 }
 
-// TODO: symlinking
-export async function makeModTemplate(): Promise<void> {
-  const yesNo: string[] = ["yes", "no"];
-  let modOpts: ModOptions = await getModInfo();
-
-  if (
-    modOpts.assets &&
-    modOpts.scripting &&
-    modOpts.items &&
-    modOpts.preexists
-  ) {
-    vscode.window.showInformationMessage("mod fully created!");
-    return;
-  }
-
-  if (!modOpts.name) {
-    modOpts.name =
+export async function modOptPrompts(
+  mo: ModOptions,
+): Promise<ModOptions | undefined> {
+  if (!mo.name) {
+    mo.name =
       (await vscode.window.showInputBox({
         title: "mod name?",
       })) ?? "";
   }
 
-  if (!modOpts.author) {
-    modOpts.author =
+  if (!mo.author) {
+    mo.author =
       (await vscode.window.showInputBox({
         title: "author name?",
       })) ?? "";
   }
 
-  if (!modOpts.name || !modOpts.author) {
-    return;
+  if (!mo.name || !mo.author) {
+    return undefined;
   }
 
   let q: string | undefined;
-  if (!modOpts.assets) {
-    q = await vscode.window.showQuickPick(yesNo, {
-      title: "assets?",
-      prompt: "will this mod add custom assets?",
-    });
-    modOpts.assets = q === "yes";
-    consoleWebviewLog("assets?", q);
+  for (const o of optionPrompts) {
+    let key = o.category as keyof ModOptions;
+    if (!mo[key]) {
+      q = await vscode.window.showQuickPick(["yes", "no"], {
+        title: o.category + "?",
+        prompt: o.prompt,
+      });
+      Reflect.set(mo, key, q === "yes");
+    }
+  }
+  return mo;
+}
+
+export async function makeModTemplate(): Promise<void> {
+  let modOpts: ModOptions | undefined = await getModInfo();
+
+  if (
+    modOpts.assets &&
+    modOpts.scripting &&
+    modOpts.items &&
+    modOpts.preexists &&
+    modOpts.symlinks
+  ) {
+    consoleWebviewLog("mod", modOpts.name, "is fully created!");
+    vscode.window.showInformationMessage("mod fully created!");
+    return;
   }
 
-  if (!modOpts.items) {
-    q = await vscode.window.showQuickPick(yesNo, {
-      title: "items?",
-      prompt: "will this mod add custom items?",
-    });
-    modOpts.items = q === "yes";
-    consoleWebviewLog("items?", q);
-  }
-
-  if (!modOpts.scripting) {
-    q = await vscode.window.showQuickPick(yesNo, {
-      title: "scripting?",
-      prompt: "will this mod use script extender scripting?",
-    });
-    modOpts.scripting = q === "yes";
-    consoleWebviewLog("scripting?", q);
+  modOpts = await modOptPrompts(modOpts);
+  if (modOpts === undefined) {
+    return;
   }
 
   let mt = new ModTemplate(modOpts);

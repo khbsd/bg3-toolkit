@@ -192,3 +192,9 @@ export function getTab(): string {
 
   return tab;
 }
+
+export function wvErrLog(err: NodeJS.ErrnoException | null) {
+  if (err) {
+    consoleWebviewLog(err);
+  }
+}
