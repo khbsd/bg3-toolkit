@@ -323,7 +323,20 @@ export class ModTemplate {
       );
 
       let gitData: string | any = await res.json();
-      this.seVersion = Number(gitData.tag_name.slice(1));
+      let ver: string = "";
+      for (const c of gitData.tag_name) {
+        let n: number | undefined;
+        try {
+          n = Number(c);
+        } catch (err) {
+          continue;
+        }
+
+        if (n) {
+          ver += n.toString();
+        }
+      }
+      this.seVersion = Number(ver);
       consoleWebviewLog("found latest bg3se version:", this.seVersion);
     } catch (err) {
       consoleWebviewLog(err);
