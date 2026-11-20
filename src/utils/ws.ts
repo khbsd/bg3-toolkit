@@ -1,6 +1,7 @@
 import * as path from "path";
 import * as vscode from "vscode";
 import * as futils from "./file";
+import * as os from "os"
 
 import { consoleWebviewLog } from "../webview/console";
 import { getConf } from "./config";
@@ -110,7 +111,7 @@ export function getWorkspacePath(short: boolean = false): string {
     wsPathShortSlice.map((p) => wsPathShort.concat(p, path.sep, ""));
     return wsPathShort;
   }
-  
+
   return futils.fixPath(wsPath);
 }
 
@@ -198,4 +199,8 @@ export function wvErrLog(err: NodeJS.ErrnoException | null) {
   if (err) {
     consoleWebviewLog(err);
   }
+}
+
+export function isMacOs(): boolean {
+  return os.type() === "Darwin";
 }

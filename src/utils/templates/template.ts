@@ -4,9 +4,14 @@ import * as vscode from "vscode";
 
 import { consoleWebviewLog } from "../../webview/console";
 import { getConf } from "../config";
-import { getModInfo, ModOption } from "../mod_info";
+import { getModInfo, getSeVersion, ModOption } from "../mod_info";
 import { Handle, Uuid } from "../uuid_handle";
-import { getDisplayLanguageName, getWorkspacePath, wvErrLog } from "../ws";
+import {
+  getDisplayLanguageName,
+  getWorkspacePath,
+  isMacOs,
+  wvErrLog,
+} from "../ws";
 import { generateDds } from "./dds";
 
 const templatesPath: string = path.resolve(
@@ -313,36 +318,12 @@ export class ModTemplate {
     return this;
   }
 
-  public async getSeVersion() {
-    try {
-      let res: Response = await fetch(
-        "https://api.github.com/repos/Norbyte/bg3se/releases/latest",
-        { method: "GET" },
-      );
-
-      let gitData: string | any = await res.json();
-      let ver: string = "";
-      for (const c of gitData.tag_name) {
-        let n: number | undefined;
-        try {
-          n = Number(c);
-        } catch (err) {
-          continue;
-        }
-
-        if (n) {
-          ver += n.toString();
-        }
-      }
-      this.seVersion = Number(ver);
-      consoleWebviewLog("found latest bg3se version:", this.seVersion);
-    } catch (err) {
-      consoleWebviewLog(err);
-    }
+  public async setSeVersion() {
+    this.seVersion = await getSeVersion();
   }
 
   public build() {
-    if (this.symlinks) {
+    if (this.symlinks && !isMacOs()) {
       const gameDataPath = getConf().gameDataPath;
       if (!gameDataPath) {
         vscode.window.showErrorMessage(
@@ -423,6 +404,9 @@ export async function modOptPrompts(
   let q: string | undefined;
   for (const o of optionPrompts) {
     let key = o.category as keyof ModOptions;
+    if (key === ModOption[ModOption.symlinks] && isMacOs()) {
+      continue;
+    }
     if (!mo[key]) {
       q = await vscode.window.showQuickPick(["yes", "no"], {
         title: o.category + "?",
@@ -457,11 +441,11 @@ export async function makeModTemplate(): Promise<void> {
     modOpts.scripting &&
     modOpts.items &&
     modOpts.preexists &&
-    modOpts.symlinks
+    (modOpts.symlinks || isMacOs())
   ) {
     consoleWebviewLog("mod", modOpts.name, "is fully created!");
     vscode.window.showInformationMessage("mod fully created!");
-    
+
     return;
   }
 
@@ -470,6 +454,6 @@ export async function makeModTemplate(): Promise<void> {
   }
 
   let mt = new ModTemplate(modOpts);
-  await mt.getSeVersion();
+  await mt.setSeVersion();
   mt.format().build();
 }

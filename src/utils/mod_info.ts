@@ -6,7 +6,7 @@ import { getConf } from "./config";
 import { getModPath } from "./file";
 import { LsFile } from "./ls-formats/formats";
 import { ModOptions } from "./templates/template";
-import { getWorkspacePath } from "./ws";
+import { getWorkspacePath, isMacOs } from "./ws";
 
 export enum ModOption {
   name,
@@ -251,6 +251,9 @@ export async function getModInfo(): Promise<ModOptions> {
         if (!gameDataPath) {
           break;
         }
+        if (isMacOs()) {
+          break;
+        }
 
         let exists: boolean = false;
         try {
@@ -277,4 +280,24 @@ export async function getModInfo(): Promise<ModOptions> {
     }
   }
   return opts;
+}
+
+export async function getSeVersion(): Promise<number> {
+  let verNum: number = 0;
+  try {
+    let res: Response = await fetch(
+      "https://api.github.com/repos/Norbyte/bg3se/releases/latest",
+      { method: "GET" },
+    );
+
+    let gitData: string | any = await res.json();
+    let tag: string = gitData.tag_name;
+    verNum = Number(tag.match(/[\d]+/));
+    
+    consoleWebviewLog("found latest bg3se version:", verNum);
+  } catch (err) {
+    consoleWebviewLog(err);
+  }
+
+  return verNum;
 }
