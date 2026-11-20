@@ -156,16 +156,11 @@ export function getModIndicatorDir(name: string): boolean {
 }
 
 export async function getModInfo(): Promise<ModOptions> {
-  let opts = {
+  let opts: ModOptions = {
     name: "",
     author: "",
     modUuid: undefined,
     iconUuid: undefined,
-    assets: undefined,
-    items: undefined,
-    scripting: undefined,
-    preexists: undefined,
-    symlinks: undefined,
   };
   consoleWebviewLog("checking for existing mod files && folders...");
 
@@ -173,9 +168,13 @@ export async function getModInfo(): Promise<ModOptions> {
     switch (indicator.type) {
       case "folder": {
         const dirExists: boolean = getModIndicatorDir(indicator.name);
+        const not = dirExists ? "" : " not";
+
         consoleWebviewLog(
           indicator.name,
-          "folder found, marking as",
+          "folder" + not,
+          "found, marking",
+          indicator.of,
           dirExists,
         );
 
@@ -259,9 +258,17 @@ export async function getModInfo(): Promise<ModOptions> {
             fs.readlinkSync(path.join(gameDataPath, indicator.name, opts.name))
               .length > 0;
           if (Reflect.get(opts, indicator.of) === undefined) {
+            consoleWebviewLog(
+              indicator.of,
+              "found at",
+              "'" + gameDataPath + "',",
+              "marking as",
+              exists,
+            );
             Reflect.set(opts, indicator.of, exists);
           }
         } catch (err) {
+          consoleWebviewLog(indicator.of, "missing, marking as", exists);
           Reflect.set(opts, indicator.of, exists);
         }
 
@@ -269,5 +276,5 @@ export async function getModInfo(): Promise<ModOptions> {
       }
     }
   }
-  return opts as ModOptions;
+  return opts;
 }

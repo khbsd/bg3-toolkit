@@ -208,9 +208,9 @@ export class ModTemplate {
   // this.getSeVersion()
   seVersion: number = 33;
 
-  modFiles: TemplateFile[];
-  modImages: TemplateDds[];
-  modPaths: TemplateFolder[];
+  modFiles: TemplateFile[] = [];
+  modImages: TemplateDds[] = [];
+  modPaths: TemplateFolder[] = [];
 
   constructor(opts: ModOptions) {
     this.author = opts.author;
@@ -235,13 +235,9 @@ export class ModTemplate {
     this.initHandle = handle.handle;
     this.language = getDisplayLanguageName().name;
     this.wsPath = opts?.wsPath ?? path.join(getWorkspacePath());
-
-    this.modFiles = [];
-    this.modImages = [];
-    this.modPaths = [];
   }
 
-  public format() {
+  public format(): ModTemplate {
     function _f(mt: ModTemplate, text: string): string {
       for (const attr of Object.keys(mt)) {
         const key = attr as keyof typeof mt;
@@ -313,6 +309,8 @@ export class ModTemplate {
     if (this.scripting) {
       _addFiles(this, scriptFiles);
     }
+
+    return this;
   }
 
   public async getSeVersion() {
@@ -346,46 +344,33 @@ export class ModTemplate {
   public build() {
     if (this.symlinks) {
       const gameDataPath = getConf().gameDataPath;
-      if (gameDataPath) {
-        for (const link of linkPaths) {
-          const fullLinkPath = path.join(this.wsPath, link, this.name);
-          const dataLinkPath = path.join(gameDataPath, link, this.name);
-          const linkPath = path.dirname(fullLinkPath);
-          const dataPath = path.dirname(dataLinkPath);
-
-          fs.stat(dataPath, (err) => {
-            if (err) {
-              fs.mkdir(
-                dataPath,
-                {
-                  recursive: true,
-                },
-                wvErrLog,
-              );
-            }
-          });
-          fs.stat(linkPath, (err) => {
-            if (err) {
-              fs.mkdir(
-                linkPath,
-                {
-                  recursive: true,
-                },
-                wvErrLog,
-              );
-            }
-          });
-
-          fs.readlink(dataLinkPath, (err) => {
-            if (err) {
-              fs.symlink(fullLinkPath, dataLinkPath, "dir", wvErrLog);
-            }
-          });
-        }
-      } else {
+      if (!gameDataPath) {
         vscode.window.showErrorMessage(
           "make sure you set the game data path option in the extension settings !!",
         );
+
+        return;
+      }
+      for (const link of linkPaths) {
+        const fullLinkPath = path.join(this.wsPath, link, this.name);
+        const dataLinkPath = path.join(gameDataPath, link, this.name);
+
+        for (const p of [
+          path.dirname(fullLinkPath),
+          path.dirname(fullLinkPath),
+        ]) {
+          fs.stat(p, (err) => {
+            if (err) {
+              fs.mkdir(p, { recursive: true }, wvErrLog);
+            }
+          });
+        }
+
+        fs.readlink(dataLinkPath, (err) => {
+          if (err) {
+            fs.symlink(fullLinkPath, dataLinkPath, "dir", wvErrLog);
+          }
+        });
       }
     }
 
@@ -409,6 +394,8 @@ export class ModTemplate {
     for (const image of this.modImages) {
       generateDds(image);
     }
+
+    consoleWebviewLog("mod template for", this.name, "(re)built!");
   }
 }
 
@@ -474,16 +461,15 @@ export async function makeModTemplate(): Promise<void> {
   ) {
     consoleWebviewLog("mod", modOpts.name, "is fully created!");
     vscode.window.showInformationMessage("mod fully created!");
+    
     return;
   }
 
-  modOpts = await modOptPrompts(modOpts);
-  if (modOpts === undefined) {
+  if ((await modOptPrompts(modOpts)) === undefined) {
     return;
   }
 
   let mt = new ModTemplate(modOpts);
   await mt.getSeVersion();
-  mt.format();
-  mt.build();
+  mt.format().build();
 }
