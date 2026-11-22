@@ -135,6 +135,9 @@ export async function unpackGameData(): Promise<void> {
     "this may take a minute depending on your computers specs!",
   );
 
+  // TODO: make buffer and read file bytes to it
+  // may need to grab file size and use that to read the entire file or chunk it up
+  // 1_800_000_000 bytes (1.8 GiB) should be the maximum per chunk, just in case
   const unPakPath: string = fixPath(unPakPathUri.toString());
   for (let pak of pakPathUri) {
     Unpak(fixPath(pak.toString()), unPakPath);
