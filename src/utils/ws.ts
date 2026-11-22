@@ -5,6 +5,7 @@ import * as os from "os"
 
 import { consoleWebviewLog } from "../webview/console";
 import { getConf } from "./config";
+import { fixPath } from "./file";
 
 /**
  * English (US) 	      en
@@ -14,7 +15,7 @@ import { getConf } from "./config";
  * German 	            de
  * Italian 	            it
  * Spanish 	            es
- * LatinSpanish         es // unaware of an iso code for this, i presume its latin american spanish as opposed to spain spanish
+ * LatinSpanish         es  // unaware of an iso code for this, i presume its latin american spanish as opposed to spain spanish (ustedes vs nosotros)
  * Japanese 	          ja
  * Korean 	            ko
  * Russian 	            ru
@@ -96,10 +97,7 @@ export function getWorkspacePath(short: boolean = false): string {
       vscode.workspace.workspaceFolders?.length !== undefined &&
       vscode.workspace.workspaceFolders.length > 0
     ) {
-      wsPath = vscode.workspace.workspaceFolders[0].uri.toString();
-      if (wsPath.includes("%")) {
-        wsPath = decodeURIComponent(wsPath);
-      }
+      wsPath = fixPath(vscode.workspace.workspaceFolders[0].uri.toString());
     } else {
       wsPath = "home";
     }

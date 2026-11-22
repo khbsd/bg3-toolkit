@@ -2,9 +2,9 @@ import * as fs from "fs";
 import * as vscode from "vscode";
 
 import { getConf } from "../config";
-import { fixPath, getFiles } from "../file";
+import { fixPath } from "../file";
 import { getWorkspacePath } from "../ws";
-import { LsFile, FileFormats } from "./formats";
+import { FileFormats, LsFile } from "./formats";
 import { Loca, Xml } from "./loca_xml";
 import { Lsf, Lsx } from "./lsx";
 import { Pak, Unpak } from "./pak";
@@ -69,8 +69,8 @@ export function pack(wsPath?: string) {
 }
 
 export async function unpackGameData(): Promise<void> {
-  let pakPath: any | undefined;
-  let unPakPath: any | undefined;
+  let pakPathUri: vscode.Uri[] | undefined;
+  let unPakPathUri: vscode.Uri[] | undefined;
   let gameData: string = getConf().gameDataPath;
 
   if (gameData.length === 0) {
@@ -79,18 +79,17 @@ export async function unpackGameData(): Promise<void> {
 
   let gameDataUri: vscode.Uri = vscode.Uri.parse(gameData);
 
-  while (pakPath === undefined) {
-    pakPath = await vscode.window
-      .showOpenDialog({
-        defaultUri: gameDataUri,
-        canSelectFiles: true,
-        canSelectFolders: true,
-        canSelectMany: true,
-        title: "Select .pak file(s) to unpack",
-      })
-      .then((p) => p);
+  while (pakPathUri === undefined) {
+    pakPathUri = await vscode.window.showOpenDialog({
+      defaultUri: gameDataUri,
+      canSelectFiles: true,
+      canSelectFolders: false,
+      canSelectMany: true,
+      filters: { ".pak": [FileFormats[FileFormats.pak]] },
+      title: "Select .pak file(s) to unpack",
+    });
 
-    if (pakPath === undefined) {
+    if (pakPathUri === undefined) {
       let warning;
       await vscode.window
         .showWarningMessage("You must select something!", "oops", "never mind")
@@ -103,18 +102,15 @@ export async function unpackGameData(): Promise<void> {
     }
   }
 
-  while (unPakPath === undefined) {
-    unPakPath = await vscode.window
-      .showOpenDialog({
-        defaultUri: gameDataUri,
-        canSelectFiles: false,
-        canSelectFolders: true,
-        canSelectMany: false,
-        title: "Select a destination for unpacked game data",
-      })
-      .then((p) => p);
+  while (unPakPathUri === undefined) {
+    unPakPathUri = await vscode.window.showOpenDialog({
+      canSelectFiles: false,
+      canSelectFolders: true,
+      canSelectMany: false,
+      title: "Select a destination for unpacked game data",
+    });
 
-    if (unPakPath === undefined) {
+    if (unPakPathUri === undefined) {
       let warning;
       await vscode.window
         .showWarningMessage(
@@ -131,24 +127,16 @@ export async function unpackGameData(): Promise<void> {
     }
   }
 
-  if (pakPath === undefined || unPakPath === undefined) {
+  if (pakPathUri === undefined || unPakPathUri === undefined) {
     return;
   }
 
-  unPakPath = fixPath(unPakPath);
+  vscode.window.showInformationMessage(
+    "this may take a minute depending on your computers specs!",
+  );
 
-  if (Array.isArray(pakPath)) {
-    for (let pak of pakPath) {
-      Unpak(fixPath(pak.toString()), unPakPath);
-    }
-  } else if (fs.statSync(pakPath).isFile()) {
-    Unpak(fixPath(pakPath.toString()), unPakPath);
-  } else if (fs.statSync(pakPath).isDirectory()) {
-    for (const pak of getFiles(fixPath(pakPath.toString()), {
-      type: FileFormats.pak,
-      forUnpackingGameFiles: true,
-    })) {
-      Unpak(pak.path, unPakPath);
-    }
+  const unPakPath: string = fixPath(unPakPathUri.toString());
+  for (let pak of pakPathUri) {
+    Unpak(fixPath(pak.toString()), unPakPath);
   }
 }

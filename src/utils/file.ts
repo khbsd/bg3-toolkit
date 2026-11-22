@@ -16,15 +16,19 @@ import { getWorkspacePath } from "./ws";
 const virtualTextureRegex: RegExp = /Textures_[\d]+/;
 const hotfixPatchRegex: RegExp = /Patch[\d]+_Hotfix[\d]+/;
 
-export function fixPath(wsPath: string): string {
+export function fixPath(p: string): string {
   const illegal_strings = ["file:", "//"];
   for (let str of illegal_strings) {
-    if (wsPath.includes(str)) {
-      wsPath = wsPath.replace(str, "");
+    if (p.includes(str)) {
+      p = p.replace(str, "");
     }
   }
 
-  return wsPath;
+  if (p.includes("%")) {
+    p = decodeURIComponent(p);
+  }
+
+  return p;
 }
 
 /**
@@ -190,7 +194,7 @@ export function getFiles(wsPath: string, opts?: getFilesOpts): LsFile[] {
         break;
       }
     }
-    
+
     if (hidden) {
       continue;
     }
