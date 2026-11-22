@@ -1,7 +1,7 @@
+import * as os from "os";
 import * as path from "path";
 import * as vscode from "vscode";
 import * as futils from "./file";
-import * as os from "os"
 
 import { consoleWebviewLog } from "../webview/console";
 import { getConf } from "./config";
