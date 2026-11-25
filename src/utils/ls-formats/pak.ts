@@ -6,9 +6,9 @@ import * as futils from "../file";
 
 import { consoleWebviewLog } from "../../webview/console";
 import { getConf } from "../config";
+import { mergeXmlFiles } from "../xml";
 import { ConvertCommon, FileFormats } from "./formats";
 import { convertAll } from "./junction";
-import { mergeXmlFiles } from "../xml";
 
 function convertFilesForPacking(wsPath: string): void {
   mergeXmlFiles(wsPath);
@@ -98,12 +98,11 @@ export async function unpackChoose(): Promise<void> {
       .then((p) => p?.toString());
 
     if (pakPath === undefined) {
-      let warning;
-      await vscode.window
-        .showWarningMessage("You must select a pak!", "oops", "never mind")
-        .then((value) => {
-          warning = value;
-        });
+      let warning = await vscode.window.showWarningMessage(
+        "You must select a pak!",
+        "oops",
+        "never mind",
+      );
       if (warning !== "oops") {
         return;
       }
@@ -120,17 +119,11 @@ export async function unpackChoose(): Promise<void> {
       .then((p) => p?.toString());
 
     if (unpakPath === undefined) {
-      let warning;
-      await vscode.window
-        .showWarningMessage(
-          "You must select a destination!",
-          "oops",
-          "never mind",
-        )
-        .then((value) => {
-          warning = value;
-        });
-
+      let warning = await vscode.window.showWarningMessage(
+        "You must select a destination!",
+        "oops",
+        "never mind",
+      );
       if (warning !== "oops") {
         return;
       }

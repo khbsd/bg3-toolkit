@@ -90,12 +90,11 @@ export async function unpackGameData(): Promise<void> {
     });
 
     if (pakPathUri === undefined) {
-      let warning;
-      await vscode.window
-        .showWarningMessage("You must select something!", "oops", "never mind")
-        .then((value) => {
-          warning = value;
-        });
+      let warning = await vscode.window.showWarningMessage(
+        "You must select something!",
+        "oops",
+        "never mind",
+      );
       if (warning !== "oops") {
         return;
       }
@@ -111,16 +110,11 @@ export async function unpackGameData(): Promise<void> {
     });
 
     if (unPakPathUri === undefined) {
-      let warning;
-      await vscode.window
-        .showWarningMessage(
-          "You must select a destination!",
-          "oops",
-          "never mind",
-        )
-        .then((value) => {
-          warning = value;
-        });
+      let warning = await vscode.window.showWarningMessage(
+        "You must select a destination!",
+        "oops",
+        "never mind",
+      );
       if (warning !== "oops") {
         return;
       }
@@ -140,6 +134,7 @@ export async function unpackGameData(): Promise<void> {
   // 1_800_000_000 bytes (1.8 GiB) should be the maximum per chunk, just in case
   const unPakPath: string = fixPath(unPakPathUri.toString());
   for (let pak of pakPathUri) {
+    // console.log(pak);
     Unpak(fixPath(pak.toString()), unPakPath);
   }
 }
